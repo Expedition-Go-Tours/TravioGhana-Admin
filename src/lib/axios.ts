@@ -58,6 +58,12 @@ api.interceptors.request.use((config) => {
     return config;
   }
 
+  // /chat/* → /travioghana/admin/chat/* (Ghana-scoped)
+  if (url.startsWith("/chat")) {
+    config.url = "/travioghana/admin" + url;
+    return config;
+  }
+
   // /tours/* (non-admin) → /travioghana/admin/tours/* (Ghana tours only)
   // Exception: /tours/filters/options stays shared (filter metadata)
   if (url.startsWith("/tours/") && !url.startsWith("/tours/filters")) {
@@ -65,7 +71,6 @@ api.interceptors.request.use((config) => {
     return config;
   }
 
-  // Chat stays shared (admin talks to all suppliers/customers)
   // Blog stays shared (cross-platform content)
 
   return config;
