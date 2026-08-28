@@ -1,0 +1,115 @@
+.container {
+  padding-left: 0.75rem;
+  padding-right: 0.75rem;
+}
+
+@media (min-width: 768px) {
+  .container {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1440px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+.kpiGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.kpiGrid > * {
+  flex: 1 1 100%;
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .kpiGrid > * {
+    flex: 1 1 calc(33.333% - 0.667rem);
+    min-width: 200px;
+  }
+}
+
+.kpiCard {
+  padding: 1rem;
+}
+
+@media (min-width: 640px) {
+  .kpiCard {
+    padding: 1.25rem;
+  }
+}
+
+.contentGrid3 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .contentGrid3 {
+    grid-template-columns: 2fr 1fr;
+  }
+}
+
+@media (min-width: 1024px) {
+  .contentGrid3 {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+}
+
+.contentGrid2 {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .contentGrid2 {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.hideMobile {
+  display: none;
+}
+
+@media (min-width: 640px) {
+  .hideMobile {
+    display: table-cell;
+  }
+}
+
+.chartBar {
+  width: 100%;
+  height: 160px;
+}
+
+@media (min-width: 768px) {
+  .chartBar {
+    height: 220px;
+  }
+}
+
+.chartPie {
+  width: 100%;
+  height: 160px;
+}
+
+@media (min-width: 768px) {
+  .chartPie {
+    height: 200px;
+  }
+}

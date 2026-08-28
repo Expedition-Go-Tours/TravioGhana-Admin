@@ -1,0 +1,245 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98%;
+    --foreground: 210 20% 12%;
+    --card: 0 0% 100%;
+    --card-foreground: 210 20% 12%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 20% 12%;
+
+    --primary: 163 85% 32%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 16% 96%;
+    --secondary-foreground: 210 15% 25%;
+    --muted: 210 14% 95%;
+    --muted-foreground: 210 12% 50%;
+    --accent: 163 85% 94%;
+    --accent-foreground: 163 45% 28%;
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 163 85% 32%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 75% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 210 14% 90%;
+    --input: 210 14% 90%;
+    --ring: 163 85% 42%;
+    --radius: 8px;
+
+    --text-primary: 210 20% 12%;
+    --text-secondary: 210 12% 45%;
+    --text-tertiary: 210 10% 60%;
+    --surface-base: 0 0% 100%;
+    --surface-muted: 210 14% 95%;
+    --border-muted: 210 12% 88%;
+
+    --status-pending: 38 75% 50%;
+    --status-approved: 210 60% 50%;
+    --status-active: 163 85% 32%;
+    --status-rejected: 0 65% 50%;
+    --status-suspended: 210 5% 45%;
+    --status-flagged: 25 70% 50%;
+    --status-processing: 270 40% 55%;
+
+    --chart-1: 163 85% 38%;
+    --chart-2: 210 55% 50%;
+    --chart-3: 38 70% 52%;
+    --chart-4: 25 65% 50%;
+    --chart-5: 270 35% 52%;
+
+    --green-50: 163 60% 93%;
+    --green-100: 163 55% 84%;
+    --green-200: 163 50% 70%;
+    --green-300: 163 48% 58%;
+    --green-400: 163 50% 48%;
+    --green-500: 163 60% 40%;
+    --green-600: 163 85% 32%;
+    --green-700: 163 80% 24%;
+    --green-800: 163 75% 18%;
+    --green-900: 163 70% 12%;
+    --green-950: 163 65% 7%;
+
+    --font-display: "Space Grotesk", "Plus Jakarta Sans", system-ui, sans-serif;
+
+    --sidebar-bg: 163 80% 24%;
+    --sidebar-surface: 163 70% 18%;
+    --sidebar-border: 163 60% 28%;
+    --sidebar-text: 163 30% 72%;
+    --sidebar-text-active: 0 0% 100%;
+  }
+
+  .dark {
+    --background: 210 20% 7%;
+    --foreground: 210 12% 82%;
+    --card: 210 18% 10%;
+    --card-foreground: 210 12% 82%;
+    --popover: 210 18% 10%;
+    --popover-foreground: 210 12% 82%;
+
+    --primary: 163 80% 38%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 12% 15%;
+    --secondary-foreground: 210 12% 72%;
+    --muted: 210 12% 14%;
+    --muted-foreground: 210 8% 50%;
+    --accent: 163 30% 12%;
+    --accent-foreground: 163 40% 62%;
+    --destructive: 0 60% 42%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 163 75% 38%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 70% 48%;
+    --warning-foreground: 0 0% 100%;
+
+    --border: 210 12% 16%;
+    --input: 210 12% 16%;
+    --ring: 163 80% 42%;
+
+    --text-primary: 210 12% 82%;
+    --text-secondary: 210 8% 52%;
+    --text-tertiary: 210 6% 40%;
+    --surface-base: 210 18% 10%;
+    --surface-muted: 210 14% 14%;
+    --border-muted: 210 12% 18%;
+
+    --status-pending: 38 65% 48%;
+    --status-approved: 210 45% 48%;
+    --status-active: 163 75% 38%;
+    --status-rejected: 0 55% 48%;
+    --status-suspended: 210 5% 42%;
+    --status-flagged: 25 60% 48%;
+    --status-processing: 270 30% 52%;
+
+    --chart-1: 163 75% 40%;
+    --chart-2: 210 40% 48%;
+    --chart-3: 38 60% 48%;
+    --chart-4: 25 55% 48%;
+    --chart-5: 270 30% 48%;
+
+    --green-50: 163 30% 10%;
+    --green-100: 163 30% 13%;
+    --green-200: 163 28% 18%;
+    --green-300: 163 30% 26%;
+    --green-400: 163 40% 36%;
+    --green-500: 163 50% 42%;
+    --green-600: 163 55% 38%;
+    --green-700: 163 50% 34%;
+    --green-800: 163 45% 26%;
+    --green-900: 163 40% 18%;
+    --green-950: 163 38% 12%;
+
+    --sidebar-bg: 163 65% 14%;
+    --sidebar-surface: 163 55% 10%;
+    --sidebar-border: 163 45% 18%;
+    --sidebar-text: 163 30% 72%;
+    --sidebar-text-active: 0 0% 100%;
+  }
+}
+
+@layer utilities {
+  .scrollbar-none {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--border)) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 99px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground));
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
+    font-weight: 500;
+  }
+
+  ::selection {
+    background: hsl(var(--primary) / 0.2);
+    color: hsl(var(--primary));
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-primary/30;
+  }
+
+  input:focus-visible,
+  textarea:focus-visible {
+    @apply ring-0;
+  }
+}
+
+@layer components {
+  .noise-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.025;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 256px 256px;
+  }
+
+  .double-bezel {
+    @apply relative;
+    background: hsl(var(--surface-muted));
+    padding: 1.5px;
+    border-radius: calc(0.5rem + 2px);
+  }
+  .double-bezel-inner {
+    @apply bg-surface-base rounded-[0.5rem];
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.6);
+  }
+
+  .glass-panel {
+    background: hsl(var(--surface-base) / 0.7);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid hsl(var(--border));
+  }
+}
+
+@media (pointer: coarse) {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+}

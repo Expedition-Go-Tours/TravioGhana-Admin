@@ -1,0 +1,41 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+node_modules
+dist
+dist-ssr
+coverage
+*.local
+.env
+null
+SUPPLIER_FIELD_MISMATCH_ANALYSIS.md
+SUPPLIER_FIX_IMPLEMENTATION_SUMMARY.md
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+Backendv2/
+
+# Playwright MCP
+.playwright-mcp/
+
+# Design references
+imagereference/
+
+# Markdown docs (keep only README)
+*.md
+!README.md
