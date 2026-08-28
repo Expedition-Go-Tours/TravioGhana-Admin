@@ -13,9 +13,8 @@ const api = axios.create({
 
 // ── Ghana Admin route rewriting ──────────────────────────────────────────
 // Auth endpoints (/auth/*) stay on the shared backend.
-// Admin endpoints are rewritten to /travioghana/admin/* so this dashboard
-// only sees Ghana-scoped data (TravioGhanaTour, source='GHANA', role='ghana').
-// Blog and chat stay shared across brands.
+// Everything else is rewritten to /travioghana/admin/* so this dashboard
+// only sees Ghana-scoped data. Blog stays shared (cross-platform content).
 api.interceptors.request.use((config) => {
   const url = config.url || "";
 
@@ -26,7 +25,6 @@ api.interceptors.request.use((config) => {
   }
 
   // /reviews/admin/* → /travioghana/admin/reviews/*
-  // /reviews/:id/moderate|admin → /travioghana/admin/reviews/:id/...
   if (url.startsWith("/reviews/admin/")) {
     config.url = "/travioghana/admin/reviews" + url.slice("/reviews/admin".length);
     return config;
@@ -53,6 +51,22 @@ api.interceptors.request.use((config) => {
     config.url = "/travioghana/admin/payout-methods" + url.slice("/payout-methods/admin".length);
     return config;
   }
+
+  // /notifications → /travioghana/admin/notifications (Ghana-scoped)
+  if (url.startsWith("/notifications")) {
+    config.url = "/travioghana/admin" + url;
+    return config;
+  }
+
+  // /tours/* (non-admin) → /travioghana/admin/tours/* (Ghana tours only)
+  // Exception: /tours/filters/options stays shared (filter metadata)
+  if (url.startsWith("/tours/") && !url.startsWith("/tours/filters")) {
+    config.url = "/travioghana/admin/tours" + url.slice("/tours".length);
+    return config;
+  }
+
+  // Chat stays shared (admin talks to all suppliers/customers)
+  // Blog stays shared (cross-platform content)
 
   return config;
 });
