@@ -11,6 +11,52 @@ const api = axios.create({
   timeout: 30_000,
 });
 
+// ── Ghana Admin route rewriting ──────────────────────────────────────────
+// Auth endpoints (/auth/*) stay on the shared backend.
+// Admin endpoints are rewritten to /travioghana/admin/* so this dashboard
+// only sees Ghana-scoped data (TravioGhanaTour, source='GHANA', role='ghana').
+// Blog and chat stay shared across brands.
+api.interceptors.request.use((config) => {
+  const url = config.url || "";
+
+  // /admin/* → /travioghana/admin/*
+  if (url.startsWith("/admin")) {
+    config.url = "/travioghana" + url;
+    return config;
+  }
+
+  // /reviews/admin/* → /travioghana/admin/reviews/*
+  // /reviews/:id/moderate|admin → /travioghana/admin/reviews/:id/...
+  if (url.startsWith("/reviews/admin/")) {
+    config.url = "/travioghana/admin/reviews" + url.slice("/reviews/admin".length);
+    return config;
+  }
+  if (url.match(/^\/reviews\/[^/]+\/(moderate|admin)/)) {
+    config.url = "/travioghana/admin/reviews" + url.slice("/reviews".length);
+    return config;
+  }
+
+  // /suppliers/admin/* → /travioghana/admin/suppliers/*
+  if (url.startsWith("/suppliers/admin/")) {
+    config.url = "/travioghana/admin/suppliers" + url.slice("/suppliers/admin".length);
+    return config;
+  }
+
+  // /payouts/admin/* → /travioghana/admin/payouts/*
+  if (url.startsWith("/payouts/admin")) {
+    config.url = "/travioghana/admin/payouts" + url.slice("/payouts/admin".length);
+    return config;
+  }
+
+  // /payout-methods/admin/* → /travioghana/admin/payout-methods/*
+  if (url.startsWith("/payout-methods/admin")) {
+    config.url = "/travioghana/admin/payout-methods" + url.slice("/payout-methods/admin".length);
+    return config;
+  }
+
+  return config;
+});
+
 // Augment AxiosRequestConfig so callers can opt in/out of the global error
 // toast on a per-request basis.
 declare module "axios" {
