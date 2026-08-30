@@ -1,4 +1,4 @@
-﻿import api from "@/lib/axios";
+import api from "@/lib/axios";
 
 export interface ChatUser {
   id: string;
@@ -33,7 +33,7 @@ export interface Message {
 
 export interface Conversation {
   id: string;
-  type: "SUPPLIER_ADMIN" | "USER_SUPPORT";
+  type: "SUPPLIER_ADMIN" | "USER_SUPPORT" | "EXPEDITION_CUSTOMER";
   title?: string | null;
   createdAt: string;
   updatedAt: string;

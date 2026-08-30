@@ -23,7 +23,7 @@ interface ChatWindowProps {
   onEditMessage?: (messageId: string, content: string) => Promise<void>;
   onDeleteMessage?: (messageId: string) => Promise<void>;
   onDeleteConversation?: () => Promise<void>;
-  chatType?: "suppliers" | "customers";
+  chatType?: "suppliers" | "customers" | "expedition";
   onBack?: () => void;
 }
 
@@ -279,10 +279,10 @@ export function ChatWindow({
   }, [conversation?.id, onSendMessage]);
 
   const otherParticipant = conversation?.participants?.find(
-    (p) => p.user.roles && !p.user.roles.includes('admin')
+    (p) => p.user.roles && !p.user.roles.includes('admin') && !p.user.roles.includes('expedition')
   )?.user || conversation?.participants?.[0]?.user;
   const otherParticipantId = conversation?.participants?.find(
-    (p) => p.user.roles && !p.user.roles.includes('admin')
+    (p) => p.user.roles && !p.user.roles.includes('admin') && !p.user.roles.includes('expedition')
   )?.userId || conversation?.participants?.[0]?.userId;
   const headerName =
     otherParticipant?.name ||

@@ -33,11 +33,11 @@ interface NewConversationDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSelect: (recipientId: string, recipientName: string) => void;
-  chatType?: "suppliers" | "customers";
+  chatType?: "suppliers" | "customers" | "expedition";
 }
 
-function Skeleton({ chatType }: { chatType: "suppliers" | "customers" }) {
-  const bg = chatType === "suppliers" ? "bg-green-100/60" : "bg-blue-100/60";
+function Skeleton({ chatType }: { chatType: "suppliers" | "customers" | "expedition" }) {
+  const bg = chatType === "suppliers" ? "bg-green-100/60" : chatType === "expedition" ? "bg-purple-100/60" : "bg-blue-100/60";
   return (
     <div className="flex items-center gap-3 px-4 py-3">
       <div className={cn("h-10 w-10 animate-pulse rounded-full", bg)} />

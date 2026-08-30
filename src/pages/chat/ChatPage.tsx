@@ -29,7 +29,7 @@ export default function ChatPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const queryClient = useQueryClient();
-  const type = (location.pathname.endsWith('/suppliers') ? 'suppliers' : 'customers') as 'suppliers' | 'customers';
+  const type = (location.pathname.endsWith('/suppliers') ? 'suppliers' : location.pathname.endsWith('/expedition') ? 'expedition' : 'customers') as 'suppliers' | 'customers' | 'expedition';
   const [selectedConv, setSelectedConv] = useState<Conversation | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [messageStatuses, setMessageStatuses] = useState<Record<string, MessageStatus>>({});
@@ -41,7 +41,7 @@ export default function ChatPage() {
   const selectedIdRef = useRef<string | null>(null);
   const invalidateTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const selectByNotificationRef = useRef<string | null>(null);
-  const conversationType = type === "suppliers" ? "SUPPLIER_ADMIN" : "USER_SUPPORT" as const;
+  const conversationType = type === "suppliers" ? "SUPPLIER_ADMIN" : type === "expedition" ? "EXPEDITION_CUSTOMER" : "USER_SUPPORT" as const;
   const [typingConversations, setTypingConversations] = useState<Record<string, { userName: string }>>({});
   const typingTimeoutsRef = useRef<Record<string, ReturnType<typeof setTimeout>>>({});
   const TYPING_TIMEOUT_MS = 5000;
@@ -114,6 +114,7 @@ export default function ChatPage() {
 
   const conversations = allConversations.filter((c: Conversation) => {
     if (type === "suppliers") return c.type === "SUPPLIER_ADMIN";
+    if (type === "expedition") return c.type === "EXPEDITION_CUSTOMER";
     return c.type === "USER_SUPPORT";
   });
 

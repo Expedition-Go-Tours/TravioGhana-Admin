@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { cn, timeAgo } from "@/lib/utils";
 import { MailOpen, Inbox, Eye, Building2, Headphones } from "lucide-react";
@@ -10,7 +10,7 @@ interface ConversationListProps {
   selectedId: string | null;
   onSelect: (conv: Conversation) => void;
   loading: boolean;
-  chatType?: "suppliers" | "customers";
+  chatType?: "suppliers" | "customers" | "expedition";
   typingConversations: Record<string, { userName: string }>;
 }
 

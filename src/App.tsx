@@ -1,4 +1,4 @@
-﻿import { createBrowserRouter, RouterProvider, Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
@@ -160,6 +160,7 @@ const router = createBrowserRouter([
       { path: "reviews", element: <PermissionRoute permission="reviews.view"><ReviewModerationPage /></PermissionRoute> },
       { path: "chat/suppliers", element: <PermissionRoute permission="chat.suppliers"><ChatPage /></PermissionRoute> },
       { path: "chat/customers", element: <PermissionRoute permission="chat.customers"><ChatPage /></PermissionRoute> },
+      { path: "chat/expedition", element: <PermissionRoute permission="chat.expedition"><ChatPage /></PermissionRoute> },
       { path: "settings", element: <PermissionRoute permission="settings.access"><SettingsPage /></PermissionRoute> },
       { path: "activity-log", element: <PermissionRoute permission="settings.access"><ActivityLogPage /></PermissionRoute> },
       { path: "blog", element: <PermissionRoute permission="blog.manage"><BlogListPage /></PermissionRoute> },
