@@ -30,6 +30,18 @@ import type { Booking, TravelerData } from "@/types/booking";
 import { isPaymentPaid, travelerCount } from "@/types/booking";
 import OptimizedImage from "@/components/shared/OptimizedImage";
 
+// Booking source = the storefront the sale happened on. Three entities:
+// Expedition Go (company storefront), Travio Ghana, Travio Africa.
+// The DB stores these as uppercase enum values (EXPEDITION / GHANA /
+// TRAVIO_AFRICA); TRAVIO is a legacy value from seed data only.
+const SOURCE_META: Record<string, { label: string; className: string }> = {
+  EXPEDITION: { label: "Expedition Go", className: "bg-emerald-50 text-emerald-700" },
+  GHANA: { label: "Travio Ghana", className: "bg-yellow-50 text-yellow-700" },
+  TRAVIO_AFRICA: { label: "Travio Africa", className: "bg-sky-50 text-sky-700" },
+};
+const sourceMeta = (source: string) =>
+  SOURCE_META[String(source).toUpperCase()] || { label: source, className: "bg-gray-50 text-gray-600" };
+
 interface BookingDetailPanelProps {
   booking: Booking;
   onClose: () => void;
@@ -261,12 +273,9 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                   <DetailRow icon={<Globe className="h-3 w-3" />} label="Source">
                     <span className={cn(
                       "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                      booking.source === "expedition" && "bg-emerald-50 text-emerald-700",
-                      booking.source === "travio" && "bg-blue-50 text-blue-700",
-                      booking.source === "ghana" && "bg-yellow-50 text-yellow-700",
-                      !["expedition", "travio", "ghana"].includes(booking.source) && "bg-gray-50 text-gray-600",
+                      sourceMeta(booking.source).className,
                     )}>
-                      {booking.source === "expedition" ? "Expedition Go" : booking.source === "travio" ? "Travio" : booking.source === "ghana" ? "Travio Ghana" : booking.source}
+                      {sourceMeta(booking.source).label}
                     </span>
                   </DetailRow>
                 )}
