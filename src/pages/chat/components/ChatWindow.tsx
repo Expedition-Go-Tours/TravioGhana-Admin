@@ -86,23 +86,27 @@ function formatLastSeen(dateStr: string | null | undefined): string {
   return `last seen ${date} at ${time}`;
 }
 
-const accent = (type: "suppliers" | "customers") => ({
-  bg: type === "suppliers" ? "green" : "blue",
-  bg30: type === "suppliers" ? "bg-green-50/30" : "bg-blue-50/30",
-  bg50: type === "suppliers" ? "bg-green-50" : "bg-blue-50",
-  text: type === "suppliers" ? "text-green-600" : "text-blue-600",
-  text400: type === "suppliers" ? "text-green-400" : "text-blue-400",
-  text700: type === "suppliers" ? "text-green-700" : "text-blue-700",
-  border: type === "suppliers" ? "focus-visible:border-green-400" : "focus-visible:border-blue-400",
-  gradient: type === "suppliers" ? "bg-green-500" : "bg-status-approved",
-  hover: type === "suppliers" ? "hover:bg-green-50" : "hover:bg-blue-50",
-  hoverText: type === "suppliers" ? "hover:text-green-600" : "hover:text-blue-600",
-  hoverText700: type === "suppliers" ? "hover:text-green-700" : "hover:text-blue-700",
-  button: type === "suppliers" ? "bg-green-600 hover:bg-green-700" : "bg-blue-600 hover:bg-blue-700",
-  scrollBg: type === "suppliers" ? "hover:bg-green-50" : "hover:bg-blue-50",
-  loadMore: type === "suppliers" ? "hover:bg-green-50 text-green-600" : "hover:bg-blue-50 text-blue-600",
-  badge: type === "suppliers" ? "bg-green-600" : "bg-blue-600",
-});
+const accent = (type: "suppliers" | "customers" | "expedition") => {
+  const isSup = type === "suppliers";
+  const isExp = type === "expedition";
+  return {
+    bg: isSup ? "green" : isExp ? "purple" : "blue",
+    bg30: isSup ? "bg-green-50/30" : isExp ? "bg-purple-50/30" : "bg-blue-50/30",
+    bg50: isSup ? "bg-green-50" : isExp ? "bg-purple-50" : "bg-blue-50",
+    text: isSup ? "text-green-600" : isExp ? "text-purple-600" : "text-blue-600",
+    text400: isSup ? "text-green-400" : isExp ? "text-purple-400" : "text-blue-400",
+    text700: isSup ? "text-green-700" : isExp ? "text-purple-700" : "text-blue-700",
+    border: isSup ? "focus-visible:border-green-400" : isExp ? "focus-visible:border-purple-400" : "focus-visible:border-blue-400",
+    gradient: isSup ? "bg-green-500" : isExp ? "bg-purple-500" : "bg-status-approved",
+    hover: isSup ? "hover:bg-green-50" : isExp ? "hover:bg-purple-50" : "hover:bg-blue-50",
+    hoverText: isSup ? "hover:text-green-600" : isExp ? "hover:text-purple-600" : "hover:text-blue-600",
+    hoverText700: isSup ? "hover:text-green-700" : isExp ? "hover:text-purple-700" : "hover:text-blue-700",
+    button: isSup ? "bg-green-600 hover:bg-green-700" : isExp ? "bg-purple-600 hover:bg-purple-700" : "bg-blue-600 hover:bg-blue-700",
+    scrollBg: isSup ? "hover:bg-green-50" : isExp ? "hover:bg-purple-50" : "hover:bg-blue-50",
+    loadMore: isSup ? "hover:bg-green-50 text-green-600" : isExp ? "hover:bg-purple-50 text-purple-600" : "hover:bg-blue-50 text-blue-600",
+    badge: isSup ? "bg-green-600" : isExp ? "bg-purple-600" : "bg-blue-600",
+  };
+};
 
 export function ChatWindow({
   conversation,

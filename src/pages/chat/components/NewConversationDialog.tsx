@@ -49,15 +49,19 @@ function Skeleton({ chatType }: { chatType: "suppliers" | "customers" | "expedit
   );
 }
 
-const accent = (type: "suppliers" | "customers") => ({
-  bg50: type === "suppliers" ? "bg-green-50" : "bg-blue-50",
-  bg50slash20: type === "suppliers" ? "bg-green-50/20" : "bg-blue-50/20",
-  text400: type === "suppliers" ? "text-green-400" : "text-blue-400",
-  text600: type === "suppliers" ? "text-green-600" : "text-blue-600",
-  hoverText700: type === "suppliers" ? "hover:text-green-700" : "hover:text-blue-700",
-  gradient: type === "suppliers" ? "bg-green-500" : "bg-status-approved",
-  border: type === "suppliers" ? "focus-visible:border-green-400" : "focus-visible:border-blue-400",
-});
+const accent = (type: "suppliers" | "customers" | "expedition") => {
+  const isSup = type === "suppliers";
+  const isExp = type === "expedition";
+  return {
+    bg50: isSup ? "bg-green-50" : isExp ? "bg-purple-50" : "bg-blue-50",
+    bg50slash20: isSup ? "bg-green-50/20" : isExp ? "bg-purple-50/20" : "bg-blue-50/20",
+    text400: isSup ? "text-green-400" : isExp ? "text-purple-400" : "text-blue-400",
+    text600: isSup ? "text-green-600" : isExp ? "text-purple-600" : "text-blue-600",
+    hoverText700: isSup ? "hover:text-green-700" : isExp ? "hover:text-purple-700" : "hover:text-blue-700",
+    gradient: isSup ? "bg-green-500" : isExp ? "bg-purple-500" : "bg-status-approved",
+    border: isSup ? "focus-visible:border-green-400" : isExp ? "focus-visible:border-purple-400" : "focus-visible:border-blue-400",
+  };
+};
 
 export function NewConversationDialog({
   open,
