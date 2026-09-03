@@ -23,7 +23,7 @@ export function getAdminSocket(): Socket {
     socket = io(SOCKET_URL, {
       withCredentials: true,
       auth: token ? { role: "admin", token } : { role: "admin" },
-      transports: ["websocket", "polling"],
+      transports: ["websocket"],
       reconnection: typeof navigator !== "undefined" ? navigator.onLine !== false : true,
       reconnectionAttempts: Infinity,
       reconnectionDelay: 3000,
