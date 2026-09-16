@@ -17,7 +17,6 @@ import {
   Globe,
   FileText,
   MessageSquare,
-  Brain,
 } from "lucide-react";
 
 export interface ChildItem {
@@ -66,12 +65,11 @@ export function getNavGroups(can: (key: string) => boolean): { group: string; it
     ...(can('bookings.view') ? [{ label: "Bookings", path: "/admin/bookings", icon: <ShoppingCart className="h-4 w-4" />, badgeKey: "bookings" as const, keywords: ["reservation", "orders"] }] : []),
     ...(can('suppliers.view') ? [{ label: "Suppliers", path: "/admin/suppliers", icon: <UserPlus className="h-4 w-4" />, keywords: ["vendors", "partners"] }] : []),
     ...(can('suppliers.view') ? [{ label: "Quality Control", path: "/admin/quality-control", icon: <ClipboardCheck className="h-4 w-4" />, keywords: ["qc", "standards", "checks"] }] : []),
-    ...(can('tours.view') ? [{ label: "Travio Ghana", path: "/admin/expedition", icon: <Globe className="h-4 w-4" />, keywords: ["ghana", "expeditions"] }] : []),
+    ...(can('tours.view') ? [{ label: "Expedition-Go Tours", path: "/admin/expedition", icon: <Globe className="h-4 w-4" />, keywords: ["ghana", "expeditions"] }] : []),
     ...(can('reviews.view') ? [{ label: "Reviews", path: "/admin/reviews", icon: <Star className="h-4 w-4" />, badgeKey: "reviews" as const, keywords: ["ratings", "feedback"] }] : []),
     ...(can('tours.approve') ? [{ label: "Tour Moderation", path: "/admin/tour-moderation", icon: <ClipboardCheck className="h-4 w-4" />, badgeKey: "tours" as const, keywords: ["approve", "approval"] }] : []),
     ...(can('chat.suppliers') ? [{ label: "Supplier Messages", path: "/admin/chat/suppliers", icon: <Building className="h-4 w-4" />, keywords: ["inbox", "messages"] }] : []),
     ...(can('blog.manage') ? [{ label: "Blog", path: "/admin/blog", icon: <FileText className="h-4 w-4" />, keywords: ["posts", "articles", "content"] }] : []),
-    ...(can('tours.view') ? [{ label: "AI Processing", path: "/admin/ai-processing", icon: <Brain className="h-4 w-4" />, keywords: ["mimo", "ai", "image", "classification"] }] : []),
   ];
 
   const financeItems: NavItem[] = [
