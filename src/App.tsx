@@ -32,6 +32,7 @@ import { PayoutsListTab } from "@/pages/finance/components/PayoutsListTab";
 import { PayoutsMethodsTab } from "@/pages/finance/components/PayoutsMethodsTab";
 import { PayoutRequestsTab } from "@/pages/finance/components/PayoutRequestsTab";
 import { DisputesQueueTab } from "@/pages/finance/components/DisputesQueueTab";
+import { CustomerRefundClaimsTab } from "@/pages/finance/components/CustomerRefundClaimsTab";
 import ReviewModerationPage from "@/pages/reviews/ReviewModeration";
 import BookingsPage from "@/pages/bookings/BookingsPage";
 import ChatPage from "@/pages/chat/ChatPage";
@@ -67,12 +68,12 @@ function PermissionRoute({ permission, children }: { permission: string; childre
   return <>{children}</>;
 }
 
-type PayoutTab = "payments" | "requests" | "payouts" | "disputes" | "methods";
+type PayoutTab = "payments" | "requests" | "payouts" | "disputes" | "claims" | "methods";
 
 function PayoutsTabPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab: PayoutTab = (["payments", "requests", "payouts", "disputes", "methods"] as const).find((t) => searchParams.get("tab") === t) ?? "payments";
+  const tab: PayoutTab = (["payments", "requests", "payouts", "disputes", "claims", "methods"] as const).find((t) => searchParams.get("tab") === t) ?? "payments";
   const [statusOverride, setStatusOverride] = useState<string | undefined>(undefined);
 
   const switchTab = (t: PayoutTab) => {
@@ -100,6 +101,7 @@ function PayoutsTabPage() {
           { key: "requests", label: "Payout Requests" },
           { key: "payouts", label: "All Payouts" },
           { key: "disputes", label: "Refund Requests" },
+          { key: "claims", label: "Customer Refund Claims" },
           { key: "methods", label: "Supplier Methods" },
         ] as const).map(({ key, label }) => (
           <button
@@ -119,6 +121,7 @@ function PayoutsTabPage() {
       {tab === "requests" && <PayoutRequestsTab />}
       {tab === "payouts" && <PayoutsListTab initialStatus={statusOverride} onStatusChange={setStatusOverride} />}
       {tab === "disputes" && <DisputesQueueTab />}
+      {tab === "claims" && <CustomerRefundClaimsTab />}
       {tab === "methods" && <PayoutsMethodsTab />}
     </div>
   );

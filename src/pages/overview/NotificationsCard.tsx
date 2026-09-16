@@ -54,6 +54,7 @@ const notificationRouteMap: Record<string, (data?: Record<string, unknown>) => {
   PAYOUT_NEEDS_APPROVAL: (d) => ({ path: "/admin/payouts", state: { payoutId: d?.payoutId || d?.payoutRequestId } }),
   BOOKING_CREATED: (d) => (d?.bookingId ? { path: `/admin/bookings?bookingId=${d.bookingId}` } : { path: "/admin/bookings" }),
   BOOKING_CONFIRMED: (d) => (d?.bookingId ? { path: `/admin/bookings?bookingId=${d.bookingId}` } : { path: "/admin/bookings" }),
+  BOOKING_MODIFIED: (d) => (d?.bookingId ? { path: `/admin/bookings?bookingId=${d.bookingId}` } : { path: "/admin/bookings" }),
   DOCUMENT_EXPIRING: (d) => (d?.supplierId ? { path: `/admin/suppliers/${d.supplierId}` } : { path: "/admin/suppliers" }),
   DOCUMENT_EXPIRED: (d) => (d?.supplierId ? { path: `/admin/suppliers/${d.supplierId}` } : { path: "/admin/suppliers" }),
   REFUND_REQUEST: (d) => (d?.disputeId ? { path: "/admin/payouts?tab=disputes", state: { disputeId: d.disputeId } } : { path: "/admin/payouts?tab=disputes" }),

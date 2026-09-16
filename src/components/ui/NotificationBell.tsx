@@ -36,9 +36,11 @@ const notificationRouteMap: Record<string, (data?: Record<string, unknown>) => {
   PAYOUT_NEEDS_APPROVAL: (data) => ({ path: "/admin/payouts", state: { payoutId: data?.payoutId || data?.payoutRequestId } }),
   BOOKING_CREATED: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
   BOOKING_CONFIRMED: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
+  BOOKING_MODIFIED: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
   DOCUMENT_EXPIRING: (data) => data?.supplierId ? { path: `/admin/suppliers/${data.supplierId}` } : { path: "/admin/suppliers" },
   DOCUMENT_EXPIRED: (data) => data?.supplierId ? { path: `/admin/suppliers/${data.supplierId}` } : { path: "/admin/suppliers" },
   REFUND_REQUEST: (data) => data?.disputeId ? { path: "/admin/payouts?tab=disputes", state: { disputeId: data.disputeId } } : { path: "/admin/payouts?tab=disputes" },
+  REFUND_CLAIM: (data) => data?.claimId ? { path: `/admin/payouts?tab=claims&claimId=${data.claimId}` } : { path: "/admin/payouts?tab=claims" },
   PAYMENT_UPCOMING: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
   PAYMENT_COLLECTED: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
   PAYMENT_COLLECTION_FAILED: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
@@ -54,6 +56,7 @@ const notificationRouteMap: Record<string, (data?: Record<string, unknown>) => {
 
 const typeConfig: Record<string, { icon: React.ReactNode; color: string }> = {
   BOOKING_CONFIRMED: { icon: <ShoppingBag className="h-3.5 w-3.5" />, color: "text-green-600 dark:text-green-400" },
+  BOOKING_MODIFIED: { icon: <ShoppingBag className="h-3.5 w-3.5" />, color: "text-indigo-600 dark:text-indigo-400" },
   BOOKING_CANCELLED: { icon: <XCircle className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
   BOOKING_CREATED: { icon: <ShoppingBag className="h-3.5 w-3.5" />, color: "text-blue-600 dark:text-blue-400" },
   PAYMENT_RECEIVED: { icon: <CreditCard className="h-3.5 w-3.5" />, color: "text-green-600 dark:text-green-400" },
@@ -77,6 +80,7 @@ const typeConfig: Record<string, { icon: React.ReactNode; color: string }> = {
   DOCUMENT_EXPIRING: { icon: <FileWarning className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
   DOCUMENT_EXPIRED: { icon: <FileWarning className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
   REFUND_REQUEST: { icon: <RefreshCw className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
+  REFUND_CLAIM: { icon: <RefreshCw className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
   REFUND_NEEDS_ATTENTION: { icon: <RefreshCw className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
   STRIPE_CUSTOMER_CREATE_FAILED: { icon: <AlertTriangle className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
 };

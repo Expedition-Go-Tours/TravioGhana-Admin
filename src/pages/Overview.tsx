@@ -252,6 +252,8 @@ export default function OverviewPage() {
     socket.on("admin:supplier-application", onSupplierApp);
     socket.on("admin:supplier-status-change", onSupplierStatus);
     socket.on("admin:payout-update", onPayout);
+    socket.on("admin-notification", refetchNotifStats);
+    socket.on("admin:notification", refetchNotifStats);
     return () => {
       socket.off("admin:signup", onSignup);
       socket.off("admin:new-booking", onBooking);
@@ -260,6 +262,8 @@ export default function OverviewPage() {
       socket.off("admin:supplier-application", onSupplierApp);
       socket.off("admin:supplier-status-change", onSupplierStatus);
       socket.off("admin:payout-update", onPayout);
+      socket.off("admin-notification", refetchNotifStats);
+      socket.off("admin:notification", refetchNotifStats);
     };
   }, [queryClient]);
 
