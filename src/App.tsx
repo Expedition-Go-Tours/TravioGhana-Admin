@@ -1,4 +1,4 @@
-import { createBrowserRouter, RouterProvider, Navigate, useNavigate, useSearchParams } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Navigate, useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
@@ -35,6 +35,7 @@ import { DisputesQueueTab } from "@/pages/finance/components/DisputesQueueTab";
 import { CustomerRefundClaimsTab } from "@/pages/finance/components/CustomerRefundClaimsTab";
 import ReviewModerationPage from "@/pages/reviews/ReviewModeration";
 import BookingsPage from "@/pages/bookings/BookingsPage";
+import CancellationsPage from "@/pages/cancellations/CancellationsPage";
 import ChatPage from "@/pages/chat/ChatPage";
 import SettingsPage from "@/pages/settings/SettingsPage";
 import ActivityLogPage from "@/pages/activity/ActivityLogPage";
@@ -57,15 +58,26 @@ function HomeRedirect() {
   return <Navigate to={getDefaultRoute()} replace />;
 }
 
-function PermissionRoute({ permission, children }: { permission: string; children: React.ReactNode }) {
+function PermissionRoute({ permission, children }: { permission: string | string[]; children: React.ReactNode }) {
   const { data: role, isLoading } = useAdminRole();
 
   if (isLoading) return null;
   if (!role) return <Navigate to="/admin" replace />;
   if (role.name === "super_admin") return <>{children}</>;
-  if (!role.permissions?.includes(permission)) return <Navigate to="/admin" replace />;
+  const keys = Array.isArray(permission) ? permission : [permission];
+  if (!keys.some((key) => role.permissions?.includes(key))) return <Navigate to="/admin" replace />;
 
   return <>{children}</>;
+}
+
+/**
+ * Ops emails and the notification feed deep-link to the queue as
+ * `/cancellations?request=<id>` (the admin app is mounted under `/admin`).
+ * Preserve the query string when normalising into the router.
+ */
+function CancellationsRedirect() {
+  const location = useLocation();
+  return <Navigate to={`/admin/cancellations${location.search}`} replace />;
 }
 
 type PayoutTab = "payments" | "requests" | "payouts" | "disputes" | "claims" | "methods";
@@ -138,6 +150,7 @@ function AdminLayout() {
 const router = createBrowserRouter([
   { path: "/admin/login", element: <LoginPage /> },
   { path: "/auth/callback", element: <AuthCallback /> },
+  { path: "/cancellations", element: <CancellationsRedirect /> },
   {
     path: "/admin",
     element: <AdminLayout />,
@@ -160,6 +173,7 @@ const router = createBrowserRouter([
       { path: "payouts", element: <PermissionRoute permission="payouts.view"><PayoutsTabPage /></PermissionRoute> },
       { path: "payout-methods", element: <PermissionRoute permission="payout-methods.view"><Navigate to="/admin/payouts?tab=methods" replace /></PermissionRoute> },
       { path: "bookings", element: <PermissionRoute permission="bookings.view"><BookingsPage /></PermissionRoute> },
+      { path: "cancellations", element: <PermissionRoute permission={["bookings.view", "dashboard.*"]}><CancellationsPage /></PermissionRoute> },
       { path: "reviews", element: <PermissionRoute permission="reviews.view"><ReviewModerationPage /></PermissionRoute> },
       { path: "chat/suppliers", element: <PermissionRoute permission="chat.suppliers"><ChatPage /></PermissionRoute> },
       { path: "chat/customers", element: <PermissionRoute permission="chat.customers"><ChatPage /></PermissionRoute> },

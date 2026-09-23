@@ -17,6 +17,7 @@ import {
   Globe,
   FileText,
   MessageSquare,
+  ShieldAlert,
 } from "lucide-react";
 
 export interface ChildItem {
@@ -29,7 +30,7 @@ export interface NavItem {
   label: string;
   path?: string;
   icon: React.ReactNode;
-  badgeKey?: "bookings" | "reviews" | "tours";
+  badgeKey?: "bookings" | "reviews" | "tours" | "cancellations";
   keywords?: string[];
   children?: ChildItem[];
 }
@@ -63,6 +64,7 @@ export function getNavGroups(can: (key: string) => boolean): { group: string; it
 
   const managementItems: NavItem[] = [
     ...(can('bookings.view') ? [{ label: "Bookings", path: "/admin/bookings", icon: <ShoppingCart className="h-4 w-4" />, badgeKey: "bookings" as const, keywords: ["reservation", "orders"] }] : []),
+    ...(can('bookings.view') || can('dashboard.*') ? [{ label: "Cancellations", path: "/admin/cancellations", icon: <ShieldAlert className="h-4 w-4" />, badgeKey: "cancellations" as const, keywords: ["approval", "refund", "supplier cancel"] }] : []),
     ...(can('suppliers.view') ? [{ label: "Suppliers", path: "/admin/suppliers", icon: <UserPlus className="h-4 w-4" />, keywords: ["vendors", "partners"] }] : []),
     ...(can('suppliers.view') ? [{ label: "Quality Control", path: "/admin/quality-control", icon: <ClipboardCheck className="h-4 w-4" />, keywords: ["qc", "standards", "checks"] }] : []),
     ...(can('tours.view') ? [{ label: "Expedition-Go Tours", path: "/admin/expedition", icon: <Globe className="h-4 w-4" />, keywords: ["ghana", "expeditions"] }] : []),

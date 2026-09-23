@@ -21,6 +21,8 @@ import {
   ClipboardCheck,
   FileWarning,
   RefreshCw,
+  ShieldAlert,
+  ShieldCheck,
 } from "lucide-react";
 import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from "@/services/notificationService";
 import { onAdminNotification, onAdminSocketConnect } from "@/lib/adminSocket";
@@ -46,6 +48,8 @@ const notificationRouteMap: Record<string, (data?: Record<string, unknown>) => {
   PAYMENT_COLLECTION_FAILED: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
   STRIPE_CUSTOMER_CREATE_FAILED: () => ({ path: "/admin/settings" }),
   REFUND_NEEDS_ATTENTION: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/payouts?tab=disputes" },
+  SUPPLIER_CANCELLATION_REQUEST: (data) => data?.requestId ? { path: `/cancellations?request=${data.requestId}` } : { path: "/cancellations" },
+  SUPPLIER_CANCELLATION_DECIDED: (data) => data?.requestId ? { path: `/cancellations?request=${data.requestId}` } : { path: "/cancellations" },
   SYSTEM_ALERT: (data) => data?.payoutMethodId ? { path: "/admin/payouts?tab=methods", state: { viewSupplierId: data.supplierId } } : data?.supplierId ? { path: `/admin/suppliers/${data.supplierId}` } : { path: "/admin" },
   NEW_MESSAGE: (data) => {
     if (!data?.conversationId) return null;
@@ -83,9 +87,16 @@ const typeConfig: Record<string, { icon: React.ReactNode; color: string }> = {
   REFUND_CLAIM: { icon: <RefreshCw className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
   REFUND_NEEDS_ATTENTION: { icon: <RefreshCw className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
   STRIPE_CUSTOMER_CREATE_FAILED: { icon: <AlertTriangle className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
+  SUPPLIER_CANCELLATION_REQUEST: { icon: <ShieldAlert className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
+  SUPPLIER_CANCELLATION_DECIDED: { icon: <ShieldCheck className="h-3.5 w-3.5" />, color: "text-green-600 dark:text-green-400" },
 };
 
-function getTypeConfig(type: string) {
+function getTypeConfig(type: string, data?: Record<string, unknown>) {
+  // 24h escalation reminders carry `reminder: true` — render them hotter than
+  // the original request so a stuck queue is impossible to miss.
+  if (type === "SUPPLIER_CANCELLATION_REQUEST" && data?.reminder === true) {
+    return { icon: <ShieldAlert className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" };
+  }
   return typeConfig[type] || { icon: <Bell className="h-3.5 w-3.5" />, color: "text-text-secondary" };
 }
 
@@ -224,7 +235,7 @@ export function NotificationBell() {
               ) : (
                 <div className="divide-y divide-border-muted">
                   {notifications.map((n) => {
-                    const cfg = getTypeConfig(n.type);
+                    const cfg = getTypeConfig(n.type, n.data);
                     return (
                       <button
                         key={n.id}

@@ -45,6 +45,35 @@ export interface BookingTour {
   };
 }
 
+export interface PendingCancellationPreview {
+  refund?: { amount: number; note?: string };
+  fee?: number;
+  countsTowardRate?: boolean;
+  stopSell?: { tourId?: string; marker?: string; blocked?: Array<{ date: string }> };
+}
+
+export interface PendingCancellationPayload {
+  cancellationCode?: string;
+  cancellationCategory?: string;
+  explanation?: string;
+  supplierNotes?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Open supplier cancellation request attached to a booking by the admin
+ * list/detail serializers (`pendingCancellation`). Nothing has been executed
+ * on the booking while this is present.
+ */
+export interface PendingCancellation {
+  id: string;
+  status: string;
+  createdAt: string;
+  payload?: PendingCancellationPayload | null;
+  preview?: PendingCancellationPreview | null;
+  stopSellingApplied?: boolean;
+}
+
 export interface Booking {
   id: string;
   bookingNumber: string;
@@ -90,6 +119,20 @@ export interface Booking {
   customer: BookingCustomer;
   tour: BookingTour;
   payouts: BookingPayout[];
+
+  // ── Supplier cancellation approval ──────────────────────────────────────
+  /** Present while a supplier cancellation request awaits an admin decision. */
+  pendingCancellation?: PendingCancellation | null;
+  cancellationCode?: string | null;
+  cancellationCategory?: string | null;
+  cancellationOrigin?: string | null;
+  countsTowardRate?: boolean | null;
+  cancellationFee?: number | null;
+  refundStatus?: string | null;
+  refundAmount?: number | null;
+  cancelledAt?: string | null;
+  cancellationChoiceDeadline?: string | null;
+  customerChoice?: string | null;
 }
 
 export interface TravelerDetail {

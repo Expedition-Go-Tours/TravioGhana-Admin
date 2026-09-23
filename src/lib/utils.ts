@@ -90,6 +90,8 @@ export function getStatusColor(status: string): string {
   const map: Record<string, string> = {
     PENDING: "bg-status-pending/10 text-status-pending border-status-pending/30",
     PENDING_APPROVAL: "bg-status-pending/10 text-status-pending border-status-pending/30",
+  APPROVING: "bg-status-processing/10 text-status-processing border-status-processing/30",
+  SUPERSEDED: "bg-status-suspended/10 text-status-suspended border-status-suspended/30",
     APPROVED: "bg-status-approved/10 text-status-approved border-status-approved/30",
     ACTIVE: "bg-status-active/10 text-status-active border-status-active/30",
     REJECTED: "bg-status-rejected/10 text-status-rejected border-status-rejected/30",

@@ -50,6 +50,7 @@ function useSidebarCounts(can: (key: string) => boolean) {
   const canBookings = can('bookings.view') || can('dashboard.*');
   const canReviews = can('reviews.view');
   const canTours = can('tours.approve') || can('tours.view');
+  const canCancellations = can('bookings.view') || can('dashboard.*');
 
   const bookingsQuery = useQuery({
     queryKey: ["admin", "bookings", "sidebar-count"],
@@ -75,14 +76,30 @@ function useSidebarCounts(can: (key: string) => boolean) {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Supplier cancellation requests awaiting admin approval — the queue
+  // response carries the authoritative `pendingCount`.
+  const cancellationsQuery = useQuery({
+    queryKey: ["admin", "cancellations", "sidebar-count"],
+    queryFn: () =>
+      api
+        .get("/admin/cancellation-requests?status=PENDING_APPROVAL&limit=1")
+        .then((r) => r.data?.data?.pendingCount ?? 0),
+    enabled: canCancellations,
+    refetchInterval: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+  });
+
   useSocketInvalidate("admin:new-booking", ["admin", "bookings"]);
   useSocketInvalidate("admin:new-review", ["admin", "reviews-pending-count"]);
   useSocketInvalidate("admin:tour-update", ["admin", "tour-review"]);
+  // Cancellation requests push through the admin notification feed.
+  useSocketInvalidate("admin-notification", ["admin", "cancellations"]);
 
   return {
     bookings: bookingsQuery.data ?? 0,
     reviews: reviewsQuery.data ?? 0,
     tours: toursQuery.data ?? 0,
+    cancellations: cancellationsQuery.data ?? 0,
   };
 }
 

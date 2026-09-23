@@ -41,6 +41,18 @@ export interface SystemConfig {
   [key: string]: unknown;
 }
 
+/**
+ * Permission keys the admin UI references directly. The canonical catalog is
+ * seeded by the backend (`prisma/seed.js`) and rendered dynamically in
+ * Settings → Admin Roles, where owners grant it. `cancellations.approve`
+ * ("Approve Cancellations", category "Bookings") gates deciding supplier
+ * cancellation requests; viewing the queue only needs `bookings.view` or
+ * `dashboard.*`.
+ */
+export const PERMISSIONS = {
+  CANCELLATIONS_APPROVE: "cancellations.approve",
+} as const;
+
 const ROUTE_PRIORITY = [
   { permission: 'dashboard.*', route: '/admin/overview' },
   { permission: 'analytics.view', route: '/admin/overview' },
