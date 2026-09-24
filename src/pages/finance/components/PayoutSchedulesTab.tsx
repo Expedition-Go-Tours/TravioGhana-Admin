@@ -99,6 +99,23 @@ function optionFor(options: PlanOption[], value?: string | null) {
   return options.find((o) => o.value === value) || null;
 }
 
+/**
+ * How close the next run is — "Today" / "Tomorrow" / "In 4 days". The list is
+ * ordered soonest-first, so this makes the top of the queue scannable at a
+ * glance. Returns null once the run is more than a week away.
+ */
+function relativeRunLabel(value: string | null): { label: string; today: boolean } | null {
+  if (!value) return null;
+  const run = new Date(value);
+  if (Number.isNaN(run.getTime())) return null;
+  const startOf = (d: Date) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const days = Math.round((startOf(run).getTime() - startOf(new Date()).getTime()) / 86_400_000);
+  if (days <= 0) return { label: "Today", today: true };
+  if (days === 1) return { label: "Tomorrow", today: true };
+  if (days <= 7) return { label: `In ${days} days`, today: false };
+  return null;
+}
+
 export function PayoutSchedulesTab() {
   const queryClient = useQueryClient();
   const { can } = usePermission();
@@ -154,14 +171,31 @@ export function PayoutSchedulesTab() {
     {
       key: "next",
       header: "Next payout",
-      render: (r) => (
-        <div>
-          <p className="text-sm text-text-primary">{r.plan.nextRunAt ? formatDate(r.plan.nextRunAt) : "—"}</p>
-          {r.plan.nextRunPeriodLabel && (
-            <p className="text-xs text-text-tertiary">covering {r.plan.nextRunPeriodLabel}</p>
-          )}
-        </div>
-      ),
+      render: (r) => {
+        const soon = relativeRunLabel(r.plan.nextRunAt);
+        return (
+          <div>
+            <div className="flex items-center gap-2">
+              <p className="text-sm text-text-primary">{r.plan.nextRunAt ? formatDate(r.plan.nextRunAt) : "—"}</p>
+              {soon && (
+                <span
+                  className={cn(
+                    "inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
+                    soon.today
+                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
+                      : "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+                  )}
+                >
+                  {soon.label}
+                </span>
+              )}
+            </div>
+            {r.plan.nextRunPeriodLabel && (
+              <p className="text-xs text-text-tertiary">covering {r.plan.nextRunPeriodLabel}</p>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: "eligible",
@@ -292,7 +326,7 @@ export function PayoutSchedulesTab() {
               </SelectContent>
             </Select>
             <span className="ml-auto text-xs tabular-nums text-text-tertiary">
-              {rows.length} of {data?.pagination?.totalCount ?? rows.length} suppliers
+              {rows.length} of {data?.pagination?.totalCount ?? rows.length} suppliers · soonest payout first
             </span>
           </div>
 
