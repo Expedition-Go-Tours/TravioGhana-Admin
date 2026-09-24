@@ -30,6 +30,7 @@ import { ArrowLeft } from "lucide-react";
 import { PayoutsPaymentsTab } from "@/pages/finance/components/PayoutsPaymentsTab";
 import { PayoutsListTab } from "@/pages/finance/components/PayoutsListTab";
 import { PayoutsMethodsTab } from "@/pages/finance/components/PayoutsMethodsTab";
+import { PayoutSchedulesTab } from "@/pages/finance/components/PayoutSchedulesTab";
 import { PayoutRequestsTab } from "@/pages/finance/components/PayoutRequestsTab";
 import { DisputesQueueTab } from "@/pages/finance/components/DisputesQueueTab";
 import { CustomerRefundClaimsTab } from "@/pages/finance/components/CustomerRefundClaimsTab";
@@ -80,12 +81,12 @@ function CancellationsRedirect() {
   return <Navigate to={`/admin/cancellations${location.search}`} replace />;
 }
 
-type PayoutTab = "payments" | "requests" | "payouts" | "disputes" | "claims" | "methods";
+type PayoutTab = "payments" | "requests" | "schedules" | "payouts" | "disputes" | "claims" | "methods";
 
 function PayoutsTabPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const tab: PayoutTab = (["payments", "requests", "payouts", "disputes", "claims", "methods"] as const).find((t) => searchParams.get("tab") === t) ?? "payments";
+  const tab: PayoutTab = (["payments", "requests", "schedules", "payouts", "disputes", "claims", "methods"] as const).find((t) => searchParams.get("tab") === t) ?? "payments";
   const [statusOverride, setStatusOverride] = useState<string | undefined>(undefined);
 
   const switchTab = (t: PayoutTab) => {
@@ -111,6 +112,7 @@ function PayoutsTabPage() {
         {([
           { key: "payments", label: "Payments" },
           { key: "requests", label: "Payout Requests" },
+          { key: "schedules", label: "Payout Schedules" },
           { key: "payouts", label: "All Payouts" },
           { key: "disputes", label: "Refund Requests" },
           { key: "claims", label: "Customer Refund Claims" },
@@ -131,6 +133,7 @@ function PayoutsTabPage() {
       </div>
       {tab === "payments" && <PayoutsPaymentsTab onSwitchToList={(status) => { setStatusOverride(status); setSearchParams((prev) => { const next = new URLSearchParams(prev); next.set("tab", "payouts"); return next; }, { replace: true }); }} onSwitchToRequests={() => setSearchParams((prev) => { const next = new URLSearchParams(prev); next.set("tab", "requests"); return next; }, { replace: true })} />}
       {tab === "requests" && <PayoutRequestsTab />}
+      {tab === "schedules" && <PayoutSchedulesTab />}
       {tab === "payouts" && <PayoutsListTab initialStatus={statusOverride} onStatusChange={setStatusOverride} />}
       {tab === "disputes" && <DisputesQueueTab />}
       {tab === "claims" && <CustomerRefundClaimsTab />}

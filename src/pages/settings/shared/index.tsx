@@ -48,6 +48,8 @@ export interface FieldDef {
   max?: number;
   step?: number;
   options?: string[];
+  /** Optional friendly labels for `options` (falls back to the raw value). */
+  optionLabels?: Record<string, string>;
   section: string;
   hint?: string;
   prefix?: string;

@@ -13,7 +13,14 @@ import { useUnsavedChangesWarning, useCtrlSave, QueryErrorState, SettingsCard, F
 
 const CURRENCIES = ["USD", "EUR", "GBP", "KES", "TZS", "UGX", "RWF", "ZAR", "NGN", "GHS"];
 const TIMEZONES = ["UTC", "Africa/Dar_es_Salaam", "Africa/Nairobi", "Africa/Kampala", "Africa/Kigali", "Africa/Johannesburg", "Africa/Lagos", "America/New_York", "Europe/London"];
-const PAYOUT_SCHEDULES = ["daily", "weekly", "biweekly", "monthly"];
+// Automated payout cadences. Mirrors the backend PayoutCycle enum — never
+// "bi-weekly"/"bi-monthly", which are ambiguous.
+const PAYOUT_CYCLES = ["WEEKLY", "TWICE_MONTHLY", "MONTHLY"];
+const PAYOUT_CYCLE_LABELS: Record<string, string> = {
+  WEEKLY: "Weekly — every Monday",
+  TWICE_MONTHLY: "Twice a month — the 1st & 15th",
+  MONTHLY: "Monthly — the 1st",
+};
 
 const FIELDS: FieldDef[] = [
   { key: "platform.name", label: "Platform Name", type: "text", required: true, section: "Platform" },
@@ -23,7 +30,26 @@ const FIELDS: FieldDef[] = [
   { key: "commission.default_rate", label: "Default Commission (%)", type: "number", required: true, min: 0, max: 100, step: 0.1, section: "Commission & Fees" },
   { key: "commission.platform_fee", label: "Platform Fee", type: "number", required: true, min: 0, step: 0.01, section: "Commission & Fees" },
   { key: "payout.min_threshold", label: "Min Payout Threshold", type: "number", required: true, min: 0, step: 1, section: "Commission & Fees" },
-  { key: "payout.schedule", label: "Payout Schedule", type: "select", required: true, options: PAYOUT_SCHEDULES, section: "Commission & Fees" },
+  {
+    key: "payout.default_cycle",
+    label: "Default Payout Schedule",
+    type: "select",
+    required: true,
+    options: PAYOUT_CYCLES,
+    optionLabels: PAYOUT_CYCLE_LABELS,
+    section: "Commission & Fees",
+    hint: "New and un-enrolled suppliers start on this schedule. Suppliers can change their own from the supplier dashboard.",
+  },
+  {
+    key: "payout.auto_generate_enabled",
+    label: "Automatic Payout Runs",
+    type: "select",
+    required: true,
+    options: ["true", "false"],
+    optionLabels: { true: "Enabled", false: "Paused — suppliers request manually" },
+    section: "Commission & Fees",
+    hint: "Pausing stops the scheduler. Enrolled suppliers keep their schedule and can withdraw manually until it resumes.",
+  },
   { key: "booking.min_advance_hours", label: "Min Advance Booking (hours)", type: "number", required: true, min: 0, section: "Booking Rules" },
   { key: "booking.max_advance_days", label: "Max Advance Booking (days)", type: "number", required: true, min: 1, section: "Booking Rules" },
   { key: "booking.auto_cancel_hours", label: "Auto-Cancel After (hours)", type: "number", required: true, min: 0, section: "Booking Rules" },
@@ -195,7 +221,7 @@ export function GeneralTab() {
                         </SelectTrigger>
                         <SelectContent>
                           {(field.options || []).map((opt) => (
-                            <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                            <SelectItem key={opt} value={opt}>{field.optionLabels?.[opt] ?? opt}</SelectItem>
                           ))}
                         </SelectContent>
                       </Select>
