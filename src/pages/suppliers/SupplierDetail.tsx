@@ -31,6 +31,7 @@ import {
   Users,
   ArrowUpRight,
   Quote,
+  Smartphone,
 } from "lucide-react";
 import { Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -1225,6 +1226,8 @@ interface PayoutMethodItem {
   routingNumber?: string;
   bankCountry?: string;
   currency?: string;
+  mobileProvider?: string;
+  mobileNumber?: string;
   paypalEmail?: string;
   isDefault?: boolean;
   verified?: boolean;
@@ -1234,9 +1237,12 @@ interface PayoutMethodItem {
 function PayoutMethodCard({ method }: { method: PayoutMethodItem }) {
   const typeKey = (method.type || "").toLowerCase();
   const isBank = typeKey.includes("bank");
+  const isMobile = typeKey.includes("mobile");
   const isPaypal = typeKey.includes("paypal");
   const scheme = isBank
     ? { badge: "bg-blue-500", bg: "from-blue-50 to-white dark:from-blue-950/30 dark:to-surface-base", border: "border-blue-100 dark:border-blue-800/30", icon: Building2, iconBg: "bg-blue-100 dark:bg-blue-900/30", iconColor: "text-blue-700 dark:text-blue-300", label: "Bank Account" }
+    : isMobile
+    ? { badge: "bg-emerald-500", bg: "from-emerald-50 to-white dark:from-emerald-950/30 dark:to-surface-base", border: "border-emerald-100 dark:border-emerald-800/30", icon: Smartphone, iconBg: "bg-emerald-100 dark:bg-emerald-900/30", iconColor: "text-emerald-700 dark:text-emerald-300", label: "Mobile Money" }
     : isPaypal
     ? { badge: "bg-indigo-500", bg: "from-indigo-50 to-white dark:from-indigo-950/30 dark:to-surface-base", border: "border-indigo-100 dark:border-indigo-800/30", icon: Wallet, iconBg: "bg-indigo-100 dark:bg-indigo-900/30", iconColor: "text-indigo-700 dark:text-indigo-300", label: "PayPal Account" }
     : { badge: "bg-emerald-500", bg: "from-emerald-50 to-white dark:from-emerald-950/30 dark:to-surface-base", border: "border-emerald-100 dark:border-emerald-800/30", icon: CreditCard, iconBg: "bg-emerald-100 dark:bg-emerald-900/30", iconColor: "text-emerald-700 dark:text-emerald-300", label: "Payment Method" };
@@ -1281,6 +1287,9 @@ function PayoutMethodCard({ method }: { method: PayoutMethodItem }) {
             {isBank && method.swiftCode && <Field label="SWIFT / BIC" value={method.swiftCode} />}
             {isBank && method.iban && <Field label="IBAN" value={method.iban} />}
             {isBank && method.routingNumber && <Field label="Routing Number" value={method.routingNumber} />}
+            {isMobile && <Field label="Wallet Holder" value={method.accountName} />}
+            {isMobile && <Field label="Mobile Provider" value={method.mobileProvider} />}
+            {isMobile && <Field label="Wallet Number" value={method.mobileNumber} />}
             {isPaypal && <Field label="PayPal Email" value={method.paypalEmail} />}
             {isPaypal && <Field label="Account Name" value={method.accountName} />}
           </div>

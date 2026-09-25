@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Download, Search, X, Eye, MapPin, Hash, Building2, Wallet, Calendar, DollarSign, Receipt, Percent, Clock, Send, ArrowUpRight, Info } from "lucide-react";
+import { Download, Search, X, Eye, MapPin, Hash, Building2, Wallet, Smartphone, Calendar, DollarSign, Receipt, Percent, Clock, Send, ArrowUpRight, Info } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -286,7 +286,8 @@ export function PayoutsListTab({ initialStatus, onStatusChange }: PayoutsListTab
         const m = r.payoutMethod;
         if (!m?.type) return <span className="text-sm text-text-tertiary">—</span>;
         const isBank = m.type.toLowerCase().includes("bank");
-        const Icon = isBank ? Building2 : Wallet;
+        const isMobile = m.type.toLowerCase().includes("mobile");
+        const Icon = isMobile ? Smartphone : isBank ? Building2 : Wallet;
         return (
           <div className="flex items-center gap-1.5">
             <Icon className="h-3 w-3 shrink-0 text-text-tertiary" />

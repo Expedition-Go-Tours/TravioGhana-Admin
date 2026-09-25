@@ -68,7 +68,8 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
 
   const method = payout.payoutMethod;
   const isBank = method?.type?.toLowerCase().includes("bank");
-  const MethodIcon = isBank ? Building2 : Wallet;
+  const isMobile = method?.type?.toLowerCase().includes("mobile");
+  const MethodIcon = isMobile ? Smartphone : isBank ? Building2 : Wallet;
 
   const timelineSteps = [
     { label: "Created", date: payout.createdAt || null, active: true },
@@ -263,6 +264,12 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
                     <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
                       {method.bankName && <Field label="Bank" value={method.bankName} />}
                       {method.accountNumber && <Field label="Account" value={method.accountNumber} />}
+                    </div>
+                  )}
+                  {isMobile && (method.mobileProvider || method.mobileNumber) && (
+                    <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border">
+                      {method.mobileProvider && <Field label="Provider" value={method.mobileProvider} />}
+                      {method.mobileNumber && <Field label="Wallet Number" value={method.mobileNumber} />}
                     </div>
                   )}
                 </div>

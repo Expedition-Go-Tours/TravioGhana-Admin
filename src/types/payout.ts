@@ -40,6 +40,8 @@ export interface Payout {
     details?: string;
     bankName?: string;
     accountNumber?: string;
+    mobileProvider?: string;
+    mobileNumber?: string;
     isDefault?: boolean;
     verified?: boolean;
   };
@@ -94,6 +96,8 @@ export interface PayoutRequest {
     accountNumber?: string;
     swiftCode?: string;
     iban?: string;
+    mobileProvider?: string;
+    mobileNumber?: string;
   } | null;
   approvedBy?: string | null;
   approvedAt?: string | null;

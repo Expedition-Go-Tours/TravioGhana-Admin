@@ -1,4 +1,4 @@
-import { Building2, Wallet, Check, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Building2, Wallet, Smartphone, Check, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface PayoutMethodData {
@@ -16,6 +16,8 @@ export interface PayoutMethodData {
   routingNumber?: string;
   bankCountry?: string;
   currency?: string;
+  mobileProvider?: string;
+  mobileNumber?: string;
   paypalEmail?: string;
   isDefault?: boolean;
   verified?: boolean;
@@ -42,10 +44,15 @@ function Field({ label, value }: { label: string; value?: string | null }) {
 export function PayoutMethodCard({ method, onVerifyToggle, verifying, className }: PayoutMethodCardProps) {
   const typeKey = (method.type || "").toLowerCase();
   const isBank = typeKey.includes("bank");
+  const isMobile = typeKey.includes("mobile");
   const isPaypal = typeKey.includes("paypal");
-  const Icon = isBank ? Building2 : Wallet;
-  const iconWrap = isBank ? "bg-status-approved/10 text-status-approved" : "bg-status-flagged/10 text-status-flagged";
-  const accent = isBank ? "border-status-approved/30" : "border-status-flagged/30";
+  const Icon = isMobile ? Smartphone : isBank ? Building2 : Wallet;
+  const iconWrap = isMobile
+    ? "bg-primary/10 text-primary"
+    : isBank
+      ? "bg-status-approved/10 text-status-approved"
+      : "bg-status-flagged/10 text-status-flagged";
+  const accent = isMobile ? "border-primary/30" : isBank ? "border-status-approved/30" : "border-status-flagged/30";
 
   return (
     <div className={cn("overflow-hidden rounded-lg border border-border bg-surface-base shadow-sm", className)}>
@@ -94,7 +101,10 @@ export function PayoutMethodCard({ method, onVerifyToggle, verifying, className 
       <div className="space-y-4 px-5 py-4">
         <div className="grid grid-cols-2 gap-x-8 gap-y-3">
           {isBank && <Field label="Bank Name" value={method.bankName} />}
-          <Field label="Account Name" value={method.accountName} />
+          {isMobile && <Field label="Wallet Holder" value={method.accountName} />}
+          {isMobile && <Field label="Mobile Provider" value={method.mobileProvider} />}
+          {isMobile && <Field label="Wallet Number" value={method.mobileNumber} />}
+          {!isMobile && <Field label="Account Name" value={method.accountName} />}
           {isBank && <Field label="Account Number" value={method.accountNumber} />}
           {isBank && <Field label="Sort Code" value={method.sortCode} />}
           {isBank && <Field label="Branch Code" value={method.branchCode} />}

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
-  ChevronDown, ChevronLeft, ChevronRight, Landmark, Wallet, Inbox, Send,
+  ChevronDown, ChevronLeft, ChevronRight, Landmark, Wallet, Smartphone, Inbox, Send,
   CheckCircle, XCircle, Eye, Search, X, AlertTriangle, ShieldCheck, RefreshCw,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,6 +35,9 @@ function methodDetail(m: PayoutRequest["payoutMethod"]): string | null {
   if (!m) return null;
   if (m.type === "PAYPAL") return m.paypalEmail || null;
   if (m.type === "BANK_TRANSFER") return m.bankName || m.accountNumber?.slice(-4) || null;
+  if (m.type === "MOBILE_MONEY") {
+    return [m.mobileProvider, m.mobileNumber].filter(Boolean).join(" ") || null;
+  }
   return m.accountName || null;
 }
 
@@ -48,7 +51,7 @@ function MethodLabel({ request }: { request: PayoutRequest }) {
       </span>
     );
   }
-  const Icon = m.type === "PAYPAL" ? Wallet : Landmark;
+  const Icon = m.type === "PAYPAL" ? Wallet : m.type === "MOBILE_MONEY" ? Smartphone : Landmark;
   const detail = methodDetail(m);
   return (
     <span className="inline-flex items-center gap-1.5 text-sm text-text-secondary">

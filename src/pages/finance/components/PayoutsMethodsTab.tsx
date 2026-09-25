@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Users, Wallet, AlertCircle, ShieldCheck, Search, Building2, X } from "lucide-react";
+import { Users, Wallet, Smartphone, AlertCircle, ShieldCheck, Search, Building2, X } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -51,6 +51,7 @@ interface CoverageSummary {
   hasDefault?: number;
   typeMix?: {
     BANK_TRANSFER?: { total?: number; verified?: number };
+    MOBILE_MONEY?: { total?: number; verified?: number };
     PAYPAL?: { total?: number; verified?: number };
   };
 }
@@ -117,7 +118,7 @@ export function PayoutsMethodsTab() {
   }, [suppliers, search, searchLower]);
 
   const mix = coverage?.typeMix || {};
-  const mixTotal = (mix.BANK_TRANSFER?.total || 0) + (mix.PAYPAL?.total || 0);
+  const mixTotal = (mix.BANK_TRANSFER?.total || 0) + (mix.MOBILE_MONEY?.total || 0) + (mix.PAYPAL?.total || 0);
 
   const columns: Column<PayoutMethodSupplier>[] = [
     {
@@ -201,6 +202,12 @@ export function PayoutsMethodsTab() {
             <span className="inline-flex items-center gap-1.5 rounded-full bg-status-approved/10 px-3 py-1 text-xs font-medium text-status-approved">
               <Building2 className="h-3 w-3" />
               Bank {mix.BANK_TRANSFER.total}{mix.BANK_TRANSFER.verified ? ` · ${mix.BANK_TRANSFER.verified} verified` : ""}
+            </span>
+          )}
+          {mix.MOBILE_MONEY && (
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
+              <Smartphone className="h-3 w-3" />
+              Mobile Money {mix.MOBILE_MONEY.total}{mix.MOBILE_MONEY.verified ? ` · ${mix.MOBILE_MONEY.verified} verified` : ""}
             </span>
           )}
           {mix.PAYPAL && (
