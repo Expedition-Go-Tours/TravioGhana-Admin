@@ -64,6 +64,11 @@ interface BusinessInfo {
   phoneNumber?: string;
   phone?: string;
   website?: string;
+  // Registration details the storefront collects (and the reviewer needs to
+  // check against the uploaded documents).
+  registrationNumber?: string;
+  tin?: string;
+  yearEstablished?: string | number;
 }
 
 interface OperatingInfo {
@@ -528,6 +533,9 @@ export default function SupplierDetailPage() {
                   { label: "Legal Business Name", value: legalName },
                   { label: "Display Name", value: supplier.businessInfo?.displayName || supplier.businessInfo?.businessName },
                   { label: "Business Type", value: supplier.businessInfo?.businessType },
+                  { label: "Registration Number", value: supplier.businessInfo?.registrationNumber },
+                  { label: "TIN", value: supplier.businessInfo?.tin },
+                  { label: "Year Established", value: supplier.businessInfo?.yearEstablished != null ? String(supplier.businessInfo.yearEstablished) : null },
                   { label: "Phone", value: supplier.businessInfo?.phoneNumber || supplier.businessInfo?.phone },
                   { label: "Country", value: supplier.businessInfo?.country },
                   { label: "City", value: supplier.businessInfo?.city || (typeof supplier.businessInfo?.address === "object" ? supplier.businessInfo?.address?.city : undefined) },
@@ -571,6 +579,7 @@ export default function SupplierDetailPage() {
                   { label: "Phone", value: supplier.representativeInfo?.phoneNumber || supplier.representativeInfo?.phone },
                   { label: "Date of Birth", value: supplier.representativeInfo?.dateOfBirth || supplier.representativeInfo?.dob || supplier.representativeInfo?.birthDate },
                   { label: "ID Type", value: supplier.representativeInfo?.idType },
+                  { label: "ID Number", value: supplier.representativeInfo?.idNumber },
                   { label: "Address", value: typeof supplier.representativeInfo?.address === "string" ? supplier.representativeInfo.address : supplier.representativeInfo?.address?.line1 },
                 ]}
               />
