@@ -57,8 +57,23 @@ interface Guide {
   reviewNote?: string | null;
 }
 
+interface Requirement {
+  type: string;
+  label: string;
+  required: boolean;
+  timing: string;
+}
+
+interface Requirements {
+  supplierType: string;
+  documents: Requirement[];
+  vehicles: "required" | "optional" | "hidden";
+  guides: "required" | "optional" | "hidden";
+}
+
 interface VerificationData {
   supplierType?: string;
+  requirements?: Requirements | null;
   documents: Doc[];
   vehicles: Vehicle[];
   guides: Guide[];
@@ -82,6 +97,10 @@ export default function SupplierVerificationPanel({ supplierId }: { supplierId: 
         <span className="text-sm text-text-secondary">Supplier type:</span>
         <span className="text-sm font-semibold text-text-primary">{supplierTypeLabel(data?.supplierType)}</span>
       </div>
+
+      {data?.requirements && (
+        <RequirementChecklist requirements={data.requirements} documents={data.documents || []} />
+      )}
 
       <div className="flex gap-2 border-b border-border-muted">
         {([
@@ -115,6 +134,53 @@ export default function SupplierVerificationPanel({ supplierId }: { supplierId: 
       ) : (
         <GuidesTab guides={data?.guides || []} editable={approve} onMutated={() => queryClient.invalidateQueries({ queryKey: ["admin", "supplier-verification", supplierId] })} />
       )}
+    </div>
+  );
+}
+
+function RequirementChecklist({ requirements, documents }: { requirements: Requirements; documents: Doc[] }) {
+  const missing = requirements.documents.filter(
+    (req) => req.required && !documents.some((d) => d.ownerType === "SUPPLIER" && d.type === req.type)
+  );
+
+  return (
+    <div className="rounded-lg border border-border bg-surface-base">
+      <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
+        <span className="text-sm font-semibold text-text-primary">Verification requirements</span>
+        {missing.length > 0 ? (
+          <span className="text-xs font-medium text-status-rejected">
+            {missing.length} required document{missing.length === 1 ? "" : "s"} missing
+          </span>
+        ) : (
+          <span className="text-xs font-medium text-status-active">All required documents on file</span>
+        )}
+      </div>
+      <ul className="divide-y divide-border-muted">
+        {requirements.documents.map((req) => {
+          const doc = documents.find((d) => d.ownerType === "SUPPLIER" && d.type === req.type);
+          return (
+            <li key={req.type} className="flex items-center justify-between gap-3 px-4 py-2.5">
+              <span className="flex items-center gap-2 text-sm text-text-primary">
+                {req.label}
+                {!req.required && (
+                  <span className="rounded bg-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-text-tertiary">Optional</span>
+                )}
+              </span>
+              {doc ? (
+                <StatusBadge status={doc.status} />
+              ) : (
+                <span className={`text-xs font-medium ${req.required ? "text-status-rejected" : "text-text-tertiary"}`}>
+                  {req.required ? "Missing" : "Not provided"}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+      <div className="flex flex-wrap gap-x-4 gap-y-1 border-t border-border px-4 py-2.5 text-xs text-text-tertiary">
+        <span>Vehicles: <strong className="text-text-secondary">{requirements.vehicles}</strong></span>
+        <span>Guides: <strong className="text-text-secondary">{requirements.guides}</strong></span>
+      </div>
     </div>
   );
 }
