@@ -855,6 +855,14 @@ function SupplierHero({
                     Member since {formatDate(supplier.createdAt)}
                   </span>
                 )}
+                {/* Why the account is already live — e.g. "Auto-approved on
+                    submission" — so the team knows the ID check is still due. */}
+                {!!supplier.adminNotes && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-status-pending/10 px-2.5 py-0.5 text-xs font-medium text-status-pending">
+                    <AlertCircle className="h-3.5 w-3.5" />
+                    {supplier.adminNotes}
+                  </span>
+                )}
               </div>
             </div>
           </div>
