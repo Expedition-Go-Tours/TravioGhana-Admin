@@ -1,4 +1,4 @@
-import { useState } from "react";
+
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import {
@@ -77,8 +77,8 @@ function CronStatusSection({ status }: { status: AiStatusResponse["cron"] }) {
               <div
                 className={`flex h-10 w-10 items-center justify-center rounded-lg ${
                   status.running
-                    ? "bg-status-active/15 text-status-active"
-                    : "bg-status-rejected/15 text-status-rejected"
+                    ? "bg-status-active/15 text-status-active-text"
+                    : "bg-status-rejected/15 text-status-rejected-text"
                 }`}
               >
                 <Timer className="h-5 w-5" />
@@ -127,7 +127,7 @@ function CronStatusSection({ status }: { status: AiStatusResponse["cron"] }) {
               </p>
               <p className="text-sm font-semibold text-text-primary">
                 {status.processing ? (
-                  <span className="flex items-center gap-1 text-status-pending">
+                  <span className="flex items-center gap-1 text-status-pending-text">
                     <Loader2 className="h-3 w-3 animate-spin" /> Yes
                   </span>
                 ) : (
@@ -171,28 +171,28 @@ function DetailStatsRow({
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-xs text-text-tertiary">
-                <CheckCircle2 className="h-3 w-3 text-status-active" />
+                <CheckCircle2 className="h-3 w-3 text-status-active-text" />
                 Completed
               </span>
-              <span className="text-sm font-semibold text-status-active">
+              <span className="text-sm font-semibold text-status-active-text">
                 {imageStats.completed}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-xs text-text-tertiary">
-                <Clock className="h-3 w-3 text-status-pending" />
+                <Clock className="h-3 w-3 text-status-pending-text" />
                 Pending
               </span>
-              <span className="text-sm font-semibold text-status-pending">
+              <span className="text-sm font-semibold text-status-pending-text">
                 {imageStats.pending}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-xs text-text-tertiary">
-                <XCircle className="h-3 w-3 text-status-rejected" />
+                <XCircle className="h-3 w-3 text-status-rejected-text" />
                 Failed
               </span>
-              <span className="text-sm font-semibold text-status-rejected">
+              <span className="text-sm font-semibold text-status-rejected-text">
                 {imageStats.failed}
               </span>
             </div>
@@ -239,19 +239,19 @@ function DetailStatsRow({
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-xs text-text-tertiary">
-                <Zap className="h-3 w-3 text-status-approved" />
+                <Zap className="h-3 w-3 text-status-approved-text" />
                 AI Selected Image
               </span>
-              <span className="text-sm font-semibold text-status-approved">
+              <span className="text-sm font-semibold text-status-approved-text">
                 {attractionStats.ai_selected}
               </span>
             </div>
             <div className="flex items-center justify-between">
               <span className="flex items-center gap-1.5 text-xs text-text-tertiary">
-                <RotateCcw className="h-3 w-3 text-status-pending" />
+                <RotateCcw className="h-3 w-3 text-status-pending-text" />
                 Fallback Image
               </span>
-              <span className="text-sm font-semibold text-status-pending">
+              <span className="text-sm font-semibold text-status-pending-text">
                 {attractionStats.fallback_image}
               </span>
             </div>
@@ -288,7 +288,7 @@ function FailedToursTable({
         <CardContent className="p-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <AlertTriangle className="h-4 w-4 text-status-rejected" />
+              <AlertTriangle className="h-4 w-4 text-status-rejected-text" />
               <h3 className="text-sm font-semibold text-text-primary">
                 Failed Tours
               </h3>
@@ -375,7 +375,7 @@ function FailedImagesTable({ images }: { images: AiFailedImage[] }) {
       <Card className="border-border/60">
         <CardContent className="p-5">
           <div className="mb-4 flex items-center gap-2">
-            <ImageIcon className="h-4 w-4 text-status-rejected" />
+            <ImageIcon className="h-4 w-4 text-status-rejected-text" />
             <h3 className="text-sm font-semibold text-text-primary">
               Failed Image Analyses
             </h3>

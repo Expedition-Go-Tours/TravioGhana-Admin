@@ -3,6 +3,7 @@ import { useNavigate, useSearchParams, useLocation } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import type { AxiosError } from "axios";
 import {
   Search,
   X,
@@ -136,7 +137,10 @@ export default function BookingsPage() {
       setChargeNowBooking(null);
       setSelectedBooking(null);
     },
-    onError: (err: any) => {
+    // `AxiosError` is the actual shape react-query hands us here. Typing it
+    // means `response.data.message` is checked rather than `any`-suppressed --
+    // and it is the type the shared axios client already uses.
+    onError: (err: AxiosError<{ message?: string }>) => {
       toast.error(err?.response?.data?.message || "Failed to charge card");
     },
   });
