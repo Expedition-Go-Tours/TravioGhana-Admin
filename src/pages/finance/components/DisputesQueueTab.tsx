@@ -2,16 +2,14 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { ChevronDown, Gavel, ShieldAlert, UserRound, Store, CircleSlash } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { StatusBadge } from "@/components/shared/StatusBadge";
+import { DataTable } from "@/components/shared/DataTable";
+import type { Column } from "@/components/shared/DataTable";
 import { ConfirmModal } from "@/components/shared/ConfirmModal";
-import { SectionEmpty } from "@/components/shared/SectionEmpty";
-import { SectionError } from "@/components/shared/SectionError";
-import { Skeleton } from "@/components/ui/skeleton";
 import { usePermission } from "@/hooks/usePermission";
 import { useSocketInvalidate } from "@/hooks/useSocketEvent";
 import api from "@/lib/axios";
@@ -41,6 +39,50 @@ const OUTCOMES: Array<{ value: Outcome; label: string; icon: React.ReactNode; hi
   { value: "SUPPLIER", label: "Deny refund", icon: <Store className="h-4 w-4" />, hint: "Request rejected. Funds unfreeze back to the supplier's eligible balance" },
   { value: "WITHDRAWN", label: "Mark withdrawn", icon: <CircleSlash className="h-4 w-4" />, hint: "The supplier pulled their request. Same effect as denying: funds unfrozen" },
 ];
+
+/**
+ * Expanded detail row. Rendered by DataTable into a <tr><td colspan>, so the
+ * detail is announced as part of the row it belongs to rather than as an
+ * unrelated block below the list.
+ */
+function DisputeDetail({ dispute: d }: { dispute: Dispute }) {
+  const open = d.status === "OPEN" || d.status === "UNDER_REVIEW";
+  return (
+    // DataTable's <td> already paints `bg-surface-muted/30` and is `p-0`, so
+    // this supplies only the padding; re-tinting here would stack two 30%
+    // layers into a visibly different shade.
+    <div className="px-5 py-4">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Filed by</p>
+          <p className="mt-1 truncate text-sm text-text-secondary">{d.opener?.name || d.opener?.email || "—"}</p>
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Supplier</p>
+          <p className="mt-1 truncate text-sm text-text-secondary">{d.supplier?.name || d.supplier?.email || "—"}</p>
+        </div>
+        <div>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Travel date</p>
+          <p className="mt-1 text-sm text-text-secondary">
+            {d.booking?.travelDate ? formatDate(d.booking.travelDate) : "—"}
+          </p>
+        </div>
+      </div>
+      {d.description && (
+        <div className="mt-3 rounded-md border border-border/60 bg-surface-base px-3 py-2">
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Supplier's explanation</p>
+          <p className="mt-1 whitespace-pre-wrap text-sm text-text-secondary">{d.description}</p>
+        </div>
+      )}
+      {!open && (
+        <div className="mt-3 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
+          Resolution: {d.resolution || "—"}
+          {d.refundAmount != null && ` · refunded ${formatCurrency(Number(d.refundAmount), d.booking?.currency)}`}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function DisputesQueueTab() {
   const queryClient = useQueryClient();
@@ -102,6 +144,92 @@ export function DisputesQueueTab() {
     });
   };
 
+  const columns: Column<Dispute>[] = [
+    {
+      key: "request",
+      header: "Request",
+      rowHeader: true,
+      render: (d) => {
+        const open = d.status === "OPEN" || d.status === "UNDER_REVIEW";
+        const expanded = expandedId === d.id;
+        return (
+          <div className="flex items-start gap-2.5">
+            <div className="flex shrink-0 flex-col items-center gap-1.5 pt-0.5">
+              <ChevronDown
+                className={cn("h-4 w-4 text-text-tertiary transition-transform", expanded && "rotate-180")}
+                aria-hidden="true"
+              />
+              <ShieldAlert className={cn("h-5 w-5", open ? "text-status-pending-text" : "text-text-tertiary")} />
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-mono text-xs font-semibold text-primary">{d.disputeNumber}</span>
+                <StatusBadge status={d.status} label={STATUS_LABELS[d.status]} />
+              </div>
+              <p className="mt-0.5 truncate text-sm text-text-secondary">
+                {d.booking?.tour?.title || "Unknown tour"}
+                <span className="font-mono text-xs text-text-tertiary"> · {d.booking?.bookingNumber || d.bookingId}</span>
+              </p>
+            </div>
+          </div>
+        );
+      },
+    },
+    {
+      key: "reason",
+      header: "Reason",
+      hideBelow: "md",
+      render: (d) => (
+        <p className="max-w-[220px] truncate text-xs text-text-tertiary">
+          <span className="font-medium text-text-secondary">{d.reason.replace(/_/g, " ").toLowerCase()}</span>
+          {d.description ? ` · ${d.description}` : ""}
+        </p>
+      ),
+    },
+    {
+      key: "amount",
+      header: "At stake",
+      numeric: true,
+      hideBelow: "sm",
+      render: (d) => (
+        <span className="block">
+          <span className="block text-sm font-semibold text-text-primary tabular-nums">
+            {formatCurrency(Number(d.booking?.grossAmount || 0), d.booking?.currency)}
+          </span>
+          <span className="block text-xs text-text-tertiary">at stake</span>
+        </span>
+      ),
+    },
+    {
+      key: "filed",
+      header: "Filed",
+      hideBelow: "lg",
+      render: (d) => <span className="text-xs text-text-tertiary">{formatDate(d.createdAt)}</span>,
+    },
+    {
+      key: "actions",
+      header: "Actions",
+      align: "right",
+      render: (d) => {
+        const open = d.status === "OPEN" || d.status === "UNDER_REVIEW";
+        if (!open || !canResolve) return null;
+        return (
+          <Button
+            size="sm"
+            variant="outline"
+            className="gap-1"
+            disabled={resolveMutation.isPending}
+            onClick={() => openResolve(d)}
+          >
+            <Gavel className="h-3.5 w-3.5" /> Resolve
+          </Button>
+        );
+      },
+    },
+  ];
+
+  const emptyMessage = `No ${STATUS_TABS.find((t) => t.key === statusTab)?.label.toLowerCase()} refund requests`;
+
   return (
     <div className="space-y-4">
       {/* Status tabs */}
@@ -125,102 +253,20 @@ export function DisputesQueueTab() {
         )}
       </div>
 
-      <Card>
-        <CardContent className="p-0">
-          {isLoading ? (
-            <div className="space-y-3 p-5">
-              {[1, 2, 3].map((i) => <Skeleton key={i} className="h-16 w-full" />)}
-            </div>
-          ) : isError ? (
-            <SectionError message="Failed to load refund requests" onRetry={() => refetch()} />
-          ) : disputes.length === 0 ? (
-            <SectionEmpty message={`No ${STATUS_TABS.find((t) => t.key === statusTab)?.label.toLowerCase()} refund requests`} />
-          ) : (
-            <div className="divide-y divide-border/60">
-              {disputes.map((d) => {
-                const expanded = expandedId === d.id;
-                const open = d.status === "OPEN" || d.status === "UNDER_REVIEW";
-                return (
-                  <div key={d.id}>
-                    <div
-                      className="flex cursor-pointer items-center gap-4 px-5 py-4 transition-colors hover:bg-surface-muted/40"
-                      onClick={() => setExpandedId(expanded ? null : d.id)}
-                    >
-                      <ChevronDown className={cn("h-4 w-4 shrink-0 text-text-tertiary transition-transform", expanded && "rotate-180")} />
-                      <ShieldAlert className={cn("h-5 w-5 shrink-0", open ? "text-status-pending" : "text-text-tertiary")} />
-                      <div className="min-w-0 flex-1">
-                        <div className="flex flex-wrap items-center gap-2">
-                          <span className="font-mono text-xs font-semibold text-primary">{d.disputeNumber}</span>
-                          <StatusBadge status={d.status} label={STATUS_LABELS[d.status]} />
-                        </div>
-                        <p className="mt-0.5 truncate text-sm text-text-secondary">
-                          {d.booking?.tour?.title || "Unknown tour"}
-                          <span className="font-mono text-xs text-text-tertiary"> · {d.booking?.bookingNumber || d.bookingId}</span>
-                        </p>
-                      </div>
-                      <div className="hidden min-w-0 max-w-[220px] flex-1 md:block">
-                        <p className="truncate text-xs text-text-tertiary">
-                          <span className="font-medium text-text-secondary">{d.reason.replace(/_/g, " ").toLowerCase()}</span>
-                          {d.description ? ` · ${d.description}` : ""}
-                        </p>
-                      </div>
-                      <div className="hidden text-right sm:block">
-                        <p className="text-sm font-semibold text-text-primary tabular-nums">
-                          {formatCurrency(Number(d.booking?.grossAmount || 0), d.booking?.currency)}
-                        </p>
-                        <p className="text-xs text-text-tertiary">at stake</p>
-                      </div>
-                      <div className="hidden w-24 text-right lg:block">
-                        <p className="text-xs text-text-tertiary">{formatDate(d.createdAt)}</p>
-                      </div>
-                      {open && canResolve && (
-                        <div className="shrink-0" onClick={(e) => e.stopPropagation()}>
-                          <Button size="sm" variant="outline" className="gap-1" disabled={resolveMutation.isPending} onClick={() => openResolve(d)}>
-                            <Gavel className="h-3.5 w-3.5" /> Resolve
-                          </Button>
-                        </div>
-                      )}
-                    </div>
-
-                    {expanded && (
-                      <div className="border-t border-border/60 bg-surface-muted/30 px-5 py-4">
-                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                          <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Filed by</p>
-                            <p className="mt-1 truncate text-sm text-text-secondary">{d.opener?.name || d.opener?.email || "—"}</p>
-                          </div>
-                          <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Supplier</p>
-                            <p className="mt-1 truncate text-sm text-text-secondary">{d.supplier?.name || d.supplier?.email || "—"}</p>
-                          </div>
-                          <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Travel date</p>
-                            <p className="mt-1 text-sm text-text-secondary">
-                              {d.booking?.travelDate ? formatDate(d.booking.travelDate) : "—"}
-                            </p>
-                          </div>
-                        </div>
-                        {d.description && (
-                          <div className="mt-3 rounded-md border border-border/60 bg-surface-base px-3 py-2">
-                            <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Supplier's explanation</p>
-                            <p className="mt-1 whitespace-pre-wrap text-sm text-text-secondary">{d.description}</p>
-                          </div>
-                        )}
-                        {!open && (
-                          <div className="mt-3 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
-                            Resolution: {d.resolution || "—"}
-                            {d.refundAmount != null && ` · refunded ${formatCurrency(Number(d.refundAmount), d.booking?.currency)}`}
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
-        </CardContent>
-      </Card>
+      <DataTable
+        columns={columns}
+        data={disputes}
+        loading={isLoading}
+        error={isError ? "Failed to load refund requests" : null}
+        onRetry={() => refetch()}
+        keyExtractor={(d) => d.id}
+        caption={`Refund requests — ${STATUS_TABS.find((t) => t.key === statusTab)?.label ?? statusTab}`}
+        size="compact"
+        expandedRow={expandedId}
+        onRowClick={(d) => setExpandedId(expandedId === d.id ? null : d.id)}
+        renderExpanded={(d) => <DisputeDetail dispute={d} />}
+        emptyMessage={emptyMessage}
+      />
 
       {/* Resolve modal */}
       {resolving && (

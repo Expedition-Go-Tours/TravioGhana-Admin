@@ -1,15 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "sonner";
+import { useQuery } from "@tanstack/react-query";
 import {
-  CalendarClock, CalendarDays, PauseCircle, AlertTriangle, Search, X, Check, Loader2, Pencil,
+  CalendarClock, CalendarDays, PauseCircle, AlertTriangle, Search, X, Check,
 } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
 import {
   Select,
   SelectContent,
@@ -18,21 +11,24 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { DataTable } from "@/components/shared/DataTable";
 import type { Column } from "@/components/shared/DataTable";
 import { StatCard } from "@/components/shared/StatCard";
-import { usePermission } from "@/hooks/usePermission";
 import { useSocketInvalidate } from "@/hooks/useSocketEvent";
 import api from "@/lib/axios";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
 
 /**
  * Payout schedules — the supplier-selectable cadences (weekly / twice a month /
- * monthly). Shows who is enrolled, when their next run lands, what it will pay,
- * and lets finance change or override a supplier's plan.
+ * monthly). Shows who is enrolled, when their next run lands and what it will pay.
+ *
+ * This tab is read-only by design. A supplier's cadence is theirs to choose in
+ * their own dashboard (Settings → Payouts, `PATCH /finance/payout-settings`); the
+ * only admin-side control is the platform-wide default for new enrolments in
+ * Settings → Commission & Fees. So there is deliberately no per-row edit action
+ * here — the `pendingCycle` column surfaces changes a supplier has already
+ * scheduled for themselves, which is the only reason it exists.
  */
 
 interface PlanOption {
@@ -117,13 +113,10 @@ function relativeRunLabel(value: string | null): { label: string; today: boolean
 }
 
 export function PayoutSchedulesTab() {
-  const queryClient = useQueryClient();
-  const { can } = usePermission();
   const [page, setPage] = useState(1);
   const [cycle, setCycle] = useState("all");
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
-  const [editing, setEditing] = useState<ScheduleRow | null>(null);
   const limit = 20;
 
   useSocketInvalidate("admin:payout-request-update", ["admin", "payout-schedules"]);
@@ -152,10 +145,11 @@ export function PayoutSchedulesTab() {
     {
       key: "supplier",
       header: "Supplier",
+      rowHeader: true,
       render: (r) => (
         <div className="min-w-0">
           <p className="truncate text-sm font-medium text-text-primary">{r.name || r.email || "Unknown"}</p>
-          <p className="truncate text-xs text-text-tertiary">{r.email || "—"}</p>
+          <p className="truncate text-xs text-text-tertiary">{r.email}</p>
         </div>
       ),
     },
@@ -176,14 +170,14 @@ export function PayoutSchedulesTab() {
         return (
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm text-text-primary">{r.plan.nextRunAt ? formatDate(r.plan.nextRunAt) : "—"}</p>
+              <p className="text-sm tabular-nums text-text-primary">{r.plan.nextRunAt ? formatDate(r.plan.nextRunAt) : "—"}</p>
               {soon && (
                 <span
                   className={cn(
-                    "inline-flex items-center rounded-md px-1.5 py-0.5 text-[10px] font-semibold",
+                    "inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-semibold",
                     soon.today
-                      ? "bg-amber-500/10 text-amber-600 dark:text-amber-400"
-                      : "bg-sky-500/10 text-sky-600 dark:text-sky-400",
+                      ? "bg-amber-500/10 text-amber-700 dark:text-amber-300"
+                      : "bg-sky-500/10 text-sky-700 dark:text-sky-300",
                   )}
                 >
                   {soon.label}
@@ -200,13 +194,15 @@ export function PayoutSchedulesTab() {
     {
       key: "eligible",
       header: "Eligible now",
-      align: "right",
+      numeric: true,
       render: (r) => (
         <div>
           <p className="text-sm font-semibold tabular-nums text-text-primary">
             {formatCurrency(r.eligibleBalance?.amount || 0, r.eligibleBalance?.currency || "USD")}
           </p>
-          <p className="text-xs text-text-tertiary">{r.eligibleBalance?.bookingCount || 0} booking(s)</p>
+          <p className="text-xs tabular-nums text-text-tertiary">
+            {r.eligibleBalance?.bookingCount || 0} booking{r.eligibleBalance?.bookingCount === 1 ? "" : "s"}
+          </p>
         </div>
       ),
     },
@@ -215,43 +211,26 @@ export function PayoutSchedulesTab() {
       header: "Method",
       render: (r) =>
         r.hasVerifiedMethod ? (
-          <span className="inline-flex items-center gap-1 text-xs font-medium text-emerald-600 dark:text-emerald-400">
-            <Check className="h-3.5 w-3.5" /> Verified
+          <span className="inline-flex items-center gap-1 text-xs font-medium text-status-active-text">
+            <Check className="h-3.5 w-3.5" aria-hidden /> Verified
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1 rounded-md bg-red-500/10 px-1.5 py-0.5 text-[10px] font-semibold text-red-600 dark:text-red-400">
-            <AlertTriangle className="h-3 w-3" /> No verified method
+          <span className="inline-flex items-center gap-1 rounded-md bg-status-rejected/10 px-1.5 py-0.5 text-[11px] font-semibold text-status-rejected-text">
+            <AlertTriangle className="h-3 w-3" aria-hidden /> No verified method
           </span>
         ),
     },
     {
       key: "pending",
       header: "Scheduled change",
+      hideBelow: "lg",
       render: (r) =>
         r.plan.pendingCycle ? (
-          <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600 dark:text-amber-400">
+          <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300">
             {optionFor(options, r.plan.pendingCycle)?.shortLabel || r.plan.pendingCycle}
-            <span className="font-normal">· {formatDate(r.plan.pendingEffectiveAt)}</span>
+            <span className="font-normal tabular-nums">· {formatDate(r.plan.pendingEffectiveAt)}</span>
           </span>
-        ) : (
-          <span className="text-xs text-text-tertiary">—</span>
-        ),
-    },
-    {
-      key: "actions",
-      header: "",
-      align: "right",
-      render: (r) => (
-        <Button
-          size="sm"
-          variant="outline"
-          className="gap-1"
-          disabled={!can("payouts.approve")}
-          onClick={() => setEditing(r)}
-        >
-          <Pencil className="h-3 w-3" /> Change
-        </Button>
-      ),
+        ) : null,
     },
   ];
 
@@ -347,141 +326,6 @@ export function PayoutSchedulesTab() {
           />
         </CardContent>
       </Card>
-
-      {editing && (
-        <ChangePlanDialog
-          row={editing}
-          options={options}
-          canOverride={can("payouts.approve")}
-          onClose={() => setEditing(null)}
-          onSaved={() => {
-            queryClient.invalidateQueries({ queryKey: ["admin", "payout-schedules"] });
-            setEditing(null);
-          }}
-        />
-      )}
     </div>
-  );
-}
-
-function ChangePlanDialog({
-  row,
-  options,
-  canOverride,
-  onClose,
-  onSaved,
-}: {
-  row: ScheduleRow;
-  options: PlanOption[];
-  canOverride: boolean;
-  onClose: () => void;
-  onSaved: () => void;
-}) {
-  const current = row.plan.pendingCycle || row.plan.cycle || row.plan.defaultCycle;
-  const [selected, setSelected] = useState(current);
-  const [immediate, setImmediate] = useState(false);
-  const [note, setNote] = useState("");
-
-  const mutation = useMutation({
-    mutationFn: () =>
-      api.patch(`/admin/finance/payout-schedules/${row.supplierId}`, {
-        cycle: selected,
-        immediate,
-        note: note.trim() || undefined,
-      }),
-    onSuccess: (res) => {
-      const plan = res.data?.data;
-      const label = optionFor(options, plan?.pendingCycle || plan?.cycle)?.shortLabel || "the new schedule";
-      toast.success(plan?.pendingCycle ? `Scheduled: ${label} from ${formatDate(plan.pendingEffectiveAt)}` : `Payout schedule set to ${label}`);
-      onSaved();
-    },
-    onError: (e: { response?: { data?: { message?: string } } }) =>
-      toast.error(e?.response?.data?.message || "Failed to update the payout schedule"),
-  });
-
-  const dirty = selected !== current || immediate || note.trim().length > 0;
-
-  return (
-    <Dialog open onOpenChange={(v) => { if (!v && !mutation.isPending) onClose(); }}>
-      <DialogContent className="max-w-xl">
-        <DialogTitle className="text-base font-semibold text-text-primary">Payout schedule</DialogTitle>
-        <DialogDescription className="mt-1 text-sm text-text-secondary">
-          {row.name || row.email || "Supplier"} · currently{" "}
-          <strong className="font-medium text-text-primary">
-            {optionFor(options, row.plan.cycle)?.label || "not enrolled"}
-          </strong>
-        </DialogDescription>
-
-        <div className="mt-5 space-y-4">
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            {options.map((o) => {
-              const isSelected = selected === o.value;
-              return (
-                <button
-                  key={o.value}
-                  type="button"
-                  onClick={() => setSelected(o.value)}
-                  className={cn(
-                    "rounded-lg border-2 p-3 text-left transition-all",
-                    isSelected ? "border-primary bg-primary/5" : "border-border hover:border-border-muted",
-                  )}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className={cn("text-sm font-semibold", isSelected ? "text-primary" : "text-text-primary")}>
-                      {o.shortLabel}
-                    </span>
-                    <span className={cn(
-                      "flex h-4 w-4 items-center justify-center rounded-full border-2",
-                      isSelected ? "border-primary bg-primary" : "border-border",
-                    )}>
-                      {isSelected && <Check className="h-2.5 w-2.5 text-white" strokeWidth={3} />}
-                    </span>
-                  </div>
-                  <p className="mt-1 text-[11px] font-medium text-text-tertiary">{o.runDays}</p>
-                </button>
-              );
-            })}
-          </div>
-
-          <label className={cn(
-            "flex items-start gap-2.5 rounded-lg border border-border px-3.5 py-3",
-            canOverride ? "cursor-pointer" : "opacity-60",
-          )}>
-            <input
-              type="checkbox"
-              checked={immediate}
-              disabled={!canOverride}
-              onChange={(e) => setImmediate(e.target.checked)}
-              className="mt-0.5 h-4 w-4 rounded border-border accent-primary"
-            />
-            <span>
-              <span className="block text-sm font-medium text-text-primary">Override the 1st-of-month rule</span>
-              <span className="block text-xs text-text-tertiary">
-                Apply from the next run date instead of waiting for the 1st of next month. Use only when support needs the
-                supplier paid sooner.
-              </span>
-            </span>
-          </label>
-
-          <div>
-            <label className="mb-1 block text-xs font-medium text-text-secondary">Reason (optional, audited)</label>
-            <Textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              rows={2}
-              placeholder="e.g. supplier requested a weekly schedule by email"
-            />
-          </div>
-
-          <div className="flex justify-end gap-2 pt-1">
-            <Button variant="outline" onClick={onClose} disabled={mutation.isPending}>Cancel</Button>
-            <Button onClick={() => mutation.mutate()} disabled={!dirty || mutation.isPending} className="gap-1.5">
-              {mutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
-              Save schedule
-            </Button>
-          </div>
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 }
