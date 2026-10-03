@@ -513,7 +513,7 @@ export default function SupplierDetailPage() {
                             <td className="px-4 py-3 text-center"><StatusBadge status={tc.status} /></td>
                             <td className="px-4 py-3 text-center text-text-primary">{formatNumber(tc.bookings)}</td>
                             <td className="px-4 py-3 text-right text-text-primary">{formatCurrency(tc.revenue)}</td>
-                            <td className="px-4 py-3 text-right font-medium text-status-active">{formatCurrency(tc.commission)}</td>
+                            <td className="px-4 py-3 text-right font-medium text-status-active-text">{formatCurrency(tc.commission)}</td>
                           </tr>
                         ))}
                       </tbody>
@@ -637,12 +637,12 @@ export default function SupplierDetailPage() {
                   <div key={item.label} className="flex items-center justify-between rounded-lg border border-border bg-surface-base px-4 py-3">
                     <span className="text-sm text-text-primary">{item.label}</span>
                     {item.value ? (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-status-active">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-status-active-text">
                         <CheckCircle className="h-4 w-4" />
                         Yes
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-status-rejected">
+                      <span className="inline-flex items-center gap-1.5 text-xs font-medium text-status-rejected-text">
                         <XCircle className="h-4 w-4" />
                         No
                       </span>
@@ -739,7 +739,7 @@ export default function SupplierDetailPage() {
                 rows={3}
               />
               {actionModals[modalAction]?.reasonRequired && reason.length > 0 && reason.length < (actionModals[modalAction]?.reasonMin || 10) && (
-                <p className="text-xs text-status-rejected">Minimum {actionModals[modalAction]?.reasonMin} characters</p>
+                <p className="text-xs text-status-rejected-text">Minimum {actionModals[modalAction]?.reasonMin} characters</p>
               )}
             </div>
           )}
@@ -858,7 +858,7 @@ function SupplierHero({
                 {/* Why the account is already live — e.g. "Auto-approved on
                     submission" — so the team knows the ID check is still due. */}
                 {!!supplier.adminNotes && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-status-pending/10 px-2.5 py-0.5 text-xs font-medium text-status-pending">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-status-pending/10 px-2.5 py-0.5 text-xs font-medium text-status-pending-text">
                     <AlertCircle className="h-3.5 w-3.5" />
                     {supplier.adminNotes}
                   </span>
@@ -883,7 +883,7 @@ function SupplierHero({
         <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-4">
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-xs text-text-tertiary">
             {complianceVerified && (
-              <span className="inline-flex items-center gap-1 font-medium text-status-active">
+              <span className="inline-flex items-center gap-1 font-medium text-status-active-text">
                 <CheckCircle className="h-3.5 w-3.5" /> Verified business
               </span>
             )}
@@ -1140,7 +1140,7 @@ function ReviewsTab({ data }: { data: ReviewsResponse }) {
                       <p className="truncate text-sm font-semibold text-text-primary">{review.customer?.name || "Customer"}</p>
                       <StarRow rating={review.rating} size="sm" />
                       {review.verified && (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-status-active/10 px-2 py-0.5 text-[10px] font-semibold text-status-active">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-status-active/10 px-2 py-0.5 text-[10px] font-semibold text-status-active-text">
                           <CheckCircle className="h-3 w-3" /> Verified
                         </span>
                       )}
@@ -1271,11 +1271,11 @@ function PayoutMethodCard({ method }: { method: PayoutMethodItem }) {
                 </span>
               )}
               {method.verified ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-status-active/10 px-2 py-0.5 text-[11px] font-medium text-status-active">
+                <span className="inline-flex items-center gap-1 rounded-full bg-status-active/10 px-2 py-0.5 text-[11px] font-medium text-status-active-text">
                   <CheckCircle className="h-3 w-3" /> Verified
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 rounded-full bg-status-pending/10 px-2 py-0.5 text-[11px] font-medium text-status-pending">
+                <span className="inline-flex items-center gap-1 rounded-full bg-status-pending/10 px-2 py-0.5 text-[11px] font-medium text-status-pending-text">
                   <AlertCircle className="h-3 w-3" /> Unverified
                 </span>
               )}

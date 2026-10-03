@@ -61,8 +61,8 @@ export function SystemTab() {
               <span className={cn(
                 "inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border",
                 isEnabled
-                  ? "bg-status-rejected/10 text-status-rejected border-status-rejected/20"
-                  : "bg-status-active/10 text-status-active border-status-active/20",
+                  ? "bg-status-rejected/10 text-status-rejected-text border-status-rejected/20"
+                  : "bg-status-active/10 text-status-active-text border-status-active/20",
               )}>
                 <span className={cn("w-1.5 h-1.5 rounded-full", isEnabled ? "bg-status-rejected" : "bg-status-active")} />
                 {isEnabled ? "Under Maintenance" : "Live"}

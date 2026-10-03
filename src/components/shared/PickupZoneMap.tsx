@@ -137,7 +137,7 @@ export function PickupZoneMap({ areas = [], height = 240, showLegend = true }: {
         <div ref={containerRef} style={{ height }} className="w-full" />
         {failed && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface-base/95 px-4 text-center">
-            <AlertTriangle size={18} className="text-status-rejected" />
+            <AlertTriangle size={18} className="text-status-rejected-text" />
             <p className="text-xs text-text-secondary">
               Map unavailable — {totalAreas} pickup zone{totalAreas === 1 ? "" : "s"}
               {exclusions.length > 0 ? `, ${exclusions.length} no-pickup zone${exclusions.length === 1 ? "" : "s"}` : ""} configured.

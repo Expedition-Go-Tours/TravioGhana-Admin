@@ -266,7 +266,7 @@ export default function ExpeditionSupplierList({ onSelectSupplier }: SupplierLis
                 <div className="mt-3 flex items-center justify-between">
                   <span
                     className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-                      live ? "bg-status-active/10 text-status-active" : "bg-surface-muted text-text-tertiary"
+                      live ? "bg-status-active/10 text-status-active-text" : "bg-surface-muted text-text-tertiary"
                     }`}
                   >
                     <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-status-active" : "bg-text-tertiary/50"}`} />

@@ -277,7 +277,7 @@ export function AdminUsersTab() {
                       variant={admin.active ? "default" : "secondary"}
                       className={cn(
                         "text-xs font-medium",
-                        admin.active && "bg-status-active/10 text-status-active hover:bg-status-active/10",
+                        admin.active && "bg-status-active/10 text-status-active-text hover:bg-status-active/10",
                       )}
                     >
                       <span className={cn("w-1.5 h-1.5 rounded-full mr-1.5", admin.active ? "bg-green-500" : "bg-text-tertiary")} />

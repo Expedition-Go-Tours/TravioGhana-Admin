@@ -502,7 +502,7 @@ export default function OverviewPage() {
                             <span className="text-text-primary font-semibold text-right w-20">{formatCurrency(tour.revenue, tour.currency)}</span>
                             {tour.averageRating != null && (
                               <span className={cn("text-right w-10", styles.hideMobile)}>
-                                <span className="text-status-pending font-semibold">{Number(tour.averageRating).toFixed(1)}</span>
+                                <span className="text-status-pending-text font-semibold">{Number(tour.averageRating).toFixed(1)}</span>
                               </span>
                             )}
                             <span className={cn("text-text-tertiary text-right w-14", styles.hideMobile)}>{formatNumber(tour.reviewCount)} <span className="text-text-tertiary">rv</span></span>
@@ -900,7 +900,7 @@ function KPICardWithSparkline({
             <p className="mt-2 text-3xl font-bold text-text-primary tabular-nums">{displayValue}</p>
           )}
           {!loading && trend && (
-            <p className={cn("mt-2 text-xs font-medium flex items-center gap-1", trend.isPositive ? "text-status-active" : "text-status-rejected")}>
+            <p className={cn("mt-2 text-xs font-medium flex items-center gap-1", trend.isPositive ? "text-status-active-text" : "text-status-rejected-text")}>
               {trend.isPositive ? (
                 <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />

@@ -16,13 +16,13 @@ const badgeVariants = cva(
           "border-transparent bg-destructive/10 text-destructive",
         outline: "border-border text-text-secondary",
         success:
-          "border-transparent bg-status-active/10 text-status-active",
+          "border-transparent bg-status-active/10 text-status-active-text",
         warning:
-          "border-transparent bg-status-pending/10 text-status-pending",
+          "border-transparent bg-status-pending/10 text-status-pending-text",
         info:
-          "border-transparent bg-status-approved/10 text-status-approved",
+          "border-transparent bg-status-approved/10 text-status-approved-text",
         error:
-          "border-transparent bg-status-rejected/10 text-status-rejected",
+          "border-transparent bg-status-rejected/10 text-status-rejected-text",
       },
     },
     defaultVariants: {

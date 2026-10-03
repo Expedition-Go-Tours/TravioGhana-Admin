@@ -48,9 +48,9 @@ export function ArticleCard({ article, onPreview }: ArticleCardProps) {
               <div className="flex h-full w-full items-center justify-center">
                 <div className="flex flex-col items-center gap-1">
                   <div className="rounded-xl bg-status-processing/6 p-2.5">
-                    <BookOpen className="h-5 w-5 text-status-processing/30" />
+                    <BookOpen className="h-5 w-5 text-status-processing-text/30" />
                   </div>
-                  <span className="text-[10px] font-medium text-status-processing/25 uppercase tracking-[0.15em]">No image</span>
+                  <span className="text-[10px] font-medium text-status-processing-text/25 uppercase tracking-[0.15em]">No image</span>
                 </div>
               </div>
             )}
@@ -66,7 +66,7 @@ export function ArticleCard({ article, onPreview }: ArticleCardProps) {
                       {status.label}
                     </span>
                   </div>
-                  <h3 className="text-base font-semibold text-text-primary leading-snug group-hover:text-status-processing transition-colors duration-300 line-clamp-1">
+                  <h3 className="text-base font-semibold text-text-primary leading-snug group-hover:text-status-processing-text transition-colors duration-300 line-clamp-1">
                     {article.title}
                   </h3>
                   {article.excerpt && (

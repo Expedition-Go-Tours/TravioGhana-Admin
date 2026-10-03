@@ -187,7 +187,7 @@ export default function ConversionFunnelPage() {
                       <div className="w-28 text-right shrink-0">
                         <p className="text-xs text-text-tertiary">{pct.toFixed(1)}% of top</p>
                         {idx > 0 && dropOff && (
-                          <p className="mt-0.5 text-xs text-status-rejected flex items-center justify-end gap-1">
+                          <p className="mt-0.5 text-xs text-status-rejected-text flex items-center justify-end gap-1">
                             <ArrowDown className="h-3 w-3" />
                             {dropOff} drop-off
                           </p>

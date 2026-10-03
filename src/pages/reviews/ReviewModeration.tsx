@@ -99,21 +99,21 @@ type StatAccent = "pending" | "flagged" | "active";
 const STAT_ACCENT: Record<StatAccent, { bar: string; chip: string; glow: string; icon: string }> = {
   pending: {
     bar: "from-status-pending to-status-pending/15",
-    chip: "bg-status-pending/10 text-status-pending ring-status-pending/20",
+    chip: "bg-status-pending/10 text-status-pending-text ring-status-pending/20",
     glow: "hover:shadow-tinted-lg",
-    icon: "text-status-pending",
+    icon: "text-status-pending-text",
   },
   flagged: {
     bar: "from-status-flagged to-status-flagged/15",
-    chip: "bg-status-flagged/10 text-status-flagged ring-status-flagged/20",
+    chip: "bg-status-flagged/10 text-status-flagged-text ring-status-flagged/20",
     glow: "hover:shadow-2",
-    icon: "text-status-flagged",
+    icon: "text-status-flagged-text",
   },
   active: {
     bar: "from-status-active to-status-active/15",
-    chip: "bg-status-active/10 text-status-active ring-status-active/20",
+    chip: "bg-status-active/10 text-status-active-text ring-status-active/20",
     glow: "hover:shadow-tinted",
-    icon: "text-status-active",
+    icon: "text-status-active-text",
   },
 };
 
@@ -455,7 +455,7 @@ export default function ReviewModerationPage() {
                 <span className="truncate text-sm font-semibold text-text-primary">
                   {review.customer?.name || "Anonymous"}
                 </span>
-                {review.verified && <BadgeCheck className="h-4 w-4 shrink-0 text-status-active" />}
+                {review.verified && <BadgeCheck className="h-4 w-4 shrink-0 text-status-active-text" />}
               </div>
               <div className="mt-0.5 flex items-center gap-1.5 text-xs text-text-tertiary">
                 <span>{timeAgo(review.createdAt)}</span>
@@ -529,7 +529,7 @@ export default function ReviewModerationPage() {
                     type="button"
                     whileHover={{ scale: 1.08 }}
                     whileTap={{ scale: 0.95 }}
-                    className={iconBtn("text-text-tertiary hover:bg-status-rejected/10 hover:text-status-rejected")}
+                    className={iconBtn("text-text-tertiary hover:bg-status-rejected/10 hover:text-status-rejected-text")}
                     title="Delete response"
                     onClick={() => setDeleteResponseReview(review)}
                   >
@@ -545,7 +545,7 @@ export default function ReviewModerationPage() {
         {review.status === "FLAGGED" && review.flagReason && (
           <div className="mt-4 rounded-r-lg border-l-2 border-l-status-flagged bg-status-flagged/5 p-4">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-medium uppercase tracking-wide text-status-flagged">
+              <span className="text-[11px] font-medium uppercase tracking-wide text-status-flagged-text">
                 <Flag className="mr-1 inline h-3 w-3 -mt-0.5" />
                 Flagged by supplier
                 {review.flaggedAt && (
@@ -570,7 +570,7 @@ export default function ReviewModerationPage() {
             )}
             {(review.reportCount ?? 0) > 0 && (
               <span className="flex items-center gap-1">
-                <Flag className="h-3 w-3 text-status-flagged" />
+                <Flag className="h-3 w-3 text-status-flagged-text" />
                 {review.reportCount}
               </span>
             )}
@@ -588,7 +588,7 @@ export default function ReviewModerationPage() {
                   <Button
                     size="sm"
                     variant="outline"
-                    className="text-status-rejected hover:border-status-rejected/30 hover:bg-status-rejected/10 hover:text-status-rejected"
+                    className="text-status-rejected-text hover:border-status-rejected/30 hover:bg-status-rejected/10 hover:text-status-rejected-text"
                     onClick={() => openModerate("reject", review)}
                   >
                     <X />
@@ -600,7 +600,7 @@ export default function ReviewModerationPage() {
                     type="button"
                     whileHover={{ scale: 1.08 }}
                     whileTap={{ scale: 0.95 }}
-                    className={iconBtn("text-status-pending hover:bg-status-pending/10")}
+                    className={iconBtn("text-status-pending-text hover:bg-status-pending/10")}
                     title="Flag"
                     onClick={() => openModerate("flag", review)}
                   >
@@ -648,7 +648,7 @@ export default function ReviewModerationPage() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="text-status-rejected hover:bg-status-rejected/10 hover:text-status-rejected"
+                    className="text-status-rejected-text hover:bg-status-rejected/10 hover:text-status-rejected-text"
                     onClick={() => setDeleteReview(review)}
                   >
                     <Trash2 />
@@ -814,7 +814,7 @@ export default function ReviewModerationPage() {
             className="flex flex-col items-center justify-center py-20"
           >
             <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-status-rejected/10 mb-4">
-              <AlertTriangle className="h-7 w-7 text-status-rejected" />
+              <AlertTriangle className="h-7 w-7 text-status-rejected-text" />
             </div>
             <p className="text-sm font-medium text-text-primary mb-1">Failed to load reviews</p>
             <p className="text-xs text-text-tertiary mb-5">Could not fetch reviews from the server.</p>
@@ -837,7 +837,7 @@ export default function ReviewModerationPage() {
               {query ? (
                 <Search className="h-7 w-7 text-text-tertiary" />
               ) : (
-                <CheckCheck className="h-7 w-7 text-status-active" />
+                <CheckCheck className="h-7 w-7 text-status-active-text" />
               )}
             </div>
             <p className="text-sm font-medium text-text-primary mb-1">
@@ -892,7 +892,7 @@ export default function ReviewModerationPage() {
                         <div className="flex items-center justify-between gap-1.5">
                           <span className="truncate text-sm font-semibold text-text-primary">{group.tourTitle}</span>
                           {group.pendingReviewCount > 0 && (
-                            <span className="shrink-0 inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-status-pending/15 text-[10px] font-bold text-status-pending">
+                            <span className="shrink-0 inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-status-pending/15 text-[10px] font-bold text-status-pending-text">
                               {group.pendingReviewCount}
                             </span>
                           )}
@@ -1105,7 +1105,7 @@ export default function ReviewModerationPage() {
             </DialogHeader>
             <div className="space-y-3 py-2">
               <Label htmlFor="reason">
-                Reason <span className="text-status-rejected">*</span>
+                Reason <span className="text-status-rejected-text">*</span>
               </Label>
               <Textarea
                 id="reason"
@@ -1115,7 +1115,7 @@ export default function ReviewModerationPage() {
                 rows={3}
               />
               {reason.length > 0 && reason.length < 10 && (
-                <p className="text-xs text-status-rejected">Minimum 10 characters required</p>
+                <p className="text-xs text-status-rejected-text">Minimum 10 characters required</p>
               )}
               <p className="text-xs text-text-tertiary">{reason.length}/10 minimum</p>
             </div>
@@ -1149,7 +1149,7 @@ export default function ReviewModerationPage() {
               <DialogHeader className="text-left">
                 <div className="flex items-start gap-3">
                   <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-status-active/10 ring-1 ring-status-active/20">
-                    <BadgeCheck className="h-5 w-5 text-status-active" />
+                    <BadgeCheck className="h-5 w-5 text-status-active-text" />
                   </div>
                   <div>
                     <DialogTitle className="text-lg">
@@ -1191,7 +1191,7 @@ export default function ReviewModerationPage() {
                       </p>
                     )}
                   </div>
-                  <Badge className="shrink-0 bg-status-pending/10 px-2 py-0.5 text-[10px] font-semibold text-status-pending ring-1 ring-status-pending/20">
+                  <Badge className="shrink-0 bg-status-pending/10 px-2 py-0.5 text-[10px] font-semibold text-status-pending-text ring-1 ring-status-pending/20">
                     {actionReview.status || "PENDING"}
                   </Badge>
                 </div>
@@ -1205,7 +1205,7 @@ export default function ReviewModerationPage() {
                           {actionReview.customer?.name || "Anonymous"}
                         </span>
                         {actionReview.verified && (
-                          <BadgeCheck className="h-4 w-4 shrink-0 text-status-active" />
+                          <BadgeCheck className="h-4 w-4 shrink-0 text-status-active-text" />
                         )}
                         <span className="text-xs text-text-tertiary">· {timeAgo(actionReview.createdAt)}</span>
                       </div>
@@ -1331,7 +1331,7 @@ export default function ReviewModerationPage() {
         <Dialog open onOpenChange={(open) => { if (!open) setDeleteReview(null); }}>
           <DialogContent className="max-w-lg space-y-4">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-status-rejected">
+              <DialogTitle className="flex items-center gap-2 text-status-rejected-text">
                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-status-rejected/10">
                   <Trash2 className="h-4 w-4" />
                 </div>
@@ -1376,12 +1376,12 @@ export default function ReviewModerationPage() {
             <div className="rounded-xl border border-status-rejected/20 bg-status-rejected/5 p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <div className="h-px flex-1 bg-status-rejected/15" />
-                <span className="text-[11px] font-semibold text-status-rejected uppercase tracking-wider">Warning</span>
+                <span className="text-[11px] font-semibold text-status-rejected-text uppercase tracking-wider">Warning</span>
                 <div className="h-px flex-1 bg-status-rejected/15" />
               </div>
               <div className="flex items-start gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-status-rejected/10">
-                  <AlertTriangle className="h-4 w-4 text-status-rejected" />
+                  <AlertTriangle className="h-4 w-4 text-status-rejected-text" />
                 </div>
                 <div className="space-y-1">
                   <p className="text-sm font-semibold text-text-primary">This action cannot be undone</p>
@@ -1430,13 +1430,13 @@ export default function ReviewModerationPage() {
         <Dialog open onOpenChange={(open) => { if (!open) setDeleteResponseReview(null); }}>
           <DialogContent className="max-w-sm">
             <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-status-rejected">
+              <DialogTitle className="flex items-center gap-2 text-status-rejected-text">
                 <Trash2 className="h-5 w-5" /> Delete Response
               </DialogTitle>
               <DialogDescription>This will permanently remove the supplier's response from this review.</DialogDescription>
             </DialogHeader>
             <div className="rounded-lg border border-status-rejected/20 bg-status-rejected/5 p-3">
-              <p className="text-sm text-status-rejected line-clamp-3">{deleteResponseReview.supplierResponse}</p>
+              <p className="text-sm text-status-rejected-text line-clamp-3">{deleteResponseReview.supplierResponse}</p>
             </div>
             <DialogFooter>
               <Button variant="outline" onClick={() => setDeleteResponseReview(null)} disabled={deleteResponseMutation.isPending}>Cancel</Button>

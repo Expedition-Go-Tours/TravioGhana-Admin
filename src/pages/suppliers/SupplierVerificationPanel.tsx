@@ -148,11 +148,11 @@ function RequirementChecklist({ requirements, documents }: { requirements: Requi
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
         <span className="text-sm font-semibold text-text-primary">Verification requirements</span>
         {missing.length > 0 ? (
-          <span className="text-xs font-medium text-status-rejected">
+          <span className="text-xs font-medium text-status-rejected-text">
             {missing.length} required document{missing.length === 1 ? "" : "s"} missing
           </span>
         ) : (
-          <span className="text-xs font-medium text-status-active">All required documents on file</span>
+          <span className="text-xs font-medium text-status-active-text">All required documents on file</span>
         )}
       </div>
       <ul className="divide-y divide-border-muted">
@@ -169,7 +169,7 @@ function RequirementChecklist({ requirements, documents }: { requirements: Requi
               {doc ? (
                 <StatusBadge status={doc.status} />
               ) : (
-                <span className={`text-xs font-medium ${req.required ? "text-status-rejected" : "text-text-tertiary"}`}>
+                <span className={`text-xs font-medium ${req.required ? "text-status-rejected-text" : "text-text-tertiary"}`}>
                   {req.required ? "Missing" : "Not provided"}
                 </span>
               )}
@@ -247,7 +247,7 @@ function DocumentRow({ doc, editable, onMutated }: { doc: Doc; editable: boolean
               <span className="inline-flex items-center gap-1"><CalendarClock className="h-3 w-3" /> expires {formatDate(doc.expiryDate)}</span>
             )}
             {doc.reviewedAt && <span>reviewed {formatDate(doc.reviewedAt)}</span>}
-            {doc.reviewNote && <span className="text-status-rejected">note: {doc.reviewNote}</span>}
+            {doc.reviewNote && <span className="text-status-rejected-text">note: {doc.reviewNote}</span>}
           </div>
         </div>
         <div className="flex items-center gap-2">

@@ -70,6 +70,17 @@ const config: Config = {
           suspended: "hsl(var(--status-suspended))",
           flagged: "hsl(var(--status-flagged))",
           processing: "hsl(var(--status-processing))",
+          // Label steps. The seven above are fill chroma, tuned to sit at low
+          // alpha behind a badge; all seven measured 2.2-4.3:1 as text and are
+          // therefore never used for the label. These are the accessible
+          // equivalents (6.7-9.9:1) and are what getStatusColor puts on the text.
+          "pending-text": "hsl(var(--status-pending-text))",
+          "approved-text": "hsl(var(--status-approved-text))",
+          "active-text": "hsl(var(--status-active-text))",
+          "rejected-text": "hsl(var(--status-rejected-text))",
+          "suspended-text": "hsl(var(--status-suspended-text))",
+          "flagged-text": "hsl(var(--status-flagged-text))",
+          "processing-text": "hsl(var(--status-processing-text))",
         },
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",

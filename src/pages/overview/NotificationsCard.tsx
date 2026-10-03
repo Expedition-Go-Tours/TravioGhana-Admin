@@ -82,7 +82,7 @@ const numberColor = [
   "text-amber-600 dark:text-amber-400",
   "text-amber-600 dark:text-amber-400",
   "text-blue-600 dark:text-blue-400",
-  "text-status-active",
+  "text-status-active-text",
 ];
 
 const iconBg = [

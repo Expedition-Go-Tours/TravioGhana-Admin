@@ -52,7 +52,7 @@ export default function CartAbandonmentPage() {
     { key: "tourTitle", header: "Tour Name", render: (r) => r.tourTitle || "—" },
     { key: "cartsAdded", header: "Carts Added", sortable: true, align: "right", render: (r) => <span className="font-semibold text-text-primary tabular-nums">{formatNumber(r.cartsAdded)}</span> },
     { key: "converted", header: "Converted", sortable: true, align: "right", render: (r) => <span className="font-semibold text-text-primary tabular-nums">{formatNumber(r.converted)}</span> },
-    { key: "abandonmentRate", header: "Abandonment Rate", sortable: true, align: "right", render: (r) => r.abandonmentRate != null ? <span className="font-semibold text-status-pending tabular-nums">{r.abandonmentRate.toFixed(1)}%</span> : "—" },
+    { key: "abandonmentRate", header: "Abandonment Rate", sortable: true, align: "right", render: (r) => r.abandonmentRate != null ? <span className="font-semibold text-status-pending-text tabular-nums">{r.abandonmentRate.toFixed(1)}%</span> : "—" },
   ];
 
   return (
@@ -120,7 +120,7 @@ export default function CartAbandonmentPage() {
       <Card>
         <CardHeader className="border-b border-border pb-3">
           <CardTitle className="flex items-center gap-2 text-sm font-semibold text-text-primary">
-            <TrendingDown className="h-4 w-4 text-status-pending" />
+            <TrendingDown className="h-4 w-4 text-status-pending-text" />
             Daily Trend
           </CardTitle>
         </CardHeader>
@@ -164,7 +164,7 @@ export default function CartAbandonmentPage() {
         <CardHeader className="border-b border-border pb-3">
           <div className="flex items-center justify-between">
             <CardTitle className="flex items-center gap-2 text-sm font-semibold text-text-primary">
-              <TrendingDown className="h-4 w-4 text-status-pending" />
+              <TrendingDown className="h-4 w-4 text-status-pending-text" />
               Abandonment by Tour
             </CardTitle>
             <span className="text-xs text-text-tertiary">Tours with highest cart abandonment</span>

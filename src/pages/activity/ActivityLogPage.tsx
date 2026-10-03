@@ -505,8 +505,8 @@ export default function ActivityLogPage() {
                           <span className="text-xs font-semibold text-text-primary">{actorName}</span>
                           <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold ${
                             entry.userId
-                              ? "bg-status-processing/10 text-status-processing"
-                              : "bg-status-approved/10 text-status-approved"
+                              ? "bg-status-processing/10 text-status-processing-text"
+                              : "bg-status-approved/10 text-status-approved-text"
                           }`}>
                             {entry.userId ? "Admin" : "System"}
                           </span>

@@ -199,7 +199,7 @@ export function PayoutsMethodsTab() {
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-xs font-medium text-text-tertiary">Type mix:</span>
           {mix.BANK_TRANSFER && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-status-approved/10 px-3 py-1 text-xs font-medium text-status-approved">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-status-approved/10 px-3 py-1 text-xs font-medium text-status-approved-text">
               <Building2 className="h-3 w-3" />
               Bank {mix.BANK_TRANSFER.total}{mix.BANK_TRANSFER.verified ? ` · ${mix.BANK_TRANSFER.verified} verified` : ""}
             </span>
@@ -211,7 +211,7 @@ export function PayoutsMethodsTab() {
             </span>
           )}
           {mix.PAYPAL && (
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-status-flagged/10 px-3 py-1 text-xs font-medium text-status-flagged">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-status-flagged/10 px-3 py-1 text-xs font-medium text-status-flagged-text">
               <Wallet className="h-3 w-3" />
               PayPal {mix.PAYPAL.total}{mix.PAYPAL.verified ? ` · ${mix.PAYPAL.verified} verified` : ""}
             </span>

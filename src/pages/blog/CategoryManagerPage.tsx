@@ -56,7 +56,7 @@ export default function CategoryManagerPage() {
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditingCategory(cat); setDialogOpen(true); }}>
             <Edit className="h-4 w-4" />
           </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 text-status-rejected" onClick={() => setDeleteConfirm(cat.id)}>
+          <Button variant="ghost" size="icon" className="h-8 w-8 text-status-rejected-text" onClick={() => setDeleteConfirm(cat.id)}>
             <Trash2 className="h-4 w-4" />
           </Button>
         </div>

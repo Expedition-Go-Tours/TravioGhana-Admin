@@ -66,13 +66,13 @@ export default function TagManagerPage() {
               <span>{tag.name}</span>
               <span className="text-xs text-text-tertiary">({tag._count?.articles || 0})</span>
               <button
-                className="ml-1 text-text-tertiary hover:text-status-processing transition-colors"
+                className="ml-1 text-text-tertiary hover:text-status-processing-text transition-colors"
                 onClick={() => { setEditingTag(tag); setDialogOpen(true); }}
               >
                 <Edit className="h-3.5 w-3.5" />
               </button>
               <button
-                className="text-text-tertiary hover:text-status-rejected transition-colors"
+                className="text-text-tertiary hover:text-status-rejected-text transition-colors"
                 onClick={() => setDeleteConfirm(tag.id)}
               >
                 <Trash2 className="h-3.5 w-3.5" />

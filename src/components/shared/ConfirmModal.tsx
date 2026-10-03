@@ -29,7 +29,7 @@ const iconConfig = {
   publish: {
     icon: CheckCircle,
     bg: "bg-green-100",
-    color: "text-status-active",
+    color: "text-status-active-text",
   },
   unpublish: {
     icon: XCircle,

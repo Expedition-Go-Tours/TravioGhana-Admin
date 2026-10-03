@@ -11,18 +11,18 @@ interface TourStatCardProps {
 
 const variantStyles = {
   default: 'bg-secondary text-secondary-foreground',
-  pending: 'bg-status-pending/8 text-status-pending',
-  success: 'bg-status-active/8 text-status-active',
-  warning: 'bg-status-flagged/8 text-status-flagged',
-  error: 'bg-status-rejected/8 text-status-rejected',
+  pending: 'bg-status-pending/8 text-status-pending-text',
+  success: 'bg-status-active/8 text-status-active-text',
+  warning: 'bg-status-flagged/8 text-status-flagged-text',
+  error: 'bg-status-rejected/8 text-status-rejected-text',
 };
 
 const iconStyles = {
   default: 'text-muted-foreground',
-  pending: 'text-status-pending',
-  success: 'text-status-active',
-  warning: 'text-status-flagged',
-  error: 'text-status-rejected',
+  pending: 'text-status-pending-text',
+  success: 'text-status-active-text',
+  warning: 'text-status-flagged-text',
+  error: 'text-status-rejected-text',
 };
 
 export function TourStatCard({ label, value, icon: Icon, variant = 'default', className }: TourStatCardProps) {

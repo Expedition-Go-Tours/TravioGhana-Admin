@@ -34,8 +34,8 @@ function QueueCard({
   onView: () => void;
 }) {
   const chip = accent === "amber"
-    ? "bg-status-pending/10 text-status-pending"
-    : "bg-status-processing/10 text-status-processing";
+    ? "bg-status-pending/10 text-status-pending-text"
+    : "bg-status-processing/10 text-status-processing-text";
   return (
     <Card className={cn("border-l-4", accent === "amber" ? "border-l-status-pending" : "border-l-status-processing")}>
       <CardContent className="p-5">
@@ -189,7 +189,7 @@ export function PayoutsPaymentsTab({ onSwitchToRequests }: { onSwitchToList?: (s
         <CardHeader className="border-b border-border pb-3">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-status-active" />
+              <TrendingUp className="h-4 w-4 text-status-active-text" />
               <div>
                 <p className="text-sm font-semibold text-text-primary">Monthly Paid Trend</p>
                 {!isLoading && !isError && monthly.length > 0 && (

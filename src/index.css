@@ -11,20 +11,26 @@
     --popover: 0 0% 100%;
     --popover-foreground: 210 20% 12%;
 
-    --primary: 163 85% 32%;
+    /* Foreground tokens are the *label* colour for their matching fill, so each
+       pair is contrast-checked together (see audit_foreground_pairs.py). At the
+       previous 32%/50% lightnesses, white-on-primary was 3.70:1 and
+       white-on-warning 2.41:1 -- both below SC 1.4.3 AA for normal text, on
+       every primary button in the app. The lightnesses below are the closest
+       values that reach 4.5:1 while keeping the hue and saturation. */
+    --primary: 163 85% 28.6%;
     --primary-foreground: 0 0% 100%;
     --secondary: 210 16% 96%;
     --secondary-foreground: 210 15% 25%;
     --muted: 210 14% 95%;
-    --muted-foreground: 210 12% 50%;
+    --muted-foreground: 210 12% 44%;
     --accent: 163 85% 94%;
     --accent-foreground: 163 45% 28%;
     --destructive: 0 70% 50%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 163 85% 32%;
+    --success: 163 85% 28.6%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 75% 50%;
+    --warning: 38 75% 35%;
     --warning-foreground: 0 0% 100%;
 
     --border: 210 14% 90%;
@@ -32,9 +38,14 @@
     --ring: 163 85% 42%;
     --radius: 8px;
 
+    /* Text ramp, re-spaced so every step clears WCAG 2.2 SC 1.4.3 (4.5:1) on
+       BOTH --surface-base and --surface-muted, while keeping three visually
+       distinct steps. Measured: primary 16.65/14.83, secondary 6.33/5.64,
+       tertiary 5.05/4.50. Do not narrow these gaps — 45%/60% used to collapse
+       into each other and tertiary landed at 2.90:1. */
     --text-primary: 210 20% 12%;
-    --text-secondary: 210 12% 45%;
-    --text-tertiary: 210 10% 60%;
+    --text-secondary: 210 12% 38%;
+    --text-tertiary: 210 10% 44%;
     --surface-base: 0 0% 100%;
     --surface-muted: 210 14% 95%;
     --border-muted: 210 12% 88%;
@@ -46,6 +57,19 @@
     --status-suspended: 210 5% 45%;
     --status-flagged: 25 70% 50%;
     --status-processing: 270 40% 55%;
+
+    /* Label steps for status badges. The chroma above is tuned to sit at 10%
+       alpha as a fill/tint/border, which is far too light to carry text — all
+       seven measured 2.2-4.3:1 as a label. These are the dark equivalents used
+       for the label only, following the Polaris and Carbon tag recipe
+       (dark text step + light tint of the same hue). */
+    --status-pending-text: 30 95% 22%;
+    --status-approved-text: 214 85% 28%;
+    --status-active-text: 163 90% 18%;
+    --status-rejected-text: 0 78% 30%;
+    --status-suspended-text: 210 10% 28%;
+    --status-flagged-text: 18 92% 26%;
+    --status-processing-text: 268 60% 32%;
 
     --chart-1: 163 85% 38%;
     --chart-2: 210 55% 50%;
@@ -82,29 +106,36 @@
     --popover: 210 18% 10%;
     --popover-foreground: 210 12% 82%;
 
+    /* Dark theme keeps the BRIGHT fills -- on a dark page a saturated accent is
+       what makes a button read as actionable -- and flips the label to a
+       near-black tinted with the same hue. White on these fills was 2.7-3.0:1,
+       below AA for normal text. Near-black is 5.9-6.6:1 on the same fills.
+       (The alternative, darkening the fills to ~29%, makes dark-mode buttons
+       darker than the page surface and indistinguishable from light mode.) */
     --primary: 163 80% 38%;
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 163 40% 8%;
     --secondary: 210 12% 15%;
     --secondary-foreground: 210 12% 72%;
     --muted: 210 12% 14%;
-    --muted-foreground: 210 8% 50%;
+    --muted-foreground: 210 8% 54.4%;
     --accent: 163 30% 12%;
     --accent-foreground: 163 40% 62%;
     --destructive: 0 60% 42%;
     --destructive-foreground: 0 0% 100%;
 
     --success: 163 75% 38%;
-    --success-foreground: 0 0% 100%;
+    --success-foreground: 163 40% 8%;
     --warning: 38 70% 48%;
-    --warning-foreground: 0 0% 100%;
+    --warning-foreground: 38 40% 8%;
 
     --border: 210 12% 16%;
     --input: 210 12% 16%;
     --ring: 163 80% 42%;
 
+    /* Dark ramp — same re-spacing rule as the light block above. */
     --text-primary: 210 12% 82%;
-    --text-secondary: 210 8% 52%;
-    --text-tertiary: 210 6% 40%;
+    --text-secondary: 210 8% 62%;
+    --text-tertiary: 210 6% 55%;
     --surface-base: 210 18% 10%;
     --surface-muted: 210 14% 14%;
     --border-muted: 210 12% 18%;
@@ -116,6 +147,17 @@
     --status-suspended: 210 5% 42%;
     --status-flagged: 25 60% 48%;
     --status-processing: 270 30% 52%;
+
+    /* Dark-mode label steps — same rule as the light block: lighter than the
+       fill is unusable as text on a near-black surface, so the label steps up
+       instead. */
+    --status-pending-text: 40 90% 68%;
+    --status-approved-text: 210 90% 76%;
+    --status-active-text: 163 65% 62%;
+    --status-rejected-text: 0 85% 74%;
+    --status-suspended-text: 210 12% 74%;
+    --status-flagged-text: 28 90% 70%;
+    --status-processing-text: 270 80% 78%;
 
     --chart-1: 163 75% 40%;
     --chart-2: 210 40% 48%;

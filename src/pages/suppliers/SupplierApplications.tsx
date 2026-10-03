@@ -628,7 +628,7 @@ export default function SuppliersPage() {
                 rows={3}
               />
               {suspendReason.length > 0 && suspendReason.length < 10 && (
-                <p className="text-xs text-status-rejected">Minimum 10 characters</p>
+                <p className="text-xs text-status-rejected-text">Minimum 10 characters</p>
               )}
             </div>
           )}

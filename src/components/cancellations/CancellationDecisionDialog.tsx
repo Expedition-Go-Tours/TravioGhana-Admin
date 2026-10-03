@@ -64,7 +64,7 @@ export function CancellationDecisionDialog({
       <div className="space-y-3 text-left">
         {isReject ? (
           <div className="flex items-start gap-2 rounded-lg border border-status-rejected/30 bg-status-rejected/10 px-3 py-2">
-            <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-status-rejected" />
+            <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-status-rejected-text" />
             <p className="text-xs text-text-secondary">
               Rejecting <strong className="text-text-primary">changes nothing on the booking</strong> — the
               trip stays confirmed and any dates blocked by the request are re-opened for selling. The supplier
@@ -73,7 +73,7 @@ export function CancellationDecisionDialog({
           </div>
         ) : (
           <div className="flex items-start gap-2 rounded-lg border border-status-pending/40 bg-status-pending/10 px-3 py-2">
-            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-status-pending" />
+            <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-status-pending-text" />
             <div className="space-y-1 text-xs text-text-secondary">
               <p>
                 Approving <strong className="text-text-primary">executes a full refund</strong> to the customer
@@ -106,7 +106,7 @@ export function CancellationDecisionDialog({
               autoFocus
             />
             {rejectInvalid && (
-              <p className="text-[11px] text-status-rejected">A reason is required before rejecting.</p>
+              <p className="text-[11px] text-status-rejected-text">A reason is required before rejecting.</p>
             )}
           </div>
         ) : (

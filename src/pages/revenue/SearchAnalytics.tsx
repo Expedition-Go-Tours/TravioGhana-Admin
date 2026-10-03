@@ -94,7 +94,7 @@ export default function SearchAnalyticsPage() {
   ];
 
   const zeroResultColumns: Column<{ query?: string; searches?: number }>[] = [
-    { key: "query", header: "Query", render: (r) => <span className="text-status-flagged font-medium">{r.query}</span> },
+    { key: "query", header: "Query", render: (r) => <span className="text-status-flagged-text font-medium">{r.query}</span> },
     { key: "searches", header: "Searches", align: "right", render: (r) => <span className="tabular-nums">{formatNumber(r.searches)}</span> },
   ];
 
@@ -261,11 +261,11 @@ export default function SearchAnalyticsPage() {
           <CardHeader className="border-b border-border pb-3">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2 text-sm font-semibold text-text-primary">
-                <FileX className="h-4 w-4 text-status-pending" />
+                <FileX className="h-4 w-4 text-status-pending-text" />
                 Zero-Result Queries
               </CardTitle>
               {!isLoading && !isError && (raw?.zeroResultQueries?.length || 0) > 10 && (
-                <Button variant="ghost" size="sm" className="text-xs text-status-pending hover:text-status-pending" onClick={() => setShowAllZero(!showAllZero)}>
+                <Button variant="ghost" size="sm" className="text-xs text-status-pending-text hover:text-status-pending-text" onClick={() => setShowAllZero(!showAllZero)}>
                   {showAllZero ? "Show Less" : `View All (${raw?.zeroResultQueries?.length})`}
                 </Button>
               )}

@@ -658,7 +658,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
               <div>
                 <SectionTitle>Cancellation Reason</SectionTitle>
                 <div className="rounded-xl border border-status-rejected/30 bg-status-rejected/10 p-3">
-                  <p className="text-xs text-status-rejected">{booking.cancellationReason}</p>
+                  <p className="text-xs text-status-rejected-text">{booking.cancellationReason}</p>
                 </div>
               </div>
             )}
@@ -704,7 +704,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                           <span className="text-text-primary">{formatCurrency(pending.preview?.fee ?? 0, booking.currency)}</span>
                         </div>
                         {pending.stopSellingApplied && (
-                          <p className="flex items-center gap-1.5 text-[11px] text-status-pending">
+                          <p className="flex items-center gap-1.5 text-[11px] text-status-pending-text">
                             <ShieldAlert className="h-3.5 w-3.5" /> Dates blocked from selling at request time
                           </p>
                         )}
@@ -723,7 +723,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                           <Button
                             variant="outline"
                             size="sm"
-                            className="flex-1 gap-1.5 border-status-rejected/40 text-status-rejected hover:bg-status-rejected/10"
+                            className="flex-1 gap-1.5 border-status-rejected/40 text-status-rejected-text hover:bg-status-rejected/10"
                             onClick={() => setDecisionState({ key: pendingKey, mode: "reject" })}
                             disabled={approveCancellation.isPending || rejectCancellation.isPending}
                           >

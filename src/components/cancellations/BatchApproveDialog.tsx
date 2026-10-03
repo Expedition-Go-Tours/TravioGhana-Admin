@@ -51,12 +51,12 @@ export function BatchApproveDialog({
           <DialogTitle className="flex items-center gap-2">
             {showResults ? (
               results.failed > 0 ? (
-                <AlertTriangle className="h-5 w-5 text-status-pending" />
+                <AlertTriangle className="h-5 w-5 text-status-pending-text" />
               ) : (
-                <CheckCircle2 className="h-5 w-5 text-status-active" />
+                <CheckCircle2 className="h-5 w-5 text-status-active-text" />
               )
             ) : (
-              <AlertTriangle className="h-5 w-5 text-status-pending" />
+              <AlertTriangle className="h-5 w-5 text-status-pending-text" />
             )}
             {showResults ? "Batch approve complete" : `Approve ${requests.length} request${requests.length === 1 ? "" : "s"}`}
           </DialogTitle>
@@ -80,9 +80,9 @@ export function BatchApproveDialog({
                   )}
                 >
                   {r.ok ? (
-                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-status-active" />
+                    <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-status-active-text" />
                   ) : (
-                    <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-status-rejected" />
+                    <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-status-rejected-text" />
                   )}
                   <div className="min-w-0">
                     <p className="font-mono text-xs font-semibold text-text-primary">

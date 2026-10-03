@@ -50,8 +50,8 @@ export function PayoutMethodCard({ method, onVerifyToggle, verifying, className 
   const iconWrap = isMobile
     ? "bg-primary/10 text-primary"
     : isBank
-      ? "bg-status-approved/10 text-status-approved"
-      : "bg-status-flagged/10 text-status-flagged";
+      ? "bg-status-approved/10 text-status-approved-text"
+      : "bg-status-flagged/10 text-status-flagged-text";
   const accent = isMobile ? "border-primary/30" : isBank ? "border-status-approved/30" : "border-status-flagged/30";
 
   return (
@@ -65,16 +65,16 @@ export function PayoutMethodCard({ method, onVerifyToggle, verifying, className 
             <p className="text-sm font-semibold text-text-primary">{method.type?.replace(/_/g, " ") || "Payment Method"}</p>
             <div className="mt-0.5 flex flex-wrap items-center gap-1.5">
               {method.isDefault && (
-                <span className="inline-flex items-center gap-1 rounded-full bg-status-active/10 px-2 py-0.5 text-[10px] font-semibold text-status-active">
+                <span className="inline-flex items-center gap-1 rounded-full bg-status-active/10 px-2 py-0.5 text-[10px] font-semibold text-status-active-text">
                   <Check className="h-3 w-3" /> Default
                 </span>
               )}
               {method.verified ? (
-                <span className="inline-flex items-center gap-1 rounded-full bg-status-active/10 px-2 py-0.5 text-[10px] font-medium text-status-active">
+                <span className="inline-flex items-center gap-1 rounded-full bg-status-active/10 px-2 py-0.5 text-[10px] font-medium text-status-active-text">
                   <CheckCircle className="h-3 w-3" /> Verified
                 </span>
               ) : (
-                <span className="inline-flex items-center gap-1 rounded-full bg-status-pending/10 px-2 py-0.5 text-[10px] font-medium text-status-pending">
+                <span className="inline-flex items-center gap-1 rounded-full bg-status-pending/10 px-2 py-0.5 text-[10px] font-medium text-status-pending-text">
                   <AlertCircle className="h-3 w-3" /> Unverified
                 </span>
               )}
@@ -88,8 +88,8 @@ export function PayoutMethodCard({ method, onVerifyToggle, verifying, className 
             className={cn(
               "inline-flex shrink-0 items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-medium transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
               method.verified
-                ? "border-status-pending/30 text-status-pending hover:bg-status-pending/10"
-                : "border-status-active/40 text-status-active hover:bg-status-active/10"
+                ? "border-status-pending/30 text-status-pending-text hover:bg-status-pending/10"
+                : "border-status-active/40 text-status-active-text hover:bg-status-active/10"
             )}
           >
             {verifying ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}

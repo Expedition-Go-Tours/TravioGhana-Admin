@@ -148,7 +148,7 @@ export function CancellationDetailDrawer({
             <RequestSkeleton />
           ) : isError || !request ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
-              <AlertCircle className="mb-3 h-8 w-8 text-status-rejected" />
+              <AlertCircle className="mb-3 h-8 w-8 text-status-rejected-text" />
               <p className="text-sm text-text-secondary">Failed to load this request</p>
               <Button variant="outline" size="sm" className="mt-3" onClick={() => refetch()}>
                 <RefreshCw className="h-3.5 w-3.5" /> Retry
@@ -270,7 +270,7 @@ export function CancellationDetailDrawer({
                       className={cn(
                         "rounded-full px-2 py-0.5 text-[10px] font-semibold",
                         request.stopSellingApplied
-                          ? "bg-status-pending/10 text-status-pending"
+                          ? "bg-status-pending/10 text-status-pending-text"
                           : "bg-surface-muted text-text-tertiary",
                       )}
                     >
@@ -332,7 +332,7 @@ export function CancellationDetailDrawer({
           <div className="flex shrink-0 items-center gap-2 border-t border-border px-5 py-3">
             <Button
               variant="outline"
-              className="flex-1 gap-1.5 border-status-rejected/40 text-status-rejected hover:bg-status-rejected/10"
+              className="flex-1 gap-1.5 border-status-rejected/40 text-status-rejected-text hover:bg-status-rejected/10"
               onClick={() => onReject(request)}
             >
               <Ban className="h-4 w-4" /> Reject

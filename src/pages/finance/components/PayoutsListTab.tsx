@@ -383,7 +383,7 @@ export function PayoutsListTab({ initialStatus, onStatusChange }: PayoutsListTab
             )}
           >
             <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-status-pending/10 text-status-pending">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-status-pending/10 text-status-pending-text">
                 <Clock className="h-5 w-5" />
               </span>
               <div>
@@ -403,7 +403,7 @@ export function PayoutsListTab({ initialStatus, onStatusChange }: PayoutsListTab
             )}
           >
             <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-status-processing/10 text-status-processing">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-status-processing/10 text-status-processing-text">
                 <Send className="h-5 w-5" />
               </span>
               <div>
@@ -519,7 +519,7 @@ export function PayoutsListTab({ initialStatus, onStatusChange }: PayoutsListTab
                   </SelectContent>
                 </Select>
               ) : (
-                <p className="text-sm text-status-rejected">Supplier has no verified payout method</p>
+                <p className="text-sm text-status-rejected-text">Supplier has no verified payout method</p>
               );
             })()}
           </div>
@@ -568,7 +568,7 @@ export function PayoutsListTab({ initialStatus, onStatusChange }: PayoutsListTab
           <Label htmlFor="failReason">Reason (required, min 10 chars)</Label>
           <Textarea id="failReason" value={failReason} onChange={(e) => setFailReason(e.target.value)} placeholder="Enter the reason for failure..." rows={3} />
           {failReason.length > 0 && failReason.length < 10 && (
-            <p className="text-xs text-status-rejected">Minimum 10 characters</p>
+            <p className="text-xs text-status-rejected-text">Minimum 10 characters</p>
           )}
         </div>
       </ConfirmModal>

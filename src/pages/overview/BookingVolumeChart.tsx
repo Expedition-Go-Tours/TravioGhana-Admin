@@ -51,7 +51,7 @@ export function BookingVolumeChart({ data, total, trend, loading, period = "last
         <div className="flex items-baseline gap-2 mb-6">
           <span className="text-3xl font-bold text-text-primary">{formatNumber(total)}</span>
           {trend && (
-            <span className={cn("text-sm font-medium flex items-center gap-1", trend.isPositive ? "text-status-active" : "text-red-500")}>
+            <span className={cn("text-sm font-medium flex items-center gap-1", trend.isPositive ? "text-status-active-text" : "text-red-500")}>
               {trend.isPositive ? "+" : ""}{trend.value}% {periodTrendLabels[period] || "vs previous week"}
             </span>
           )}

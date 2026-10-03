@@ -224,7 +224,7 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
                 </DetailRow>
                 <div className="border-t border-border pt-2 mt-2 flex items-center justify-between">
                   <span className="text-xs font-semibold text-text-primary">Net Payout</span>
-                  <span className="text-sm font-bold text-status-active tabular-nums">{formatCurrency(netPayout)}</span>
+                  <span className="text-sm font-bold text-status-active-text tabular-nums">{formatCurrency(netPayout)}</span>
                 </div>
               </div>
             </div>
@@ -244,13 +244,13 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
                         {method.verified !== undefined && (
                           <span className={cn(
                             "inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-medium",
-                            method.verified ? "bg-status-active/10 text-status-active" : "bg-status-pending/10 text-status-pending"
+                            method.verified ? "bg-status-active/10 text-status-active-text" : "bg-status-pending/10 text-status-pending-text"
                           )}>
                             {method.verified ? "Verified" : "Unverified"}
                           </span>
                         )}
                         {method.isDefault && (
-                          <span className="inline-flex items-center gap-1 rounded-full bg-status-approved/10 px-2 py-0.5 text-[10px] font-medium text-status-approved">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-status-approved/10 px-2 py-0.5 text-[10px] font-medium text-status-approved-text">
                             Default
                           </span>
                         )}
@@ -314,7 +314,7 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
                         <div className={cn("pb-5", isLast && "pb-0")}>
                           <p className={cn(
                             "text-xs font-medium",
-                            step.active ? "text-status-processing" : step.date ? "text-text-primary" : "text-text-tertiary"
+                            step.active ? "text-status-processing-text" : step.date ? "text-text-primary" : "text-text-tertiary"
                           )}>
                             {step.label}
                           </p>
@@ -364,7 +364,7 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
                 <Button
                   onClick={() => { onFail(payout); onClose(); }}
                   variant="outline"
-                  className="flex-1 gap-1.5 border-status-rejected/30 text-status-rejected hover:bg-status-rejected/10"
+                  className="flex-1 gap-1.5 border-status-rejected/30 text-status-rejected-text hover:bg-status-rejected/10"
                   size="sm"
                 >
                   <XCircle className="h-4 w-4" /> Fail
@@ -387,7 +387,7 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
                 <Button
                   onClick={() => { onFail(payout); onClose(); }}
                   variant="outline"
-                  className="flex-1 gap-1.5 border-status-rejected/30 text-status-rejected hover:bg-status-rejected/10"
+                  className="flex-1 gap-1.5 border-status-rejected/30 text-status-rejected-text hover:bg-status-rejected/10"
                   size="sm"
                 >
                   <Ban className="h-4 w-4" /> Fail

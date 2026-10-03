@@ -15,7 +15,7 @@ export function SectionError({
       className="flex flex-col items-center justify-center py-8 text-text-secondary"
       aria-live="polite"
     >
-      <AlertCircle className="mb-2 h-8 w-8 text-status-rejected" />
+      <AlertCircle className="mb-2 h-8 w-8 text-status-rejected-text" />
       <p className="text-sm">{message}</p>
       {onRetry && (
         <Button variant="outline" size="sm" className="mt-4" onClick={onRetry}>

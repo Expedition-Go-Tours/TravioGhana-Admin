@@ -116,7 +116,7 @@ const TourRow = memo(function TourRow({ tour, isPending, onToggle, onOpen }: Tou
           )}
         </div>
         <div className="mt-1 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-xs text-text-tertiary">
-          <span className={`font-medium ${tour.status === "ACTIVE" ? "text-status-active" : "text-text-secondary"}`}>
+          <span className={`font-medium ${tour.status === "ACTIVE" ? "text-status-active-text" : "text-text-secondary"}`}>
             {tour.status?.replace(/_/g, " ") || "—"}
           </span>
           {tour.category && (
@@ -189,7 +189,7 @@ const TourRow = memo(function TourRow({ tour, isPending, onToggle, onOpen }: Tou
             }`}
           />
         </button>
-        <span className={`text-[10px] font-medium ${isPublished ? "text-status-active" : "text-text-tertiary"}`}>
+        <span className={`text-[10px] font-medium ${isPublished ? "text-status-active-text" : "text-text-tertiary"}`}>
           {isPublished ? "Live" : "Hidden"}
         </span>
       </div>
@@ -370,7 +370,7 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
                 <span
                   className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
-                    live ? "bg-status-active/10 text-status-active" : "bg-surface-muted text-text-tertiary"
+                    live ? "bg-status-active/10 text-status-active-text" : "bg-surface-muted text-text-tertiary"
                   }`}
                 >
                   <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-status-active" : "bg-text-tertiary/50"}`} />
@@ -546,7 +546,7 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
       {isError && (
         <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-surface-base py-16 text-center">
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-status-rejected/10">
-            <AlertCircle className="h-6 w-6 text-status-rejected" />
+            <AlertCircle className="h-6 w-6 text-status-rejected-text" />
           </div>
           <p className="text-sm font-semibold text-text-primary">Failed to load tours</p>
           <p className="mt-1 text-xs text-text-secondary">We couldn't fetch this supplier's tours. Please try again.</p>

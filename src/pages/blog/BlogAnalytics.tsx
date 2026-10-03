@@ -23,12 +23,12 @@ export default function BlogAnalytics() {
   const categoryDistribution = data?.data?.categoryDistribution || [];
 
   const kpis = [
-    { label: "Total Articles", value: totals?.totalArticles ?? 0, icon: FileText, color: "text-status-approved", bg: "bg-surface-muted" },
-    { label: "Published", value: totals?.publishedCount ?? 0, icon: BookMarked, color: "text-status-active", bg: "bg-surface-muted" },
-    { label: "Drafts", value: totals?.draftCount ?? 0, icon: FileText, color: "text-status-pending", bg: "bg-surface-muted" },
+    { label: "Total Articles", value: totals?.totalArticles ?? 0, icon: FileText, color: "text-status-approved-text", bg: "bg-surface-muted" },
+    { label: "Published", value: totals?.publishedCount ?? 0, icon: BookMarked, color: "text-status-active-text", bg: "bg-surface-muted" },
+    { label: "Drafts", value: totals?.draftCount ?? 0, icon: FileText, color: "text-status-pending-text", bg: "bg-surface-muted" },
     { label: "Archived", value: totals?.archivedCount ?? 0, icon: Archive, color: "text-text-secondary", bg: "bg-surface-muted" },
-    { label: "Total Views", value: totals?.totalViews ?? 0, icon: Eye, color: "text-status-processing", bg: "bg-surface-muted" },
-    { label: "Total Shares", value: totals?.totalShares ?? 0, icon: Share2, color: "text-status-rejected", bg: "bg-surface-muted" },
+    { label: "Total Views", value: totals?.totalViews ?? 0, icon: Eye, color: "text-status-processing-text", bg: "bg-surface-muted" },
+    { label: "Total Shares", value: totals?.totalShares ?? 0, icon: Share2, color: "text-status-rejected-text", bg: "bg-surface-muted" },
   ];
 
   return (

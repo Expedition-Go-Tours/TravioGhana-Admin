@@ -438,7 +438,7 @@ export function TourDetailPanel({
             {showDraftReview && (
               <section>
                 <h3 className="mb-3 flex items-center gap-2 text-base font-semibold text-foreground">
-                  <Shield className="h-5 w-5 text-status-approved" />
+                  <Shield className="h-5 w-5 text-status-approved-text" />
                   Pending Edits ({draftReview.changesSummary.count} changes)
                 </h3>
                 <DiffViewer

@@ -9,9 +9,9 @@ type StatAccent = "emerald" | "blue" | "amber" | "red";
 
 const ACCENT_CLASSES: Record<StatAccent, string> = {
   emerald: "bg-green-50 text-green-800 dark:bg-green-950/30 dark:text-green-300",
-  blue: "bg-status-approved/15 text-status-approved",
-  amber: "bg-status-pending/15 text-status-pending",
-  red: "bg-status-rejected/15 text-status-rejected",
+  blue: "bg-status-approved/15 text-status-approved-text",
+  amber: "bg-status-pending/15 text-status-pending-text",
+  red: "bg-status-rejected/15 text-status-rejected-text",
 };
 
 interface StatCardProps {
@@ -62,7 +62,7 @@ export function StatCard({
           {(trend || subtitle) && (
             <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5">
               {trend && (
-                <span className={cn("inline-flex items-center gap-1 text-xs font-medium", trend.isPositive ? "text-status-active" : "text-status-rejected")}>
+                <span className={cn("inline-flex items-center gap-1 text-xs font-medium", trend.isPositive ? "text-status-active-text" : "text-status-rejected-text")}>
                   {trend.isPositive ? <TrendingUp className="h-3 w-3" /> : <TrendingDown className="h-3 w-3" />}
                   {trend.isPositive ? "+" : ""}{trend.value.toFixed(1)}%
                 </span>

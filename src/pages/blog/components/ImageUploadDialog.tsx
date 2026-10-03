@@ -94,7 +94,7 @@ export function ImageUploadDialog({ open, onOpenChange, onImageSelect, title = "
                   <Upload className="h-6 w-6 text-text-tertiary" />
                 </div>
                 <p className="text-sm text-text-secondary">
-                  <span className="font-medium text-status-processing">Click to upload</span> or drag and drop
+                  <span className="font-medium text-status-processing-text">Click to upload</span> or drag and drop
                 </p>
                 <p className="text-xs text-text-tertiary">PNG, JPG, WebP up to 10MB</p>
               </div>
@@ -110,7 +110,7 @@ export function ImageUploadDialog({ open, onOpenChange, onImageSelect, title = "
             />
           </div>
 
-          {error && <p className="text-xs text-status-rejected">{error}</p>}
+          {error && <p className="text-xs text-status-rejected-text">{error}</p>}
 
           {uploading && (
             <div className="space-y-1.5">
