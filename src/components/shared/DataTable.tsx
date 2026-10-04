@@ -416,6 +416,10 @@ export function DataTable<T>({
                   data-row-id={key}
                   aria-busy={isPending || undefined}
                   aria-selected={hasSelection ? isSelected : undefined}
+                  // Only set when this table actually uses expansion —
+                  // otherwise we would claim to be a disclosure widget to
+                  // screen readers on the eight tables that are not one.
+                  aria-expanded={renderExpanded ? isExpanded : undefined}
                   className={cn(
                     "border-b border-border/50 transition-colors duration-100",
                     rowMinH,

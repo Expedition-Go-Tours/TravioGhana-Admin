@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
-  CalendarClock, CalendarDays, PauseCircle, AlertTriangle, Search, X, Check,
+  CalendarClock, CalendarDays, ChevronRight, PauseCircle, AlertTriangle, Search, X, Check,
 } from "lucide-react";
 import {
   Select,
@@ -15,6 +15,8 @@ import { Input } from "@/components/ui/input";
 import { DataTable } from "@/components/shared/DataTable";
 import type { Column } from "@/components/shared/DataTable";
 import { StatCard } from "@/components/shared/StatCard";
+import { SupplierPayoutDetail } from "./SupplierPayoutDetail";
+import type { PayoutReadiness } from "./SupplierPayoutDetail";
 import { useSocketInvalidate } from "@/hooks/useSocketEvent";
 import api from "@/lib/axios";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
@@ -62,6 +64,8 @@ interface ScheduleRow {
   plan: PayoutPlan;
   eligibleBalance: { amount: number; bookingCount: number; currency: string };
   hasVerifiedMethod: boolean;
+  /** Why the run will or will not fire — see buildPayoutReadiness. */
+  readiness: PayoutReadiness;
 }
 
 interface SchedulesPayload {
@@ -112,11 +116,26 @@ function relativeRunLabel(value: string | null): { label: string; today: boolean
   return null;
 }
 
+/**
+ * Colour for the reason a zero is zero. Paused is amber (a switch, not a
+ * fault), everything else follows the readiness kind so it matches the
+ * expanded panel it leads to.
+ */
+function reasonClass(r: PayoutReadiness | undefined): string {
+  if (!r) return "text-text-tertiary";
+  if (r.code === "SCHEDULER_PAUSED") return "text-amber-700 dark:text-amber-300";
+  if (r.kind === "blocked") return "text-status-rejected-text";
+  return "text-text-tertiary";
+}
+
 export function PayoutSchedulesTab() {
   const [page, setPage] = useState(1);
   const [cycle, setCycle] = useState("all");
   const [search, setSearch] = useState("");
   const [debounced, setDebounced] = useState("");
+  // One open at a time — expanding a second row closes the first, so the
+  // detail is never rendered (and never fetched) for two suppliers at once.
+  const [expandedId, setExpandedId] = useState<string | null>(null);
   const limit = 20;
 
   useSocketInvalidate("admin:payout-request-update", ["admin", "payout-schedules"]);
@@ -125,6 +144,13 @@ export function PayoutSchedulesTab() {
     const t = setTimeout(() => setDebounced(search.trim()), 300);
     return () => clearTimeout(t);
   }, [search]);
+
+  // Note: `expandedId` is deliberately NOT cleared when the page, cycle filter
+  // or search changes. DataTable only renders an expansion whose key matches a
+  // present row, so a supplier who has moved off the page simply shows nothing
+  // — and switching back restores what was open. Clearing it in an effect
+  // would both be a cascading render and, on a transient search keystroke,
+  // throw away what the admin was reading.
 
   const { data, isLoading, isError, refetch } = useQuery<SchedulesPayload>({
     queryKey: ["admin", "payout-schedules", { page, cycle, search: debounced }],
@@ -147,9 +173,20 @@ export function PayoutSchedulesTab() {
       header: "Supplier",
       rowHeader: true,
       render: (r) => (
-        <div className="min-w-0">
-          <p className="truncate text-sm font-medium text-text-primary">{r.name || r.email || "Unknown"}</p>
-          <p className="truncate text-xs text-text-tertiary">{r.email}</p>
+        <div className="flex items-start gap-1.5">
+          {/* The affordance: without it nothing suggests the row does
+              anything on click, and this table spans 40 suppliers. */}
+          <ChevronRight
+            className={cn(
+              "mt-1 h-3.5 w-3.5 shrink-0 text-text-tertiary transition-transform duration-150",
+              expandedId === r.supplierId && "rotate-90 text-text-secondary",
+            )}
+            aria-hidden
+          />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-medium text-text-primary">{r.name || r.email || "Unknown"}</p>
+            <p className="truncate text-xs text-text-tertiary">{r.email}</p>
+          </div>
         </div>
       ),
     },
@@ -195,16 +232,47 @@ export function PayoutSchedulesTab() {
       key: "eligible",
       header: "Eligible now",
       numeric: true,
-      render: (r) => (
-        <div>
-          <p className="text-sm font-semibold tabular-nums text-text-primary">
-            {formatCurrency(r.eligibleBalance?.amount || 0, r.eligibleBalance?.currency || "USD")}
-          </p>
-          <p className="text-xs tabular-nums text-text-tertiary">
-            {r.eligibleBalance?.bookingCount || 0} booking{r.eligibleBalance?.bookingCount === 1 ? "" : "s"}
-          </p>
-        </div>
-      ),
+      render: (r) => {
+        const amount = r.eligibleBalance?.amount || 0;
+        const count = r.eligibleBalance?.bookingCount || 0;
+        const currency = r.eligibleBalance?.currency || "USD";
+
+        // A bare $0.00 is the least actionable figure on this page — 38 of
+        // these 40 suppliers show one. Keep the number (the column is still
+        // numeric and scannable) but replace "0 bookings", which tells finance
+        // nothing, with why it is zero. Without this, triage means expanding
+        // forty rows to learn one thing.
+        if (amount <= 0) {
+          return (
+            <div>
+              <p className="text-sm font-semibold tabular-nums text-text-tertiary">
+                {formatCurrency(0, currency)}
+              </p>
+              <p className={cn("text-xs font-medium", reasonClass(r.readiness))}>
+                {r.readiness?.label || "0 bookings"}
+              </p>
+            </div>
+          );
+        }
+
+        return (
+          <div>
+            <p className="text-sm font-semibold tabular-nums text-text-primary">
+              {formatCurrency(amount, currency)}
+            </p>
+            <p className="text-xs tabular-nums text-text-tertiary">
+              {count} booking{count === 1 ? "" : "s"}
+            </p>
+            {/* Money is present but the scheduler will still skip it — the
+                one time a non-zero row needs a caveat. */}
+            {r.readiness?.code === "BELOW_MINIMUM" && (
+              <p className={cn("text-[11px] font-medium", reasonClass(r.readiness))}>
+                {r.readiness.label}
+              </p>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: "method",
@@ -323,6 +391,12 @@ export function PayoutSchedulesTab() {
             } : undefined}
             onRetry={() => refetch()}
             keyExtractor={(r) => r.supplierId}
+            // Expansion — one row open at a time. The detail fetches its own
+            // line items on mount and stays cached, so re-opening is instant.
+            expandedRow={expandedId}
+            onRowClick={(r) => setExpandedId((cur) => (cur === r.supplierId ? null : r.supplierId))}
+            renderExpanded={(r) => <SupplierPayoutDetail row={r} />}
+            caption="Suppliers enrolled in an automatic payout schedule, ordered by soonest payout"
           />
         </CardContent>
       </Card>
