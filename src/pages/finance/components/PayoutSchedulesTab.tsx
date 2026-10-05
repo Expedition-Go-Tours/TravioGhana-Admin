@@ -310,7 +310,10 @@ export function PayoutSchedulesTab() {
           value={isLoading ? "..." : String(summary?.enrolled ?? 0)}
           icon={<CalendarClock className="h-5 w-5" />}
           accent="emerald"
-          subtitle={data?.defaultCycle ? `Default: ${optionFor(options, data.defaultCycle)?.shortLabel || data.defaultCycle}` : undefined}
+          // Not "Default: X" — this card counts the suppliers already enrolled, and a bare
+          // "Default: Twice a month" beside that count reads as a description of
+          // them. It is the cadence new signups start on, so say whose it is.
+          subtitle={data?.defaultCycle ? `New signups start on ${optionFor(options, data.defaultCycle)?.shortLabel || data.defaultCycle}` : undefined}
         />
         <StatCard
           label="Runs in Next 7 Days"
