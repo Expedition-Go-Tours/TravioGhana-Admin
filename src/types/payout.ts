@@ -135,3 +135,69 @@ export interface Dispute {
   refundAmount?: number | string | null;
   createdAt: string;
 }
+
+// ── Finance v3 (automatic invoicing) ──
+
+export interface InvoiceItem {
+  id: string;
+  invoiceId: string;
+  bookingId: string;
+  grossAmount: number | string;
+  platformCommission: number | string;
+  supplierPayout: number | string;
+  currency: string;
+  createdAt?: string;
+  booking?: {
+    id?: string;
+    bookingNumber?: string;
+    travelDate?: string | null;
+    selectedTime?: string | null;
+    status?: string;
+    paymentStatus?: string;
+    payoutStatus?: string;
+    customer?: { id?: string; name?: string; email?: string };
+    tour?: { id?: string; title?: string; imageCover?: string | null };
+  } | null;
+}
+
+export interface Invoice {
+  id: string;
+  invoiceNumber: string;
+  supplierId: string;
+  supplier?: { id?: string; name?: string; email?: string; logoUrl?: string };
+  /** TWICE_MONTHLY | MONTHLY — WEEKLY was retired with finance v3. */
+  cycle: string;
+  /** Activity-date window the invoice covers (inclusive), not the run window. */
+  cycleStartDate: string;
+  cycleEndDate: string;
+  cycleLabel: string;
+  invoicedAt: string;
+  /** The processing date finance should pay by; the bank may credit later. */
+  paymentScheduledAt: string;
+  paidAt?: string | null;
+  paidBy?: string | null;
+  /** Real bank/transaction reference recorded when finance marks it paid. */
+  reference?: string | null;
+  status: "INVOICED" | "PAID" | "CANCELLED";
+  grossTotal: number | string;
+  /** Flat 17% (15% platform fee + 2% Ghana surcharge), frozen at booking time. */
+  commissionTotal: number | string;
+  netTotal: number | string;
+  currency: string;
+  bookingCount: number;
+  payoutMethodId?: string | null;
+  payoutMethod?: {
+    id?: string;
+    type?: string;
+    bankName?: string;
+    paypalEmail?: string;
+    accountName?: string;
+    accountNumber?: string;
+    swiftCode?: string;
+    iban?: string;
+    mobileProvider?: string;
+    mobileNumber?: string;
+  } | null;
+  items?: InvoiceItem[];
+  createdAt: string;
+}
