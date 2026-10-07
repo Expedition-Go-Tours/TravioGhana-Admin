@@ -176,11 +176,14 @@ export interface Invoice {
   paymentScheduledAt: string;
   paidAt?: string | null;
   paidBy?: string | null;
+  /** Maker–checker: who authorized the transfer and when (between invoiced and paid). */
+  approvedAt?: string | null;
+  approvedBy?: string | null;
   /** Real bank/transaction reference recorded when finance marks it paid. */
   reference?: string | null;
-  status: "INVOICED" | "PAID" | "CANCELLED";
+  status: "INVOICED" | "APPROVED" | "PAID" | "CANCELLED";
   grossTotal: number | string;
-  /** Flat 17% (15% platform fee + 2% Ghana surcharge), frozen at booking time. */
+  /** Flat 15% commission, frozen at booking time (older bookings may show 17%). */
   commissionTotal: number | string;
   netTotal: number | string;
   currency: string;

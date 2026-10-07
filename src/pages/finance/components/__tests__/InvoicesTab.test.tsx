@@ -6,11 +6,11 @@ import { InvoicesTab } from "../InvoicesTab";
 import type { Invoice } from "@/types/payout";
 
 /**
- * The invoice queue is where finance pays suppliers, so the two things that
- * matter are the receipt (does the invoice itemise the money it claims?) and
- * the reference gate (money never leaves the balance without the real bank
- * reference). Both are asserted here; the third check is that the Due tab
- * explains itself when empty instead of looking broken.
+ * The invoice queue is where finance pays suppliers, so the three things that
+ * matter are the receipt (does the invoice itemise the money it claims?), the
+ * maker–checker gate (approve first — money only moves after approval, and
+ * only with the real bank reference), and that the tabs explain themselves
+ * when empty instead of looking broken. All three are asserted here.
  */
 
 vi.mock("@/lib/axios", () => ({ default: { get: vi.fn(), patch: vi.fn() } }));
@@ -91,11 +91,21 @@ const DUE: Invoice = {
   createdAt: "2026-09-16T12:00:00",
 };
 
+/** Approved but unpaid — the maker–checker step between Due and Paid. */
+const APPROVED: Invoice = {
+  ...DUE,
+  id: "inv-appr-1",
+  invoiceNumber: "INV-2026-0002",
+  status: "APPROVED",
+  approvedAt: "2026-09-17T12:00:00",
+  approvedBy: "admin-1",
+};
+
 function mockApi(invoices: Invoice[]) {
   apiGet.mockImplementation((url: string) => {
     const u = String(url);
     if (u.includes("?")) {
-      const statusCounts: Record<string, number> = { INVOICED: 0, PAID: 2, CANCELLED: 0 };
+      const statusCounts: Record<string, number> = { INVOICED: 0, APPROVED: 0, PAID: 2, CANCELLED: 0 };
       for (const inv of invoices) statusCounts[inv.status] = (statusCounts[inv.status] || 0) + 1;
       return Promise.resolve({
         data: {
@@ -193,13 +203,82 @@ describe("InvoicesTab — the receipt", () => {
   });
 });
 
-describe("InvoicesTab — marking paid", () => {
-  it("refuses to close the invoice without a real bank reference", async () => {
+describe("InvoicesTab — approving (maker–checker)", () => {
+  it("approves the invoice before the money can move", async () => {
     const user = userEvent.setup();
     renderWithProviders(<InvoicesTab />);
     await screen.findByText("INV-2026-0001");
 
-    await user.click(screen.getByRole("button", { name: "Mark invoice INV-2026-0001 as paid" }));
+    await user.click(
+      screen.getByRole("button", { name: "Approve invoice INV-2026-0001 for payment" }),
+    );
+
+    const confirm = await screen.findByRole("button", { name: "Approve" });
+    await user.click(confirm);
+
+    await waitFor(() =>
+      expect(apiPatch).toHaveBeenCalledWith("/admin/finance/invoices/inv-due-1/approve"),
+    );
+    // The dialog stays open until the server accepts — like mark-paid.
+    await waitFor(() =>
+      expect(screen.queryByRole("button", { name: "Approve" })).not.toBeInTheDocument(),
+    );
+  });
+
+  it("shows approved-but-unpaid invoices on their own tab, still unpaid", async () => {
+    const user = userEvent.setup();
+    mockApi([APPROVED]);
+    renderWithProviders(<InvoicesTab />);
+
+    expect(await screen.findByText("INV-2026-0002")).toBeInTheDocument();
+    // The server-side filter is what the tab is for.
+    await user.click(screen.getByRole("button", { name: /^approved/i }));
+    await waitFor(() =>
+      expect(apiGet).toHaveBeenCalledWith(expect.stringContaining("status=APPROVED")),
+    );
+
+    const row = rowOf("INV-2026-0002");
+    expect(within(row).getByText("Approved")).toBeInTheDocument();
+    // Still owed: the processing date stays visible, not a paid stamp.
+    expect(within(row).getByText(/Pay by Sep 20, 2026/)).toBeInTheDocument();
+    expect(screen.getByText(/showing 1 approved/)).toBeInTheDocument();
+  });
+
+  it("derives the commission label from the invoice's frozen numbers (15% post-change)", async () => {
+    const user = userEvent.setup();
+    mockApi([
+      {
+        ...DUE,
+        id: "inv-15-1",
+        invoiceNumber: "INV-2026-0003",
+        status: "INVOICED",
+        grossTotal: 1000,
+        commissionTotal: 150,
+        netTotal: 850,
+        items: (DUE.items || []).map((it) => ({
+          ...it,
+          platformCommission: Math.round(Number(it.grossAmount) * 0.15),
+          supplierPayout: Number(it.grossAmount) - Math.round(Number(it.grossAmount) * 0.15),
+        })),
+      },
+    ]);
+    renderWithProviders(<InvoicesTab />);
+
+    await screen.findByText("INV-2026-0003");
+    await user.click(rowOf("INV-2026-0003"));
+
+    expect(await screen.findByText("Commission (15%)")).toBeInTheDocument();
+  });
+});
+
+describe("InvoicesTab — marking paid", () => {
+  it("refuses to close the invoice without a real bank reference", async () => {
+    const user = userEvent.setup();
+    mockApi([APPROVED]);
+    renderWithProviders(<InvoicesTab />);
+    await screen.findByText("INV-2026-0002");
+
+    await user.click(screen.getByRole("button", { name: "Mark invoice INV-2026-0002 as paid" }));
 
     const confirm = await screen.findByRole("button", { name: "Confirm paid" });
     const input = screen.getByLabelText("Transaction reference (required)");
@@ -216,7 +295,7 @@ describe("InvoicesTab — marking paid", () => {
     expect(confirm).toBeEnabled();
 
     await user.click(confirm);
-    expect(apiPatch).toHaveBeenCalledWith("/admin/finance/invoices/inv-due-1/mark-paid", {
+    expect(apiPatch).toHaveBeenCalledWith("/admin/finance/invoices/inv-appr-1/mark-paid", {
       reference: "TRX-8841209",
     });
     // Modal closes once the server accepts, not before.
@@ -227,10 +306,11 @@ describe("InvoicesTab — marking paid", () => {
 
   it("never fires the mutation when the reference field is left empty", async () => {
     const user = userEvent.setup();
+    mockApi([APPROVED]);
     renderWithProviders(<InvoicesTab />);
-    await screen.findByText("INV-2026-0001");
+    await screen.findByText("INV-2026-0002");
 
-    await user.click(screen.getByRole("button", { name: "Mark invoice INV-2026-0001 as paid" }));
+    await user.click(screen.getByRole("button", { name: "Mark invoice INV-2026-0002 as paid" }));
     const confirm = await screen.findByRole("button", { name: "Confirm paid" });
     expect(confirm).toBeDisabled();
 

@@ -25,26 +25,31 @@ import type { Invoice, InvoiceItem } from "@/types/payout";
  * invoicing.
  *
  * Invoices generate on each supplier's cadence (activity-date window → invoice
- * date → payment date). They are not approved or requested here: finance's job
- * on this screen is to pay by bank/mobile money and record the real reference,
- * which is what moves the invoice out of the supplier's balance. Money movement
- * stays manual — no provider API — so the reference is required, never free text
- * we invent for them.
+ * date → payment date). Finance approves them first — a maker–checker step
+ * that authorizes the transfer (INVOICED → APPROVED) — then pays by
+ * bank/mobile money and records the real reference, which is what moves the
+ * invoice out of the supplier's balance. Money movement stays manual — no
+ * provider API — so the reference is required, never free text we invent for
+ * them. An invoice can only be marked paid after it is approved; there is no
+ * auto-approval job.
  */
 
 const STATUS_TABS = [
   { key: "INVOICED", label: "Due" },
+  { key: "APPROVED", label: "Approved" },
   { key: "PAID", label: "Paid" },
   { key: "CANCELLED", label: "Voided" },
 ] as const;
 
 /**
  * Carbon's status-indicator rule: icon + word + colour, so state is never
- * carried by hue alone. `getStatusColor` has no `INVOICED` entry, so the Due
- * chip brings its own amber — unpaid money must not render as neutral grey.
+ * carried by hue alone. `getStatusColor` has no `INVOICED`/`APPROVED` entry,
+ * so the Due and Approved chips bring their own colour — unpaid money must not
+ * render as neutral grey.
  */
 const STATUS_META: Record<string, { label: string; Icon: typeof Clock }> = {
   INVOICED: { label: "Due", Icon: Clock },
+  APPROVED: { label: "Approved", Icon: ShieldCheck },
   PAID: { label: "Paid", Icon: CheckCircle },
   CANCELLED: { label: "Voided", Icon: Ban },
 };
@@ -58,6 +63,7 @@ function InvoiceStatusBadge({ status }: { status: Invoice["status"] }) {
         "inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium",
         getStatusColor(status),
         status === "INVOICED" && "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400",
+        status === "APPROVED" && "border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-400",
       )}
     >
       <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -103,6 +109,17 @@ function itemsCheck(inv: Invoice) {
 }
 
 /**
+ * Effective commission rate for an invoice, derived from its frozen numbers.
+ * History is mixed (17% before the flat-15% change, 15% after), so the label
+ * reads the rate off the invoice instead of hard-coding one.
+ */
+function commissionRate(inv: Invoice): number {
+  const gross = Number(inv.grossTotal || 0);
+  const commission = Number(inv.commissionTotal || 0);
+  return gross > 0 ? Math.round((commission / gross) * 100) : 0;
+}
+
+/**
  * The receipt behind an invoice row: destination, processing timeline, the
  * gross → commission → net derivation, the activity-date window it covers, and
  * the bookings it bills for — with the items total reconciled against the
@@ -128,7 +145,8 @@ function InvoiceDetail({ invoice: inv, loading }: { invoice: Invoice; loading?: 
           <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Timeline</p>
           <p className="mt-1.5 text-sm text-text-secondary">
             Invoiced {formatDateTime(inv.invoicedAt)}
-            {inv.status === "INVOICED" && inv.paymentScheduledAt && ` · pay by ${formatDate(inv.paymentScheduledAt)}`}
+            {(inv.status === "INVOICED" || inv.status === "APPROVED") && inv.paymentScheduledAt && ` · pay by ${formatDate(inv.paymentScheduledAt)}`}
+            {inv.approvedAt && ` · approved ${formatDate(inv.approvedAt)}`}
             {inv.paidAt && ` · paid ${formatDate(inv.paidAt)}`}
             {inv.status === "CANCELLED" && " · voided"}
           </p>
@@ -137,7 +155,7 @@ function InvoiceDetail({ invoice: inv, loading }: { invoice: Invoice; loading?: 
           <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Reference</p>
           {inv.reference ? (
             <p className="mt-1.5 font-mono text-sm text-text-primary">{inv.reference}</p>
-          ) : inv.status === "INVOICED" ? (
+          ) : inv.status === "INVOICED" || inv.status === "APPROVED" ? (
             <p className="mt-1.5 text-sm italic text-text-tertiary">Recorded when marked as paid</p>
           ) : (
             <p className="mt-1.5 text-sm text-text-tertiary">—</p>
@@ -153,7 +171,9 @@ function InvoiceDetail({ invoice: inv, loading }: { invoice: Invoice; loading?: 
           </p>
         </div>
         <div className="rounded-lg border border-border/60 bg-surface-base p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Commission (17%)</p>
+          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
+            Commission ({commissionRate(inv)}%)
+          </p>
           <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">
             {formatCurrency(Number(inv.commissionTotal), inv.currency)}
           </p>
@@ -250,6 +270,7 @@ export function InvoicesTab() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [markingId, setMarkingId] = useState<string | null>(null);
   const [paidReference, setPaidReference] = useState("");
+  const [approvingId, setApprovingId] = useState<string | null>(null);
   const limit = 20;
 
   useEffect(() => {
@@ -318,10 +339,24 @@ export function InvoicesTab() {
       ),
   });
 
-  // Pessimistic, never optimistic: this flips money out of the balance.
-  const busy = markPaidMutation.isPending;
+  const approveMutation = useMutation({
+    mutationFn: (id: string) => api.patch(`/admin/finance/invoices/${id}/approve`),
+    onSuccess: () => {
+      toast.success("Invoice approved — ready to send the transfer");
+      invalidate();
+    },
+    onError: (err: unknown) =>
+      toast.error(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          "Failed to approve invoice",
+      ),
+  });
+
+  // Pessimistic, never optimistic: these flip money in or out of the balance.
+  const busy = markPaidMutation.isPending || approveMutation.isPending;
   const refError = validateReference(paidReference);
   const markingInvoice = invoices.find((i) => i.id === markingId) || null;
+  const approvingInvoice = invoices.find((i) => i.id === approvingId) || null;
 
   const openMarkPaid = (inv: Invoice) => {
     setPaidReference("");
@@ -373,7 +408,7 @@ export function InvoicesTab() {
       render: (inv) => (
         <div className="flex flex-col gap-1">
           <span className="whitespace-nowrap font-mono text-xs font-semibold text-primary">{inv.invoiceNumber}</span>
-          {!inv.payoutMethod?.type && inv.status === "INVOICED" && (
+          {!inv.payoutMethod?.type && (inv.status === "INVOICED" || inv.status === "APPROVED") && (
             <span className="inline-flex items-center gap-1 rounded-md bg-status-rejected/10 px-1.5 py-0.5 text-[11px] font-semibold text-status-rejected-text">
               <AlertTriangle className="h-3 w-3" aria-hidden /> No method
             </span>
@@ -447,18 +482,36 @@ export function InvoicesTab() {
       header: <span className="sr-only">Actions</span>,
       align: "right",
       render: (inv) => {
-        if (inv.status !== "INVOICED" || !can("payouts.approve")) return null;
-        return (
-          <Button
-            size="sm"
-            className="gap-1"
-            disabled={busy}
-            aria-label={`Mark invoice ${inv.invoiceNumber} as paid`}
-            onClick={() => openMarkPaid(inv)}
-          >
-            <Send className="h-3.5 w-3.5" aria-hidden /> Mark paid
-          </Button>
-        );
+        if (!can("payouts.approve")) return null;
+        if (inv.status === "INVOICED") {
+          // Maker–checker: approve first, then the money can move. No money
+          // changes here — this only authorizes the later transfer.
+          return (
+            <Button
+              size="sm"
+              className="gap-1"
+              disabled={busy}
+              aria-label={`Approve invoice ${inv.invoiceNumber} for payment`}
+              onClick={() => setApprovingId(inv.id)}
+            >
+              <ShieldCheck className="h-3.5 w-3.5" aria-hidden /> Approve
+            </Button>
+          );
+        }
+        if (inv.status === "APPROVED") {
+          return (
+            <Button
+              size="sm"
+              className="gap-1"
+              disabled={busy}
+              aria-label={`Mark invoice ${inv.invoiceNumber} as paid`}
+              onClick={() => openMarkPaid(inv)}
+            >
+              <Send className="h-3.5 w-3.5" aria-hidden /> Mark paid
+            </Button>
+          );
+        }
+        return null;
       },
     },
   ];
@@ -535,7 +588,9 @@ export function InvoicesTab() {
                 ? `No invoices match “${debouncedSearch}”`
                 : statusTab === "INVOICED"
                   ? "No invoices due — invoices generate automatically on each supplier's invoice date"
-                  : statusTab === "PAID"
+                  : statusTab === "APPROVED"
+                    ? "No approved invoices waiting — approve due invoices to authorize their transfer"
+                    : statusTab === "PAID"
                     ? "No paid invoices yet"
                     : statusTab === "CANCELLED"
                       ? "No voided invoices"
@@ -551,6 +606,29 @@ export function InvoicesTab() {
           <Inbox className="h-3.5 w-3.5" aria-hidden />
           Invoices appear here on each supplier's invoice date, covering activity up to the day before
         </p>
+      )}
+
+      {approvingInvoice && (
+        <ConfirmModal
+          open
+          title="Approve invoice for payment"
+          description={`This authorizes the transfer: ${approvingInvoice.invoiceNumber} (${formatCurrency(
+            Number(approvingInvoice.netTotal),
+            approvingInvoice.currency,
+          )} to ${approvingInvoice.supplier?.name || "supplier"}). Approval takes the invoice from Due to Approved; the money only leaves after you mark it paid with the real bank reference.`}
+          confirmLabel="Approve"
+          icon="publish"
+          loading={approveMutation.isPending}
+          confirmDisabled={approveMutation.isPending}
+          onConfirm={() =>
+            approveMutation.mutate(approvingInvoice.id, { onSettled: () => setApprovingId(null) })
+          }
+          onCancel={() => setApprovingId(null)}
+        >
+          <p className="text-sm text-text-secondary">
+            Approving does not move money — it records who authorized the payout and when.
+          </p>
+        </ConfirmModal>
       )}
 
       {markingInvoice && (
