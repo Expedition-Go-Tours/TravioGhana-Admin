@@ -15,7 +15,6 @@ const breadcrumbMap: Record<string, string> = {
   overview: "Overview",
   "revenue-trend": "Revenue Trend",
   "search-analytics": "Search Analytics",
-  "cart-abandonment": "Cart Abandonment",
   "user-growth": "User Growth",
   clv: "Customer Lifetime Value",
   funnel: "Conversion Funnel",

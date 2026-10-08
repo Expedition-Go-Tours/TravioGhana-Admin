@@ -16,7 +16,6 @@ import AuthCallback from "@/pages/auth/AuthCallback";
 import OverviewPage from "@/pages/Overview";
 import RevenueTrendPage from "@/pages/revenue/RevenueTrend";
 import SearchAnalyticsPage from "@/pages/revenue/SearchAnalytics";
-import CartAbandonmentPage from "@/pages/revenue/CartAbandonment";
 import UserGrowthPage from "@/pages/users/UserGrowth";
 import CustomerLifetimeValuePage from "@/pages/users/CustomerLifetimeValue";
 import ConversionFunnelPage from "@/pages/users/ConversionFunnel";
@@ -165,7 +164,6 @@ const router = createBrowserRouter([
       { path: "overview", element: <OverviewPage /> },
       { path: "revenue-trend", element: <PermissionRoute permission="analytics.view"><RevenueTrendPage /></PermissionRoute> },
       { path: "search-analytics", element: <PermissionRoute permission="analytics.view"><SearchAnalyticsPage /></PermissionRoute> },
-      { path: "cart-abandonment", element: <PermissionRoute permission="analytics.view"><CartAbandonmentPage /></PermissionRoute> },
       { path: "user-growth", element: <PermissionRoute permission="users.view"><UserGrowthPage /></PermissionRoute> },
       { path: "clv", element: <PermissionRoute permission="users.view"><CustomerLifetimeValuePage /></PermissionRoute> },
       { path: "funnel", element: <PermissionRoute permission="users.view"><ConversionFunnelPage /></PermissionRoute> },

@@ -45,7 +45,6 @@ export function getNavGroups(can: (key: string) => boolean): { group: string; it
       children: [
         { label: "Revenue Trend", path: "/admin/revenue-trend", icon: <BarChart3 className="h-4 w-4" /> },
         { label: "Search Analytics", path: "/admin/search-analytics", icon: <Search className="h-4 w-4" /> },
-        { label: "Cart Abandonment", path: "/admin/cart-abandonment", icon: <ShoppingCart className="h-4 w-4" /> },
       ],
     }] : []),
     ...(can('users.view') || can('chat.customers') ? [{
