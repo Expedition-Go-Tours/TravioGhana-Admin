@@ -19,6 +19,7 @@ import { useAuth } from "@/auth/useAuth";
 import { useSocketInvalidate } from "@/hooks/useSocketEvent";
 import OptimizedImage from "@/components/shared/OptimizedImage";
 import { getNavGroups, type NavItem } from "@/components/layout/navConfig";
+import { getUnreadCount, NOTIFICATION_FEED_ROOT } from "@/services/notificationService";
 
 interface SidebarProps {
   open: boolean;
@@ -33,6 +34,7 @@ function useSidebarCounts(can: (key: string) => boolean) {
   const canReviews = can('reviews.view');
   const canTours = can('tours.approve') || can('tours.view');
   const canCancellations = can('bookings.view') || can('dashboard.*');
+  const canNotifications = can('notifications.view');
 
   const bookingsQuery = useQuery({
     queryKey: ["admin", "bookings", "sidebar-count"],
@@ -77,11 +79,23 @@ function useSidebarCounts(can: (key: string) => boolean) {
   // Cancellation requests push through the admin notification feed.
   useSocketInvalidate("admin-notification", ["admin", "cancellations"]);
 
+  // Unread notifications. Shares the bell's query key so the two never issue
+  // separate requests, and the bell's 60s poll + socket invalidation keep the
+  // badge fresher than this interval alone would.
+  const notificationsQuery = useQuery({
+    queryKey: [NOTIFICATION_FEED_ROOT, "unread-count"],
+    queryFn: getUnreadCount,
+    enabled: canNotifications,
+    refetchInterval: 5 * 60 * 1000,
+    staleTime: 5 * 60 * 1000,
+  });
+
   return {
     bookings: bookingsQuery.data ?? 0,
     reviews: reviewsQuery.data ?? 0,
     tours: toursQuery.data ?? 0,
     cancellations: cancellationsQuery.data ?? 0,
+    notifications: notificationsQuery.data ?? 0,
   };
 }
 

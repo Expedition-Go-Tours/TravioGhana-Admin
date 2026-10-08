@@ -1,104 +1,15 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
 import { motion } from "framer-motion";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import {
-  Bell,
-  CheckCheck,
-  X,
-  MessageSquare,
-  ShoppingBag,
-  XCircle,
-  CreditCard,
-  Banknote,
-  Star,
-  UserCheck,
-  UserX,
-  AlertTriangle,
-  Loader2,
-  ChevronRight,
-  ClipboardCheck,
-  FileWarning,
-  RefreshCw,
-  ShieldAlert,
-  ShieldCheck,
-} from "lucide-react";
-import { getNotifications, getUnreadCount, markAsRead, markAllAsRead } from "@/services/notificationService";
+import { Bell, CheckCheck, X, Loader2, ChevronRight, ArrowRight } from "lucide-react";
+import { getNotifications, getUnreadCount, markAsRead, markAllAsRead, NOTIFICATION_FEED_ROOT, invalidateNotificationQueries } from "@/services/notificationService";
 import { onAdminNotification, onAdminSocketConnect } from "@/lib/adminSocket";
+import { getNotificationTypeConfig, resolveNotificationRoute } from "@/lib/notificationConfig";
 import { timeAgo, cn } from "@/lib/utils";
 
 const NOTIFICATIONS_REFETCH_INTERVAL_MS = 60_000;
-
-const notificationRouteMap: Record<string, (data?: Record<string, unknown>) => { path: string; state?: Record<string, unknown> } | null> = {
-  NEW_SUPPLIER_APPLICATION: (data) => data?.supplierId ? { path: `/admin/suppliers/${data.supplierId}` } : null,
-  SUPPLIER_STATUS_CHANGE: (data) => data?.supplierId ? { path: `/admin/suppliers/${data.supplierId}` } : null,
-  REVIEW_NEEDS_MODERATION: (data) => data?.reviewId ? { path: "/admin/reviews", state: { reviewId: data.reviewId } } : null,
-  TOUR_SUBMITTED_FOR_REVIEW: (data) => data?.tourId ? { path: "/admin/tour-moderation", state: { tourId: data.tourId } } : null,
-  PAYOUT_NEEDS_APPROVAL: (data) => ({ path: "/admin/payouts", state: { payoutId: data?.payoutId || data?.payoutRequestId } }),
-  BOOKING_CREATED: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
-  BOOKING_CONFIRMED: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
-  BOOKING_MODIFIED: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
-  DOCUMENT_EXPIRING: (data) => data?.supplierId ? { path: `/admin/suppliers/${data.supplierId}` } : { path: "/admin/suppliers" },
-  DOCUMENT_EXPIRED: (data) => data?.supplierId ? { path: `/admin/suppliers/${data.supplierId}` } : { path: "/admin/suppliers" },
-  REFUND_REQUEST: (data) => data?.disputeId ? { path: "/admin/payouts?tab=disputes", state: { disputeId: data.disputeId } } : { path: "/admin/payouts?tab=disputes" },
-  REFUND_CLAIM: (data) => data?.claimId ? { path: `/admin/payouts?tab=claims&claimId=${data.claimId}` } : { path: "/admin/payouts?tab=claims" },
-  PAYMENT_UPCOMING: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
-  PAYMENT_COLLECTED: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
-  PAYMENT_COLLECTION_FAILED: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
-  STRIPE_CUSTOMER_CREATE_FAILED: () => ({ path: "/admin/settings" }),
-  REFUND_NEEDS_ATTENTION: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/payouts?tab=disputes" },
-  SUPPLIER_CANCELLATION_REQUEST: (data) => data?.requestId ? { path: `/cancellations?request=${data.requestId}` } : { path: "/cancellations" },
-  SUPPLIER_CANCELLATION_DECIDED: (data) => data?.requestId ? { path: `/cancellations?request=${data.requestId}` } : { path: "/cancellations" },
-  SYSTEM_ALERT: (data) => data?.payoutMethodId ? { path: "/admin/payouts?tab=methods", state: { viewSupplierId: data.supplierId } } : data?.supplierId ? { path: `/admin/suppliers/${data.supplierId}` } : { path: "/admin" },
-  NEW_MESSAGE: (data) => {
-    if (!data?.conversationId) return null;
-    if (data.conversationType === 'SUPPLIER_CUSTOMER') return { path: "/admin/chat/customers" };
-    return { path: `/admin/chat/${data.chatType || "suppliers"}`, state: { conversationId: data.conversationId } };
-  },
-};
-
-const typeConfig: Record<string, { icon: React.ReactNode; color: string }> = {
-  BOOKING_CONFIRMED: { icon: <ShoppingBag className="h-3.5 w-3.5" />, color: "text-green-600 dark:text-green-400" },
-  BOOKING_MODIFIED: { icon: <ShoppingBag className="h-3.5 w-3.5" />, color: "text-indigo-600 dark:text-indigo-400" },
-  BOOKING_CANCELLED: { icon: <XCircle className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
-  BOOKING_CREATED: { icon: <ShoppingBag className="h-3.5 w-3.5" />, color: "text-blue-600 dark:text-blue-400" },
-  PAYMENT_RECEIVED: { icon: <CreditCard className="h-3.5 w-3.5" />, color: "text-green-600 dark:text-green-400" },
-  PAYMENT_UPCOMING: { icon: <CreditCard className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
-  PAYMENT_COLLECTED: { icon: <CreditCard className="h-3.5 w-3.5" />, color: "text-green-600 dark:text-green-400" },
-  PAYMENT_COLLECTION_FAILED: { icon: <XCircle className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
-  PAYOUT_NEEDS_APPROVAL: { icon: <Banknote className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
-  PAYOUT_COMPLETED: { icon: <Banknote className="h-3.5 w-3.5" />, color: "text-green-600 dark:text-green-400" },
-  PAYOUT_REQUEST_SUBMITTED: { icon: <Banknote className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
-  PAYOUT_REQUEST_APPROVED: { icon: <Banknote className="h-3.5 w-3.5" />, color: "text-green-600 dark:text-green-400" },
-  PAYOUT_REQUEST_REJECTED: { icon: <Banknote className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
-  REVIEW_RECEIVED: { icon: <Star className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
-  SUPPLIER_APPROVED: { icon: <UserCheck className="h-3.5 w-3.5" />, color: "text-green-600 dark:text-green-400" },
-  SUPPLIER_REJECTED: { icon: <UserX className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
-  NEW_SUPPLIER_APPLICATION: { icon: <UserCheck className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
-  SUPPLIER_STATUS_CHANGE: { icon: <UserCheck className="h-3.5 w-3.5" />, color: "text-blue-600 dark:text-blue-400" },
-  REVIEW_NEEDS_MODERATION: { icon: <MessageSquare className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
-  TOUR_SUBMITTED_FOR_REVIEW: { icon: <ClipboardCheck className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
-  SYSTEM_ALERT: { icon: <AlertTriangle className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
-  NEW_MESSAGE: { icon: <MessageSquare className="h-3.5 w-3.5" />, color: "text-green-600 dark:text-green-400" },
-  DOCUMENT_EXPIRING: { icon: <FileWarning className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
-  DOCUMENT_EXPIRED: { icon: <FileWarning className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
-  REFUND_REQUEST: { icon: <RefreshCw className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
-  REFUND_CLAIM: { icon: <RefreshCw className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
-  REFUND_NEEDS_ATTENTION: { icon: <RefreshCw className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
-  STRIPE_CUSTOMER_CREATE_FAILED: { icon: <AlertTriangle className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" },
-  SUPPLIER_CANCELLATION_REQUEST: { icon: <ShieldAlert className="h-3.5 w-3.5" />, color: "text-amber-600 dark:text-amber-400" },
-  SUPPLIER_CANCELLATION_DECIDED: { icon: <ShieldCheck className="h-3.5 w-3.5" />, color: "text-green-600 dark:text-green-400" },
-};
-
-function getTypeConfig(type: string, data?: Record<string, unknown>) {
-  // 24h escalation reminders carry `reminder: true` — render them hotter than
-  // the original request so a stuck queue is impossible to miss.
-  if (type === "SUPPLIER_CANCELLATION_REQUEST" && data?.reminder === true) {
-    return { icon: <ShieldAlert className="h-3.5 w-3.5" />, color: "text-red-500 dark:text-red-400" };
-  }
-  return typeConfig[type] || { icon: <Bell className="h-3.5 w-3.5" />, color: "text-text-secondary" };
-}
 
 export function NotificationBell() {
   const navigate = useNavigate();
@@ -115,7 +26,7 @@ export function NotificationBell() {
 
   const { data: dropdown, isLoading } = useQuery({
     queryKey: ["admin-notifications", "feed"],
-    queryFn: () => getNotifications(1, 20, true),
+    queryFn: () => getNotifications({ page: 1, limit: 20, unreadOnly: true }),
     enabled: open,
     refetchOnWindowFocus: false,
   });
@@ -124,21 +35,19 @@ export function NotificationBell() {
 
   const markRead = useMutation({
     mutationFn: markAsRead,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-notifications"] });
-    },
+    onSuccess: () => invalidateNotificationQueries(queryClient),
   });
 
   const markAllRead = useMutation({
     mutationFn: markAllAsRead,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-notifications"] });
-    },
+    onSuccess: () => invalidateNotificationQueries(queryClient),
   });
 
   useEffect(() => {
+    // The badge is a live surface: refresh it (and the page's cached copy) the
+    // moment a notification lands or the socket reconnects.
     const invalidate = () => {
-      queryClient.invalidateQueries({ queryKey: ["admin-notifications"] });
+      queryClient.invalidateQueries({ queryKey: [NOTIFICATION_FEED_ROOT] });
     };
     const cleanupNotification = onAdminNotification(invalidate);
     const cleanupConnect = onAdminSocketConnect(invalidate);
@@ -235,13 +144,14 @@ export function NotificationBell() {
               ) : (
                 <div className="divide-y divide-border-muted">
                   {notifications.map((n) => {
-                    const cfg = getTypeConfig(n.type, n.data);
+                    const cfg = getNotificationTypeConfig(n.type, n.data);
+                    const TypeIcon = cfg.icon;
                     return (
                       <button
                         key={n.id}
                         onClick={() => {
                           if (!n.read) markRead.mutate(n.id);
-                          const result = notificationRouteMap[n.type]?.(n.data);
+                          const result = resolveNotificationRoute(n.type, n.data);
                           if (result) {
                             setOpen(false);
                             navigate(result.path, { state: result.state });
@@ -253,7 +163,7 @@ export function NotificationBell() {
                         )}
                       >
                         <span className={cn("mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30", cfg.color)}>
-                          {cfg.icon}
+                          <TypeIcon className="h-3.5 w-3.5" />
                         </span>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
@@ -278,6 +188,14 @@ export function NotificationBell() {
               <p className="text-center text-[11px] text-text-tertiary">
                 {dropdown?.pagination?.unreadCount ?? 0} unread · {dropdown?.pagination?.totalCount ?? 0} total
               </p>
+              <Link
+                to="/admin/notifications"
+                onClick={() => setOpen(false)}
+                className="mt-1.5 flex items-center justify-center gap-1 text-xs font-medium text-green-600 hover:text-green-700 dark:text-green-400 dark:hover:text-green-300"
+              >
+                View all notifications
+                <ArrowRight className="h-3 w-3" />
+              </Link>
             </div>
           </motion.aside>
         </div>,

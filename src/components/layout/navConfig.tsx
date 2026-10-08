@@ -18,6 +18,7 @@ import {
   FileText,
   MessageSquare,
   ShieldAlert,
+  Bell,
 } from "lucide-react";
 
 export interface ChildItem {
@@ -30,7 +31,7 @@ export interface NavItem {
   label: string;
   path?: string;
   icon: React.ReactNode;
-  badgeKey?: "bookings" | "reviews" | "tours" | "cancellations";
+  badgeKey?: "bookings" | "reviews" | "tours" | "cancellations" | "notifications";
   keywords?: string[];
   children?: ChildItem[];
 }
@@ -62,6 +63,7 @@ export function getNavGroups(can: (key: string) => boolean): { group: string; it
   ].filter((i) => !i.children || i.children.length > 0);
 
   const managementItems: NavItem[] = [
+    ...(can('notifications.view') ? [{ label: "Notifications", path: "/admin/notifications", icon: <Bell className="h-4 w-4" />, badgeKey: "notifications" as const, keywords: ["alerts", "unread", "inbox", "activity", "updates"] }] : []),
     ...(can('bookings.view') ? [{ label: "Bookings", path: "/admin/bookings", icon: <ShoppingCart className="h-4 w-4" />, badgeKey: "bookings" as const, keywords: ["reservation", "orders"] }] : []),
     ...(can('bookings.view') || can('dashboard.*') ? [{ label: "Cancellations", path: "/admin/cancellations", icon: <ShieldAlert className="h-4 w-4" />, badgeKey: "cancellations" as const, keywords: ["approval", "refund", "supplier cancel"] }] : []),
     ...(can('suppliers.view') ? [{ label: "Suppliers", path: "/admin/suppliers", icon: <UserPlus className="h-4 w-4" />, keywords: ["vendors", "partners"] }] : []),

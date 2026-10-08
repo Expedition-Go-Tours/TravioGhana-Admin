@@ -3,73 +3,23 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Bell, CheckCheck, Users, Star, Banknote, ClipboardCheck } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { markAllAsRead } from "@/services/notificationService";
+import {
+  markAllAsRead,
+  invalidateNotificationQueries,
+  NOTIFICATION_OVERVIEW_ROOT,
+  type NotificationStats,
+} from "@/services/notificationService";
+import {
+  hasNotificationRoute,
+  notificationDotClass,
+  resolveNotificationRoute,
+} from "@/lib/notificationConfig";
 import { timeAgo, cn } from "@/lib/utils";
-
-export interface RecentNotification {
-  id: string;
-  type: string;
-  title: string;
-  message: string;
-  data?: Record<string, unknown>;
-  acknowledged: boolean;
-  createdAt: string;
-}
-
-export interface NotificationStats {
-  total: number;
-  unacknowledged: number;
-  byType: Array<{ type: string; _count: number }>;
-  recent: Array<RecentNotification>;
-}
 
 interface NotificationsCardProps {
   data?: NotificationStats;
   loading?: boolean;
 }
-
-const dotColors: Record<string, string> = {
-  NEW_SUPPLIER_APPLICATION: "bg-amber-400",
-  REVIEW_NEEDS_MODERATION: "bg-blue-400",
-  TOUR_SUBMITTED_FOR_REVIEW: "bg-amber-400",
-  PAYOUT_NEEDS_APPROVAL: "bg-emerald-400",
-  PAYOUT_PROCESSED: "bg-green-400",
-  PAYOUT_APPROVED: "bg-green-400",
-  PAYOUT_COMPLETED: "bg-green-400",
-  PAYOUT_REQUEST_SUBMITTED: "bg-emerald-400",
-  PAYOUT_REQUEST_APPROVED: "bg-green-400",
-  PAYOUT_REQUEST_REJECTED: "bg-red-400",
-  SUPPLIER_STATUS_CHANGE: "bg-violet-400",
-  SYSTEM_ALERT: "bg-red-400",
-  NEW_MESSAGE: "bg-cyan-400",
-};
-
-const dotColor = (type: string) => dotColors[type] || "bg-text-tertiary";
-
-const notificationRouteMap: Record<string, (data?: Record<string, unknown>) => { path: string; state?: Record<string, unknown> } | null> = {
-  NEW_SUPPLIER_APPLICATION: (d) => (d?.supplierId ? { path: `/admin/suppliers/${d.supplierId}` } : null),
-  SUPPLIER_STATUS_CHANGE: (d) => (d?.supplierId ? { path: `/admin/suppliers/${d.supplierId}` } : null),
-  REVIEW_NEEDS_MODERATION: (d) => (d?.reviewId ? { path: "/admin/reviews", state: { reviewId: d.reviewId } } : null),
-  TOUR_SUBMITTED_FOR_REVIEW: (d) => (d?.tourId ? { path: "/admin/tour-moderation", state: { tourId: d.tourId } } : null),
-  PAYOUT_NEEDS_APPROVAL: (d) => ({ path: "/admin/payouts", state: { payoutId: d?.payoutId || d?.payoutRequestId } }),
-  BOOKING_CREATED: (d) => (d?.bookingId ? { path: `/admin/bookings?bookingId=${d.bookingId}` } : { path: "/admin/bookings" }),
-  BOOKING_CONFIRMED: (d) => (d?.bookingId ? { path: `/admin/bookings?bookingId=${d.bookingId}` } : { path: "/admin/bookings" }),
-  BOOKING_MODIFIED: (d) => (d?.bookingId ? { path: `/admin/bookings?bookingId=${d.bookingId}` } : { path: "/admin/bookings" }),
-  DOCUMENT_EXPIRING: (d) => (d?.supplierId ? { path: `/admin/suppliers/${d.supplierId}` } : { path: "/admin/suppliers" }),
-  DOCUMENT_EXPIRED: (d) => (d?.supplierId ? { path: `/admin/suppliers/${d.supplierId}` } : { path: "/admin/suppliers" }),
-  REFUND_REQUEST: (d) => (d?.disputeId ? { path: "/admin/payouts?tab=disputes", state: { disputeId: d.disputeId } } : { path: "/admin/payouts?tab=disputes" }),
-  PAYMENT_UPCOMING: (d) => (d?.bookingId ? { path: `/admin/bookings?bookingId=${d.bookingId}` } : { path: "/admin/bookings" }),
-  PAYMENT_COLLECTED: (d) => (d?.bookingId ? { path: `/admin/bookings?bookingId=${d.bookingId}` } : { path: "/admin/bookings" }),
-  PAYMENT_COLLECTION_FAILED: (d) => (d?.bookingId ? { path: `/admin/bookings?bookingId=${d.bookingId}` } : { path: "/admin/bookings" }),
-  STRIPE_CUSTOMER_CREATE_FAILED: () => ({ path: "/admin/settings" }),
-  REFUND_NEEDS_ATTENTION: (d) => (d?.bookingId ? { path: `/admin/bookings?bookingId=${d.bookingId}` } : { path: "/admin/payouts?tab=disputes" }),
-  SYSTEM_ALERT: (d) => d?.payoutMethodId ? { path: "/admin/payouts?tab=methods", state: { viewSupplierId: d.supplierId } } : d?.supplierId ? { path: `/admin/suppliers/${d.supplierId}` } : { path: "/admin" },
-  NEW_MESSAGE: (d) => {
-    if (!d?.conversationId) return null;
-    if (d.conversationType === 'SUPPLIER_CUSTOMER') return { path: "/admin/chat/customers" };
-    return { path: `/admin/chat/${d.chatType || "suppliers"}`, state: { conversationId: d.conversationId } };
-  },
-};
 
 const statItems = [
   { type: "NEW_SUPPLIER_APPLICATION", label: "Apps", icon: Users, route: "/admin/suppliers" },
@@ -101,8 +51,8 @@ export function NotificationsCard({ data, loading }: NotificationsCardProps) {
   const markAllRead = useMutation({
     mutationFn: markAllAsRead,
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["admin", "notifications", "stats"] });
-      queryClient.invalidateQueries({ queryKey: ["admin-notifications"] });
+      queryClient.invalidateQueries({ queryKey: NOTIFICATION_OVERVIEW_ROOT });
+      invalidateNotificationQueries(queryClient);
     },
   });
 
@@ -209,16 +159,16 @@ export function NotificationsCard({ data, loading }: NotificationsCardProps) {
                   <button
                     key={n.id}
                     onClick={() => {
-                      const route = notificationRouteMap[n.type]?.(n.data);
+                      const route = resolveNotificationRoute(n.type, n.data);
                       if (route) navigate(route.path, { state: route.state });
                     }}
                     className={cn(
-                      "w-full flex items-center gap-3 py-2.5 text-left transition-colors cursor-pointer",
+                      "w-full flex items-center gap-3 py-2.5 text-left transition-colors",
                       "hover:bg-surface-muted -mx-5 px-5 rounded-lg",
-                      notificationRouteMap[n.type] ? "cursor-pointer" : "cursor-default"
+                      hasNotificationRoute(n.type, n.data) ? "cursor-pointer" : "cursor-default"
                     )}
                   >
-                    <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", dotColor(n.type))} />
+                    <span className={cn("h-1.5 w-1.5 rounded-full shrink-0", notificationDotClass(n.type))} />
                     <p
                       className={cn(
                         "text-sm flex-1 min-w-0 truncate",

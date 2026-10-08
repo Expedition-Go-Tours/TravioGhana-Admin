@@ -37,7 +37,8 @@ import { SparklineChart } from "@/components/shared/SparklineChart";
 import { BookingVolumeChart } from "./overview/BookingVolumeChart";
 import { RecentActivityPanel } from "./overview/RecentActivityPanel";
 import { TopSuppliers } from "./overview/TopSuppliers";
-import { NotificationsCard, type NotificationStats } from "./overview/NotificationsCard";
+import { NotificationsCard } from "./overview/NotificationsCard";
+import { getNotificationStats, NOTIFICATION_OVERVIEW_ROOT } from "@/services/notificationService";
 import { RecentBookingsTable } from "./overview/RecentBookingsTable";
 import styles from "./Overview.module.css";
 import api from "@/lib/axios";
@@ -220,11 +221,8 @@ export default function OverviewPage() {
 
   // Notification Stats
   const { data: notifStats, isLoading: notifStatsLoading } = useQuery({
-    queryKey: ["admin", "notifications", "stats"],
-    queryFn: async () => {
-      const res = await api.get("/admin/notifications/stats");
-      return res.data.data as NotificationStats;
-    },
+    queryKey: NOTIFICATION_OVERVIEW_ROOT,
+    queryFn: () => getNotificationStats(),
     enabled: can("notifications.view"),
   });
 
@@ -236,7 +234,7 @@ export default function OverviewPage() {
     const refetchSignups = () => queryClient.invalidateQueries({ queryKey: ["admin", "users", "new-signups"] });
     const refetchTodayBookings = () => queryClient.invalidateQueries({ queryKey: ["admin", "bookings", "today"] });
     const refetchRevenueTrend = () => queryClient.invalidateQueries({ queryKey: ["admin", "revenue-trend"] });
-    const refetchNotifStats = () => queryClient.invalidateQueries({ queryKey: ["admin", "notifications", "stats"] });
+    const refetchNotifStats = () => queryClient.invalidateQueries({ queryKey: NOTIFICATION_OVERVIEW_ROOT });
     const onBooking = () => { refetchOverview(); refetchTodayBookings(); refetchRevenueTrend(); refetchNotifStats(); };
     const onSignup = () => { refetchSignups(); refetchOverview(); };
     const onTourChange = () => refetchOverview();
