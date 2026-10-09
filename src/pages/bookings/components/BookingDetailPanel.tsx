@@ -314,6 +314,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
           </div>
           <button
             onClick={onClose}
+            aria-label="Close booking detail"
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-text-tertiary hover:text-text-primary hover:bg-surface-muted transition-colors"
           >
             <X className="h-4 w-4" />

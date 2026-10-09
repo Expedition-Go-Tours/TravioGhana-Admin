@@ -121,6 +121,7 @@ export default function BookingsPage() {
       toast.success(`Payment confirmed for #${confirmPayBooking?.bookingNumber}`);
       setConfirmPayBooking(null);
       setSelectedBooking(null);
+      setDeepLinkedBookingId(null);
     },
     onError: () => toast.error("Failed to confirm payment"),
   });
@@ -136,6 +137,7 @@ export default function BookingsPage() {
       toast.success(`Card charged for #${b?.bookingNumber || bookingId}`);
       setChargeNowBooking(null);
       setSelectedBooking(null);
+      setDeepLinkedBookingId(null);
     },
     // `AxiosError` is the actual shape react-query hands us here. Typing it
     // means `response.data.message` is checked rather than `any`-suppressed --
@@ -152,7 +154,12 @@ export default function BookingsPage() {
   const bookingIdFromUrl = searchParams.get("bookingId");
   const bookingId = bookingIdFromState || bookingIdFromUrl;
 
-  const [deepLinkHandled, setDeepLinkHandled] = useState(false);
+  // Which booking id the detail sidebar is showing because of a deep link
+  // (`?bookingId=` from a booking notification or a marked row). Tracking the
+  // id — instead of a one-shot "handled" flag — means every new deep link
+  // opens the sidebar: a repeat click while this page stays mounted (e.g. from
+  // the bell dropdown) and re-opening the same booking after closing it.
+  const [deepLinkedBookingId, setDeepLinkedBookingId] = useState<string | null>(null);
 
   const findInCaches = useCallback((id: string): Booking | undefined => {
     const recent = queryClient.getQueryData<Booking[]>(["admin", "bookings", "recent"]);
@@ -170,22 +177,24 @@ export default function BookingsPage() {
   }, [queryClient]);
 
   const cachedBooking = useMemo(() => {
-    if (!bookingId || deepLinkHandled) return undefined;
+    if (!bookingId || deepLinkedBookingId === bookingId) return undefined;
     return findInCaches(bookingId);
-  }, [bookingId, findInCaches, deepLinkHandled]);
+  }, [bookingId, findInCaches, deepLinkedBookingId]);
 
   const { data: fetchedBooking } = useQuery({
     queryKey: ["admin", "booking", bookingId],
     queryFn: () => api.get(`/admin/bookings/${bookingId}`).then((r) => r.data?.data as Booking),
-    enabled: !!bookingId && !cachedBooking,
+    enabled: !!bookingId && !cachedBooking && bookingId !== deepLinkedBookingId,
   });
 
   const deepLinkBooking = cachedBooking || fetchedBooking;
 
   useEffect(() => {
-    if (!deepLinkBooking || deepLinkHandled) return;
+    if (!bookingId) return;
+    if (deepLinkedBookingId === bookingId) return;
+    if (!deepLinkBooking) return;
     startTransition(() => {
-      setDeepLinkHandled(true);
+      setDeepLinkedBookingId(bookingId);
       setSelectedBooking(deepLinkBooking);
     });
 
@@ -197,7 +206,7 @@ export default function BookingsPage() {
       next.delete("bookingId");
       setSearchParams(next, { replace: true });
     }
-  }, [deepLinkBooking, deepLinkHandled, location.pathname, location.state?.bookingId, navigate, searchParams, setSearchParams]);
+  }, [bookingId, deepLinkBooking, deepLinkedBookingId, location.pathname, location.state?.bookingId, navigate, searchParams, setSearchParams]);
 
   return (
     <div className="space-y-4 md:space-y-5 w-full h-full flex flex-col">
@@ -524,6 +533,7 @@ export default function BookingsPage() {
             booking={selectedBooking}
             onClose={() => {
               setSelectedBooking(null);
+              setDeepLinkedBookingId(null);
               const next = new URLSearchParams(searchParams);
               next.delete("bookingId");
               setSearchParams(next, { replace: true });
@@ -536,6 +546,7 @@ export default function BookingsPage() {
             }}
             onViewCustomer={() => {
               setSelectedBooking(null);
+              setDeepLinkedBookingId(null);
             }}
           />
         )}
