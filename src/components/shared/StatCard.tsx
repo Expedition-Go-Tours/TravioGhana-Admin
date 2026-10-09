@@ -4,6 +4,7 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { fadeIn } from "@/lib/animations";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SparklineChart } from "./SparklineChart";
 
 type StatAccent = "emerald" | "blue" | "amber" | "red";
 
@@ -20,6 +21,10 @@ interface StatCardProps {
   icon: ReactNode;
   accent?: StatAccent;
   trend?: { value: number; isPositive: boolean };
+  /** Context for the trend chip — e.g. "vs prev. 30 days". */
+  trendNote?: string;
+  /** Lightweight history strip under the card content. */
+  sparkline?: { data?: number[]; color?: string };
   subtitle?: string;
   loading?: boolean;
   onClick?: () => void;
@@ -32,6 +37,8 @@ export function StatCard({
   icon,
   accent = "emerald",
   trend,
+  trendNote,
+  sparkline,
   subtitle,
   loading,
   onClick,
@@ -67,6 +74,7 @@ export function StatCard({
                   {trend.isPositive ? "+" : ""}{trend.value.toFixed(1)}%
                 </span>
               )}
+              {trendNote && <span className="text-[11px] text-text-tertiary">{trendNote}</span>}
               {subtitle && <span className="text-[11px] text-text-tertiary truncate">{subtitle}</span>}
             </div>
           )}
@@ -75,6 +83,11 @@ export function StatCard({
           {icon}
         </div>
       </div>
+      {sparkline?.data?.length ? (
+        <div className="mt-3 -mx-1">
+          <SparklineChart data={sparkline.data} color={sparkline.color} height={36} />
+        </div>
+      ) : null}
     </motion.div>
   );
 }
