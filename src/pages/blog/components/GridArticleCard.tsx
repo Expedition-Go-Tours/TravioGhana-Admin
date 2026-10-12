@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { MoreVertical, Edit, Trash2, ArrowUpDown, ArrowUpRight, BookOpen } from "lucide-react"
+import { MoreVertical, Edit, Trash2, ArrowUpDown, ArrowUpRight, BookOpen, ExternalLink } from "lucide-react"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -73,6 +73,20 @@ export function GridArticleCard({ article, onPreview, onEdit, onDelete, onToggle
                 <Edit className="h-4 w-4" />
                 Edit
               </DropdownMenuItem>
+              {article.status === "PUBLISHED" && (
+                <DropdownMenuItem
+                  onClick={() =>
+                    window.open(
+                      `https://www.travioghana.com/blog/${encodeURIComponent(article.slug)}`,
+                      "_blank",
+                      "noopener,noreferrer",
+                    )
+                  }
+                >
+                  <ExternalLink className="h-4 w-4" />
+                  View live
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={onToggleStatus}>
                 <ArrowUpDown className="h-4 w-4" />
                 {article.status === "PUBLISHED" ? "Unpublish" : "Publish"}
