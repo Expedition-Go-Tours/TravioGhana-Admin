@@ -1,9 +1,10 @@
 import axios, { AxiosError, type InternalAxiosRequestConfig } from "axios";
 import { toast } from "sonner";
 import { disconnectAdminSocket } from "@/lib/adminSocket";
+import { API_BASE_URL } from "@/lib/apiBase";
 
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "/api",
+  baseURL: API_BASE_URL,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
   // A dropped connection (e.g. a suspended background tab) must not hang
@@ -170,7 +171,8 @@ api.interceptors.response.use(
         originalRequest &&
         !originalRequest._retry &&
         !originalRequest.url?.includes("/auth/refresh") &&
-        !originalRequest.url?.includes("/auth/login")
+        !originalRequest.url?.includes("/auth/login") &&
+        !originalRequest.url?.includes("/auth/set-cookies")
       ) {
         if (isRefreshing) {
           return new Promise<void>((resolve, reject) => {

@@ -1,6 +1,7 @@
 import { useCallback, useMemo, type ReactNode } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import api from "@/lib/axios";
+import { API_BASE_URL } from "@/lib/apiBase";
 import { disconnectAdminSocket } from "@/lib/adminSocket";
 import { resetLoginRedirectGuard } from "@/lib/axios";
 import {
@@ -60,8 +61,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   const loginWithGoogle = useCallback(async () => {
-    const base = import.meta.env.VITE_API_URL || "/api";
-    window.location.href = `${base}/auth/google`;
+    const url = new URL(`${API_BASE_URL}/auth/google`, window.location.origin);
+    // Send the return origin explicitly. The backend validates it against
+    // ALLOWED_ORIGINS; relying on Referer lets privacy settings or a missing
+    // header fall back to the Africa CLIENT_URL.
+    url.searchParams.set("state", window.location.origin);
+    window.location.href = url.toString();
     // Full page navigation — this promise never resolves meaningfully.
     return false;
   }, []);

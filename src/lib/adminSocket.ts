@@ -1,9 +1,8 @@
 import { io, Socket } from "socket.io-client";
+import { API_BASE_URL } from "@/lib/apiBase";
 
 const SOCKET_URL = (() => {
-  const url = import.meta.env.VITE_API_URL;
-  if (!url) return "";
-  try { return new URL(url).origin; } catch { return ""; }
+  try { return new URL(API_BASE_URL, window.location.origin).origin; } catch { return ""; }
 })();
 const ADMIN_NOTIFICATION_EVENT = "admin-notification";
 
