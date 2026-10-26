@@ -50,6 +50,12 @@ export interface FieldDef {
   options?: string[];
   /** Optional friendly labels for `options` (falls back to the raw value). */
   optionLabels?: Record<string, string>;
+  /**
+   * Used when the server has no row for this key yet. Without it a `required`
+   * select renders empty and blocks saving every other setting, which is how a
+   * new flag would break the whole page on the day it ships.
+   */
+  defaultValue?: string;
   section: string;
   hint?: string;
   prefix?: string;

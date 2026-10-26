@@ -1,7 +1,7 @@
 import { useState, useCallback, useMemo, type ReactNode } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { HelpCircle, Globe, Percent, CalendarClock } from "lucide-react";
+import { HelpCircle, Globe, Percent, CalendarClock, CreditCard } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -54,18 +54,80 @@ const FIELDS: FieldDef[] = [
   { key: "booking.max_advance_days", label: "Max Advance Booking (days)", type: "number", required: true, min: 1, section: "Booking Rules" },
   { key: "booking.auto_cancel_hours", label: "Auto-Cancel After (hours)", type: "number", required: true, min: 0, section: "Booking Rules" },
   { key: "booking.max_travelers", label: "Max Travelers Per Booking", type: "number", required: true, min: 1, section: "Booking Rules" },
+
+  // ── Hosted payment links ────────────────────────────────────────────────
+  // Mirrors `paymentLinkService.FLAGS` in the backend. The runtime treats a
+  // missing row as off, so `defaultValue` shows the truth on first load instead
+  // of an empty select.
+  {
+    key: "feature.payLaterPaymentAttempts.ghana",
+    label: "Hosted payment links",
+    type: "select",
+    required: true,
+    options: ["true", "false"],
+    optionLabels: { true: "On", false: "Off" },
+    defaultValue: "false",
+    section: "Payment links",
+    hint: "Master switch for hosted Stripe Checkout on pay-later bookings. Customer “Pay now”, supplier links and automatic recovery all depend on it.",
+  },
+  {
+    key: "feature.supplierPaymentLinks.ghana",
+    label: "Supplier-sent links",
+    type: "select",
+    required: true,
+    options: ["true", "false"],
+    optionLabels: { true: "On", false: "Off" },
+    defaultValue: "false",
+    section: "Payment links",
+    hint: "Lets a supplier send, resend or regenerate a secure link from the booking drawer. Requires hosted payment links.",
+  },
+  {
+    key: "feature.payLaterPaymentRecovery.ghana",
+    label: "Automatic recovery",
+    type: "select",
+    required: true,
+    options: ["true", "false"],
+    optionLabels: { true: "On", false: "Off" },
+    defaultValue: "false",
+    section: "Payment links",
+    hint: "Emails a link automatically after a failed deferred charge, at most twice per booking. Requires hosted payment links.",
+  },
+  {
+    key: "feature.paymentLinkChat.ghana",
+    label: "Post links in chat",
+    type: "select",
+    required: true,
+    options: ["true", "false"],
+    optionLabels: { true: "On", false: "Off" },
+    defaultValue: "false",
+    section: "Payment links",
+    hint: "Adds “Also post the link in chat” to the payment-link actions. Requires supplier-sent links.",
+  },
+];
+
+const PAYMENT_LINK_SECTION = "Payment links";
+const PAYMENT_LINK_MASTER_KEY = "feature.payLaterPaymentAttempts.ghana";
+const PAYMENT_LINK_DEPENDENT_KEYS = [
+  "feature.supplierPaymentLinks.ghana",
+  "feature.payLaterPaymentRecovery.ghana",
+  "feature.paymentLinkChat.ghana",
 ];
 
 const SECTION_LABELS: Record<string, { title: string; desc: string }> = {
   Platform: { title: "Platform", desc: "General platform information and regional settings" },
   "Commission & Fees": { title: "Commission & Fees", desc: "Platform revenue and payout configuration" },
   "Booking Rules": { title: "Booking Rules", desc: "Default constraints for new bookings" },
+  "Payment links": {
+    title: "Payment links",
+    desc: "Hosted Stripe Checkout for pay-later bookings. Changes take effect within a minute; links already sent stay payable until they expire. Automatic recovery emails customers without supplier action.",
+  },
 };
 
 const SECTION_ICONS: Record<string, ReactNode> = {
   Platform: <Globe className="h-4 w-4" />,
   "Commission & Fees": <Percent className="h-4 w-4" />,
   "Booking Rules": <CalendarClock className="h-4 w-4" />,
+  "Payment links": <CreditCard className="h-4 w-4" />,
 };
 
 export function GeneralTab() {
@@ -98,7 +160,7 @@ export function GeneralTab() {
       flattened[key] = String(val ?? "");
     }
     for (const f of FIELDS) {
-      if (!(f.key in flattened)) flattened[f.key] = "";
+      if (!flattened[f.key]) flattened[f.key] = f.defaultValue ?? "";
     }
     setForm(flattened);
     setOriginal(flattened);
@@ -184,6 +246,13 @@ export function GeneralTab() {
               icon={SECTION_ICONS[section]}
               errorCount={sectionErrors}
             >
+              {section === PAYMENT_LINK_SECTION &&
+                form[PAYMENT_LINK_MASTER_KEY] !== "true" &&
+                PAYMENT_LINK_DEPENDENT_KEYS.some((key) => form[key] === "true") && (
+                  <div className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+                    These options do nothing until <strong>Hosted payment links</strong> is on.
+                  </div>
+                )}
               <div className="space-y-5">
                 {sectionFields.map((field) => {
                   const value = form[field.key] ?? "";
