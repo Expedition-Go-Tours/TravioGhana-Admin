@@ -27,6 +27,7 @@ describe("getNavGroups", () => {
     expect(operations?.items.map((item) => item.label)).toEqual([
       "Bookings",
       "Cancellations",
+      "Refund requests",
       "Suppliers",
       "Quality Control",
     ]);
@@ -41,7 +42,11 @@ describe("getNavGroups", () => {
 
     expect(groups).toHaveLength(1);
     expect(groups[0].group).toBe("Operations");
-    expect(groups[0].items.map((item) => item.label)).toEqual(["Bookings", "Cancellations"]);
+    expect(groups[0].items.map((item) => item.label)).toEqual([
+      "Bookings",
+      "Cancellations",
+      "Refund requests",
+    ]);
   });
 
   it("moves messages into Engagement instead of scattering them", () => {

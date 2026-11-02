@@ -27,6 +27,7 @@ import PayoutsPage from "@/pages/finance/PayoutsPage";
 import ReviewModerationPage from "@/pages/reviews/ReviewModeration";
 import BookingsPage from "@/pages/bookings/BookingsPage";
 import CancellationsPage from "@/pages/cancellations/CancellationsPage";
+import RefundRequestsPage from "@/pages/refund-requests/RefundRequestsPage";
 import ChatPage from "@/pages/chat/ChatPage";
 import SettingsPage from "@/pages/settings/SettingsPage";
 import ActivityLogPage from "@/pages/activity/ActivityLogPage";
@@ -105,6 +106,7 @@ const router = createBrowserRouter([
       { path: "payout-methods", element: <PermissionRoute permission="payout-methods.view"><Navigate to="/admin/payouts?tab=methods" replace /></PermissionRoute> },
       { path: "bookings", element: <PermissionRoute permission="bookings.view"><BookingsPage /></PermissionRoute> },
       { path: "cancellations", element: <PermissionRoute permission={["bookings.view", "dashboard.*"]}><CancellationsPage /></PermissionRoute> },
+      { path: "refund-requests", element: <PermissionRoute permission={["bookings.view", "dashboard.*"]}><RefundRequestsPage /></PermissionRoute> },
       { path: "reviews", element: <PermissionRoute permission="reviews.view"><ReviewModerationPage /></PermissionRoute> },
       { path: "chat/suppliers", element: <PermissionRoute permission="chat.suppliers"><ChatPage /></PermissionRoute> },
       { path: "chat/customers", element: <PermissionRoute permission="chat.customers"><ChatPage /></PermissionRoute> },

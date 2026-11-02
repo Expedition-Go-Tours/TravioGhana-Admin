@@ -15,12 +15,12 @@ import {
   FileText,
   MessageSquare,
   ShieldAlert,
+  Wallet,
   Bell,
   Briefcase,
   Compass,
   LineChart,
   MessagesSquare,
-  Wallet,
   Settings2,
   History,
   Settings,
@@ -59,6 +59,9 @@ export function getNavGroups(can: (key: string) => boolean): NavGroup[] {
           : []),
         ...(can("bookings.view") || can("dashboard.*")
           ? [{ label: "Cancellations", path: "/admin/cancellations", icon: <ShieldAlert className="h-4 w-4" />, badgeKey: "cancellations" as const, keywords: ["approval", "refund", "supplier cancel"] }]
+          : []),
+        ...(can("bookings.view") || can("dashboard.*")
+          ? [{ label: "Refund requests", path: "/admin/refund-requests", icon: <Wallet className="h-4 w-4" />, keywords: ["supplier refund", "balance", "approval"] }]
           : []),
         ...(can("suppliers.view")
           ? [{ label: "Suppliers", path: "/admin/suppliers", icon: <UserPlus className="h-4 w-4" />, keywords: ["vendors", "partners"] }]
