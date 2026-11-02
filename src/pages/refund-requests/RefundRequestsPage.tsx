@@ -235,7 +235,7 @@ export default function RefundRequestsPage() {
     {
       key: "booking",
       header: "Booking",
-      hideBelow: "md",
+      hideBelow: "lg",
       render: (row) => (
         <div className="min-w-0">
           <p className="truncate text-[13px] font-medium text-text-primary">
