@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { cn, timeAgo } from "@/lib/utils";
 import { MailOpen, Inbox, Eye, Building2, Headphones } from "lucide-react";
 import type { Conversation } from "@/services/chatService";
@@ -19,15 +18,15 @@ const accent = (type: "suppliers" | "customers" | "expedition") => {
   const isExp = type === "expedition";
   return {
     bg: isSup ? "green" : isExp ? "purple" : "blue",
-    bg50: isSup ? "bg-green-50" : isExp ? "bg-purple-50" : "bg-blue-50",
-    bg50slash: isSup ? "bg-green-50/70" : isExp ? "bg-purple-50/70" : "bg-blue-50/70",
-    bg100: isSup ? "bg-green-100/60" : isExp ? "bg-purple-100/60" : "bg-blue-100/60",
-    text: isSup ? "text-green-600" : isExp ? "text-purple-600" : "text-blue-600",
-    text700: isSup ? "text-green-700" : isExp ? "text-purple-700" : "text-blue-700",
-    text400: isSup ? "text-green-400" : isExp ? "text-purple-400" : "text-blue-400",
-    ring: isSup ? "focus-visible:ring-green-400" : isExp ? "focus-visible:ring-purple-400" : "focus-visible:ring-blue-400",
-    gradient: isSup ? "bg-green-500" : isExp ? "bg-purple-500" : "bg-status-approved",
-    badge: isSup ? "bg-green-600" : isExp ? "bg-purple-600" : "bg-blue-600",
+    bg50: isSup ? "bg-primary/10" : isExp ? "bg-status-processing/10" : "bg-status-approved/10",
+    bg50slash: isSup ? "bg-primary/10" : isExp ? "bg-status-processing/10" : "bg-status-approved/10",
+    bg100: isSup ? "bg-primary/10" : isExp ? "bg-status-processing/10" : "bg-status-approved/10",
+    text: isSup ? "text-primary" : isExp ? "text-status-processing-text" : "text-status-approved-text",
+    text700: isSup ? "text-primary" : isExp ? "text-status-processing-text" : "text-status-approved-text",
+    text400: isSup ? "text-primary" : isExp ? "text-status-processing-text" : "text-status-approved-text",
+    ring: isSup ? "focus-visible:ring-primary/40" : isExp ? "focus-visible:ring-status-processing/30" : "focus-visible:ring-status-approved/30",
+    gradient: isSup ? "bg-primary" : isExp ? "bg-status-processing" : "bg-status-approved",
+    badge: isSup ? "bg-primary" : isExp ? "bg-status-processing" : "bg-status-approved",
   };
 };
 
@@ -67,10 +66,10 @@ export function ConversationList({
   return (
     <div className="flex flex-col h-full">
       <div className="px-4 pt-3 pb-2">
-        <div className={cn("relative flex rounded-lg p-0.5", a.bg50slash)}>
+        <div className={cn("relative flex rounded-xl p-0.5", a.bg50slash)}>
           <div
             className={cn(
-              "absolute inset-y-0.5 z-0 rounded-md bg-surface-base shadow-sm ring-1 ring-black/5 transition-all duration-200 ease-out",
+              "absolute inset-y-0.5 z-0 rounded-md bg-surface-base ring-1 ring-black/5 transition-colors duration-200 ease-out",
               tab === "all" ? "left-0.5 right-1/2" : "left-1/2 right-0.5"
             )}
           />
@@ -104,7 +103,7 @@ export function ConversationList({
               Unread
             </span>
             {unreadCount > 0 && (
-              <span className={cn("flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-bold leading-none text-white shadow-sm", a.badge)}>
+              <span className={cn("flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold leading-none text-white ", a.badge)}>
                 {unreadCount}
               </span>
             )}
@@ -172,12 +171,12 @@ export function ConversationList({
                   key={conv.id}
                   onClick={() => onSelect(conv)}
                   className={cn(
-                    "flex w-full items-start gap-3 px-4 py-3 text-left transition-all duration-200 focus-visible:outline-none hover:shadow-sm",
+                    "flex w-full items-start gap-3 px-4 py-3 text-left transition-colors focus-visible:outline-none",
                     a.ring,
                     selectedId === conv.id && a.bg50
                   )}
                 >
-                  <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br text-sm font-bold text-white", a.gradient)}>
+                  <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white", a.gradient)}>
                     <span>{name.charAt(0).toUpperCase()}</span>
                     {otherUser?.photoURL && (
                       <OptimizedImage
@@ -199,8 +198,8 @@ export function ConversationList({
                         <span className={cn(
                           "shrink-0 rounded-full px-1.5 py-[1px] text-[10px] font-medium leading-normal",
                           roleLabel === "Supplier"
-                            ? "bg-blue-50 text-blue-600"
-                            : "bg-purple-50 text-purple-600"
+                            ? "bg-status-approved/10 text-status-approved-text"
+                            : "bg-status-processing/10 text-status-processing-text"
                         )}>
                           {roleLabel}
                         </span>
@@ -217,12 +216,9 @@ export function ConversationList({
                           <span className="inline-flex items-center gap-1">
                             <span>typing</span>
                             {[0, 1, 2].map((i) => (
-                              <motion.span
+                              <span
                                 key={i}
-                                className={cn("h-1.5 w-1.5 rounded-full", a.badge)}
-                                animate={{ y: [0, -3, 0] }}
-                                transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15, ease: "easeInOut" }}
-                              />
+                                className={cn("h-1.5 w-1.5 rounded-full", a.badge)} />
                             ))}
                           </span>
                         </span>
@@ -234,7 +230,7 @@ export function ConversationList({
                         </span>
                       )}
                       {conv.unreadCount > 0 && (
-                        <span className={cn("flex h-4 min-w-[16px] shrink-0 items-center justify-center rounded-full px-1 text-[10px] font-bold text-white", a.badge)}>
+                        <span className={cn("flex h-4 min-w-[16px] shrink-0 items-center justify-center rounded-full px-1 text-[10px] font-semibold text-white", a.badge)}>
                           {conv.unreadCount}
                         </span>
                       )}

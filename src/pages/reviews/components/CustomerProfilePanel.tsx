@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 import {
   X,
   Star,
@@ -75,7 +74,7 @@ export function CustomerProfilePanel({ customerId, onClose }: CustomerProfilePan
       {[1, 2, 3, 4, 5].map((s) => (
         <Star
           key={s}
-          className={cn("h-3 w-3", s <= rating ? "fill-amber-400 text-amber-400" : "text-text-tertiary")}
+          className={cn("h-3 w-3", s <= rating ? "fill-status-pending text-status-pending-text" : "text-text-tertiary")}
         />
       ))}
     </div>
@@ -83,21 +82,11 @@ export function CustomerProfilePanel({ customerId, onClose }: CustomerProfilePan
 
   return (
     <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
+      <div 
         className="fixed inset-0 z-40 bg-black/10"
-        onClick={onClose}
-      />
-      <motion.div
-        initial={{ x: "100%" }}
-        animate={{ x: 0 }}
-        exit={{ x: "100%" }}
-        transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        className="fixed right-0 top-0 z-50 h-full w-full sm:w-[420px] bg-surface-base border-l border-border shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col"
-      >
+        onClick={onClose} />
+      <div 
+        className="fixed right-0 top-0 z-50 h-full w-full sm:w-[420px] bg-surface-base border-l border-border shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h2 className="text-sm font-semibold text-text-primary">Customer Profile</h2>
           <button
@@ -129,7 +118,7 @@ export function CustomerProfilePanel({ customerId, onClose }: CustomerProfilePan
           ) : user ? (
             <div className="p-5 space-y-5">
               <div className="flex items-start gap-4">
-                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-lg font-bold text-primary ring-2 ring-primary/10">
+                <div className="relative flex h-14 w-14 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-lg font-semibold text-primary ring-2 ring-primary/10">
                   {user.photoURL ? (
                     <OptimizedImage src={user.photoURL} alt="" width={56} className="absolute inset-0 h-full w-full object-cover" />
                   ) : null}
@@ -173,18 +162,18 @@ export function CustomerProfilePanel({ customerId, onClose }: CustomerProfilePan
               {reviewStats && (
                 <div className="grid grid-cols-3 gap-3">
                   <div className="rounded-xl bg-surface-muted border border-border p-3 text-center">
-                    <p className="text-lg font-bold text-text-primary">{reviewStats.totalReviews}</p>
+                    <p className="text-lg font-semibold text-text-primary">{reviewStats.totalReviews}</p>
                     <p className="text-[11px] text-text-secondary mt-0.5">Reviews</p>
                   </div>
                   <div className="rounded-xl bg-surface-muted border border-border p-3 text-center">
-                    <div className="flex justify-center">{reviewStats.averageRating ? renderStars(Math.round(reviewStats.averageRating)) : <span className="text-lg font-bold text-text-tertiary">—</span>}</div>
+                    <div className="flex justify-center">{reviewStats.averageRating ? renderStars(Math.round(reviewStats.averageRating)) : <span className="text-lg font-semibold text-text-tertiary">—</span>}</div>
                     <p className="text-[11px] text-text-secondary mt-1">Avg Rating</p>
                     {reviewStats.averageRating && (
                       <p className="text-[10px] text-text-tertiary">{reviewStats.averageRating}/5</p>
                     )}
                   </div>
                   <div className="rounded-xl bg-surface-muted border border-border p-3 text-center">
-                    <p className="text-lg font-bold text-text-primary">{bookings.length > 0 ? data?.bookings?.length || 0 : 0}</p>
+                    <p className="text-lg font-semibold text-text-primary">{bookings.length > 0 ? data?.bookings?.length || 0 : 0}</p>
                     <p className="text-[11px] text-text-secondary mt-0.5">Bookings</p>
                   </div>
                 </div>
@@ -222,7 +211,7 @@ export function CustomerProfilePanel({ customerId, onClose }: CustomerProfilePan
               {activeTab === "reviews" && recentReviews.length > 0 && (
                 <div className="space-y-2">
                   {recentReviews.map((review) => (
-                    <div key={review.id} className="rounded-lg border border-border bg-surface-base p-3 space-y-1.5">
+                    <div key={review.id} className="rounded-xl border border-border bg-surface-base p-3 space-y-1.5">
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-2">
                           {renderStars(review.rating || 0)}
@@ -255,9 +244,9 @@ export function CustomerProfilePanel({ customerId, onClose }: CustomerProfilePan
               {activeTab === "bookings" && bookings.length > 0 && (
                 <div className="space-y-2">
                   {bookings.map((booking) => (
-                    <div key={booking.id} className="rounded-lg border border-border bg-surface-base p-3 space-y-2">
+                    <div key={booking.id} className="rounded-xl border border-border bg-surface-base p-3 space-y-2">
                       <div className="flex items-start gap-3">
-                        <div className="w-10 h-10 rounded-lg shrink-0 overflow-hidden bg-surface-muted border border-border">
+                        <div className="w-10 h-10 rounded-xl shrink-0 overflow-hidden bg-surface-muted border border-border">
                           {booking.tour?.coverPhoto ? (
                             <OptimizedImage src={booking.tour.coverPhoto} alt="" width={40} className="w-full h-full object-cover" />
                           ) : (
@@ -333,7 +322,7 @@ export function CustomerProfilePanel({ customerId, onClose }: CustomerProfilePan
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
     </>
   );
 }

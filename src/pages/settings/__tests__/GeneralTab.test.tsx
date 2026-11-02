@@ -80,16 +80,16 @@ describe("GeneralTab — payment links", () => {
     renderWithProviders(<GeneralTab />);
 
     for (const label of PAYMENT_LINK_LABELS) {
-      const trigger = await screen.findByLabelText(new RegExp(label, "i"));
-      expect(trigger).toBeInTheDocument();
+      const toggle = await screen.findByRole("switch", { name: new RegExp(label, "i") });
+      expect(toggle).toBeInTheDocument();
       // Off is the runtime default for a missing row; the switch must say so
       // rather than rendering blank.
-      expect(trigger).toHaveTextContent("Off");
+      expect(toggle).toHaveAttribute("aria-checked", "false");
     }
 
     // Missing keys are defaulted, so nothing is dirty and no required-field
     // error blocks the rest of the page.
-    expect(screen.getByText(/all settings saved/i)).toBeInTheDocument();
+    expect(screen.getByText(/all changes saved/i)).toBeInTheDocument();
     expect(screen.queryByText(/is required/i)).not.toBeInTheDocument();
   });
 
@@ -107,20 +107,43 @@ describe("GeneralTab — payment links", () => {
     expect(body.settings).toEqual({ "platform.name": "Travio Ghana Ltd" });
   });
 
-  it("writes only the switch that changed, and warns while the master is off", async () => {
+  it("writes only the switch that changed", async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      data: {
+        data: {
+          ...SERVER_SETTINGS,
+          "feature.payLaterPaymentAttempts.ghana": "true",
+        },
+      },
+    });
+
     const user = userEvent.setup();
     renderWithProviders(<GeneralTab />);
 
-    await user.click(await screen.findByLabelText(/supplier-sent links/i));
-    await user.click(await screen.findByRole("option", { name: "On" }));
-
-    // Order matters at runtime: supplier links do nothing without the master.
-    expect(screen.getByText(/do nothing until/i)).toBeInTheDocument();
+    const supplier = await screen.findByRole("switch", { name: /supplier-sent links/i });
+    await user.click(supplier);
+    expect(supplier).toHaveAttribute("aria-checked", "true");
 
     await user.click(screen.getByRole("button", { name: /save changes/i }));
 
     await waitFor(() => expect(api.put).toHaveBeenCalledTimes(1));
     const body = vi.mocked(api.put).mock.calls[0][1] as { settings: Record<string, string> };
     expect(body.settings).toEqual({ "feature.supplierPaymentLinks.ghana": "true" });
+  });
+
+  it("warns and locks dependent switches while the master flag is off", async () => {
+    vi.mocked(api.get).mockResolvedValue({
+      data: {
+        data: {
+          ...SERVER_SETTINGS,
+          "feature.supplierPaymentLinks.ghana": "true",
+        },
+      },
+    });
+
+    renderWithProviders(<GeneralTab />);
+
+    expect(await screen.findByText(/do nothing until/i)).toBeInTheDocument();
+    expect(await screen.findByRole("switch", { name: /supplier-sent links/i })).toBeDisabled();
   });
 });

@@ -91,36 +91,36 @@ export function hasNotificationRoute(type: string, data?: Record<string, unknown
 type TypeStyle = { icon: LucideIcon; color: string };
 
 const notificationTypeConfig: Record<string, TypeStyle> = {
-  BOOKING_CONFIRMED: { icon: ShoppingCart, color: "text-green-600 dark:text-green-400" },
-  BOOKING_MODIFIED: { icon: ShoppingCart, color: "text-indigo-600 dark:text-indigo-400" },
-  BOOKING_CANCELLED: { icon: XCircle, color: "text-red-500 dark:text-red-400" },
-  BOOKING_CREATED: { icon: ShoppingCart, color: "text-blue-600 dark:text-blue-400" },
-  PAYMENT_RECEIVED: { icon: CreditCard, color: "text-green-600 dark:text-green-400" },
-  PAYMENT_UPCOMING: { icon: CreditCard, color: "text-amber-600 dark:text-amber-400" },
-  PAYMENT_COLLECTED: { icon: CreditCard, color: "text-green-600 dark:text-green-400" },
-  PAYMENT_COLLECTION_FAILED: { icon: XCircle, color: "text-red-500 dark:text-red-400" },
-  PAYOUT_NEEDS_APPROVAL: { icon: Banknote, color: "text-amber-600 dark:text-amber-400" },
-  PAYOUT_COMPLETED: { icon: Banknote, color: "text-green-600 dark:text-green-400" },
-  PAYOUT_REQUEST_SUBMITTED: { icon: Banknote, color: "text-amber-600 dark:text-amber-400" },
-  PAYOUT_REQUEST_APPROVED: { icon: Banknote, color: "text-green-600 dark:text-green-400" },
-  PAYOUT_REQUEST_REJECTED: { icon: Banknote, color: "text-red-500 dark:text-red-400" },
-  REVIEW_RECEIVED: { icon: Star, color: "text-amber-600 dark:text-amber-400" },
-  SUPPLIER_APPROVED: { icon: UserCheck, color: "text-green-600 dark:text-green-400" },
-  SUPPLIER_REJECTED: { icon: UserX, color: "text-red-500 dark:text-red-400" },
-  NEW_SUPPLIER_APPLICATION: { icon: UserCheck, color: "text-amber-600 dark:text-amber-400" },
-  SUPPLIER_STATUS_CHANGE: { icon: UserCheck, color: "text-blue-600 dark:text-blue-400" },
-  REVIEW_NEEDS_MODERATION: { icon: MessageSquare, color: "text-amber-600 dark:text-amber-400" },
-  TOUR_SUBMITTED_FOR_REVIEW: { icon: ClipboardCheck, color: "text-amber-600 dark:text-amber-400" },
-  SYSTEM_ALERT: { icon: AlertTriangle, color: "text-red-500 dark:text-red-400" },
-  NEW_MESSAGE: { icon: MessageSquare, color: "text-green-600 dark:text-green-400" },
-  DOCUMENT_EXPIRING: { icon: FileWarning, color: "text-amber-600 dark:text-amber-400" },
-  DOCUMENT_EXPIRED: { icon: FileWarning, color: "text-red-500 dark:text-red-400" },
-  REFUND_REQUEST: { icon: RefreshCw, color: "text-amber-600 dark:text-amber-400" },
-  REFUND_CLAIM: { icon: RefreshCw, color: "text-amber-600 dark:text-amber-400" },
-  REFUND_NEEDS_ATTENTION: { icon: RefreshCw, color: "text-red-500 dark:text-red-400" },
-  STRIPE_CUSTOMER_CREATE_FAILED: { icon: AlertTriangle, color: "text-red-500 dark:text-red-400" },
-  SUPPLIER_CANCELLATION_REQUEST: { icon: ShieldAlert, color: "text-amber-600 dark:text-amber-400" },
-  SUPPLIER_CANCELLATION_DECIDED: { icon: ShieldCheck, color: "text-green-600 dark:text-green-400" },
+  BOOKING_CONFIRMED: { icon: ShoppingCart, color: "text-primary dark:text-primary" },
+  BOOKING_MODIFIED: { icon: ShoppingCart, color: "text-primary dark:text-primary" },
+  BOOKING_CANCELLED: { icon: XCircle, color: "text-status-rejected-text dark:text-status-rejected-text" },
+  BOOKING_CREATED: { icon: ShoppingCart, color: "text-status-approved-text dark:text-status-approved-text" },
+  PAYMENT_RECEIVED: { icon: CreditCard, color: "text-primary dark:text-primary" },
+  PAYMENT_UPCOMING: { icon: CreditCard, color: "text-status-pending-text dark:text-status-pending-text" },
+  PAYMENT_COLLECTED: { icon: CreditCard, color: "text-primary dark:text-primary" },
+  PAYMENT_COLLECTION_FAILED: { icon: XCircle, color: "text-status-rejected-text dark:text-status-rejected-text" },
+  PAYOUT_NEEDS_APPROVAL: { icon: Banknote, color: "text-status-pending-text dark:text-status-pending-text" },
+  PAYOUT_COMPLETED: { icon: Banknote, color: "text-primary dark:text-primary" },
+  PAYOUT_REQUEST_SUBMITTED: { icon: Banknote, color: "text-status-pending-text dark:text-status-pending-text" },
+  PAYOUT_REQUEST_APPROVED: { icon: Banknote, color: "text-primary dark:text-primary" },
+  PAYOUT_REQUEST_REJECTED: { icon: Banknote, color: "text-status-rejected-text dark:text-status-rejected-text" },
+  REVIEW_RECEIVED: { icon: Star, color: "text-status-pending-text dark:text-status-pending-text" },
+  SUPPLIER_APPROVED: { icon: UserCheck, color: "text-primary dark:text-primary" },
+  SUPPLIER_REJECTED: { icon: UserX, color: "text-status-rejected-text dark:text-status-rejected-text" },
+  NEW_SUPPLIER_APPLICATION: { icon: UserCheck, color: "text-status-pending-text dark:text-status-pending-text" },
+  SUPPLIER_STATUS_CHANGE: { icon: UserCheck, color: "text-status-approved-text dark:text-status-approved-text" },
+  REVIEW_NEEDS_MODERATION: { icon: MessageSquare, color: "text-status-pending-text dark:text-status-pending-text" },
+  TOUR_SUBMITTED_FOR_REVIEW: { icon: ClipboardCheck, color: "text-status-pending-text dark:text-status-pending-text" },
+  SYSTEM_ALERT: { icon: AlertTriangle, color: "text-status-rejected-text dark:text-status-rejected-text" },
+  NEW_MESSAGE: { icon: MessageSquare, color: "text-primary dark:text-primary" },
+  DOCUMENT_EXPIRING: { icon: FileWarning, color: "text-status-pending-text dark:text-status-pending-text" },
+  DOCUMENT_EXPIRED: { icon: FileWarning, color: "text-status-rejected-text dark:text-status-rejected-text" },
+  REFUND_REQUEST: { icon: RefreshCw, color: "text-status-pending-text dark:text-status-pending-text" },
+  REFUND_CLAIM: { icon: RefreshCw, color: "text-status-pending-text dark:text-status-pending-text" },
+  REFUND_NEEDS_ATTENTION: { icon: RefreshCw, color: "text-status-rejected-text dark:text-status-rejected-text" },
+  STRIPE_CUSTOMER_CREATE_FAILED: { icon: AlertTriangle, color: "text-status-rejected-text dark:text-status-rejected-text" },
+  SUPPLIER_CANCELLATION_REQUEST: { icon: ShieldAlert, color: "text-status-pending-text dark:text-status-pending-text" },
+  SUPPLIER_CANCELLATION_DECIDED: { icon: ShieldCheck, color: "text-primary dark:text-primary" },
 };
 
 const FALLBACK_STYLE: TypeStyle = { icon: Bell, color: "text-text-secondary" };
@@ -139,23 +139,23 @@ export function getNotificationTypeConfig(
   // 24h escalation reminders carry `reminder: true` — render them hotter than
   // the original request so a stuck queue is impossible to miss.
   if (type === "SUPPLIER_CANCELLATION_REQUEST" && data?.reminder === true) {
-    return { icon: ShieldAlert, color: "text-red-500 dark:text-red-400" };
+    return { icon: ShieldAlert, color: "text-status-rejected-text dark:text-status-rejected-text" };
   }
   return notificationTypeConfig[type] ?? FALLBACK_STYLE;
 }
 
 /** Classes for the icon's tinted circle, shared by the bell and the page. */
 export const TYPE_ICON_BG_CLASS =
-  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-green-100 dark:bg-green-900/30";
+  "flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 dark:bg-primary/10";
 
 /** Dot colour for a compact list row, keyed by category so it cannot drift per type. */
 const CATEGORY_DOT_CLASS: Record<NotificationCategoryKey, string> = {
-  bookings: "bg-blue-400",
-  payments: "bg-emerald-400",
-  suppliers: "bg-violet-400",
-  content: "bg-amber-400",
-  messages: "bg-cyan-400",
-  system: "bg-red-400",
+  bookings: "bg-status-approved",
+  payments: "bg-primary",
+  suppliers: "bg-status-processing",
+  content: "bg-status-pending",
+  messages: "bg-status-flagged",
+  system: "bg-status-rejected",
 };
 
 export function notificationDotClass(type: string): string {

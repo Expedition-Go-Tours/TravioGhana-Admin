@@ -28,7 +28,7 @@ function getPageItems(page: number, totalPages: number): Array<number | "gap"> {
 }
 
 const pageBtn =
-  "inline-flex h-8 min-w-8 items-center justify-center rounded-md px-2 text-xs font-medium transition-colors ";
+  "tnum inline-flex h-8 min-w-8 items-center justify-center rounded-full px-2 text-xs font-medium transition-colors ";
 
 export function Pagination({
   page,
@@ -47,18 +47,18 @@ export function Pagination({
 
   return (
     <div className={cn("flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between", className)}>
-      <p className="order-2 text-xs text-text-tertiary sm:order-1">
+      <p className="tnum order-2 text-xs text-text-tertiary sm:order-1">
         {from != null && to != null ? (
           <>
-            Showing <span className="font-semibold text-text-secondary">{from}–{to}</span> of{" "}
-            <span className="font-semibold text-text-secondary">{totalCount}</span>
+            Showing <span className="font-medium text-text-secondary">{from}–{to}</span> of{" "}
+            <span className="font-medium text-text-secondary">{totalCount}</span>
           </>
         ) : (
           <>
-            Page <span className="font-semibold text-text-secondary">{page}</span> of{" "}
-            <span className="font-semibold text-text-secondary">{totalPages}</span>
+            Page <span className="font-medium text-text-secondary">{page}</span> of{" "}
+            <span className="font-medium text-text-secondary">{totalPages}</span>
             {" · "}
-            <span className="font-semibold text-text-secondary">{totalCount}</span> total
+            <span className="font-medium text-text-secondary">{totalCount}</span> total
           </>
         )}
       </p>
@@ -66,7 +66,7 @@ export function Pagination({
       <div className="order-1 flex flex-wrap items-center justify-end gap-1.5 sm:order-2">
         {onPageSizeChange && (
           <Select value={String(pageSize ?? 10)} onValueChange={(v) => onPageSizeChange(Number(v))}>
-            <SelectTrigger className="h-8 w-[76px] gap-2 rounded-md px-2.5 text-xs" aria-label="Rows per page">
+            <SelectTrigger className="h-8 w-[76px] gap-2 rounded-full px-3 text-xs" aria-label="Rows per page">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -103,7 +103,7 @@ export function Pagination({
               className={cn(
                 pageBtn,
                 item === page
-                  ? "bg-primary text-primary-foreground shadow-sm"
+                  ? "bg-primary text-primary-foreground"
                   : "text-text-secondary hover:bg-surface-muted",
               )}
             >

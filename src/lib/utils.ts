@@ -94,8 +94,8 @@ export function getStatusColor(status: string): string {
   const map: Record<string, string> = {
     PENDING: "bg-status-pending/10 text-status-pending-text border-status-pending/30",
     PENDING_APPROVAL: "bg-status-pending/10 text-status-pending-text border-status-pending/30",
-  APPROVING: "bg-status-processing/10 text-status-processing-text border-status-processing/30",
-  SUPERSEDED: "bg-status-suspended/10 text-status-suspended-text border-status-suspended/30",
+    APPROVING: "bg-status-processing/10 text-status-processing-text border-status-processing/30",
+    SUPERSEDED: "bg-status-suspended/10 text-status-suspended-text border-status-suspended/30",
     APPROVED: "bg-status-approved/10 text-status-approved-text border-status-approved/30",
     ACTIVE: "bg-status-active/10 text-status-active-text border-status-active/30",
     REJECTED: "bg-status-rejected/10 text-status-rejected-text border-status-rejected/30",
@@ -123,7 +123,7 @@ export function getStatusColor(status: string): string {
     RESOLVED_SUPPLIER: "bg-status-approved/10 text-status-approved-text border-status-approved/30",
     WITHDRAWN: "bg-status-suspended/10 text-status-suspended-text border-status-suspended/30",
   };
-  return map[status] || "bg-surface-muted text-text-secondary border-border/60";
+  return map[status] || "bg-surface-muted text-text-secondary border-border";
 }
 
 /** Human label for a supplier type enum value. */

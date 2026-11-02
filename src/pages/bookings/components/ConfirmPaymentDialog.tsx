@@ -21,15 +21,15 @@ export function ConfirmPaymentDialog({ booking, isPending, onConfirm, onClose }:
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-50">
-              <Receipt className="h-4 w-4 text-emerald-600" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
+              <Receipt className="h-4 w-4 text-primary" />
             </div>
             Confirm Payment
           </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
-          <div className="rounded-xl border border-border bg-surface-muted/50 p-4 space-y-2">
+          <div className="rounded-xl border border-border bg-surface-muted p-4 space-y-2">
             <div className="flex items-center justify-between text-sm">
               <span className="text-text-secondary">Booking</span>
               <span className="font-medium text-text-primary">#{booking.bookingNumber}</span>
@@ -42,9 +42,9 @@ export function ConfirmPaymentDialog({ booking, isPending, onConfirm, onClose }:
               <span className="text-text-secondary">Tour</span>
               <span className="font-medium text-text-primary truncate ml-4">{booking.tour.title}</span>
             </div>
-            <div className="border-t border-slate-200 pt-2 flex items-center justify-between">
-              <span className="text-sm font-semibold text-slate-900">Total</span>
-              <span className="text-base font-bold text-slate-900">
+            <div className="border-t border-border pt-2 flex items-center justify-between">
+              <span className="text-sm font-semibold text-text-primary">Total</span>
+              <span className="text-base font-semibold text-text-primary">
                 {booking.currency} {Number(booking.grossAmount).toLocaleString()}
               </span>
             </div>
@@ -63,9 +63,9 @@ export function ConfirmPaymentDialog({ booking, isPending, onConfirm, onClose }:
             />
           </div>
 
-          <div className="rounded-lg border border-emerald-200 bg-emerald-50 p-3 flex items-start gap-2.5">
-            <CheckCircle2 className="h-4 w-4 text-emerald-600 mt-0.5 shrink-0" />
-            <p className="text-xs text-emerald-700">
+          <div className="rounded-xl border border-primary/30 bg-primary/10 p-3 flex items-start gap-2.5">
+            <CheckCircle2 className="h-4 w-4 text-primary mt-0.5 shrink-0" />
+            <p className="text-xs text-primary">
               This will mark the booking as paid and confirm it. The supplier will be notified
               and the payout process will be initiated.
             </p>
@@ -79,7 +79,7 @@ export function ConfirmPaymentDialog({ booking, isPending, onConfirm, onClose }:
           <Button
             onClick={() => onConfirm(reference || undefined)}
             disabled={isPending}
-            className="bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="bg-primary hover:bg-primary text-white"
           >
             {isPending ? (
               <><Loader2 className="h-4 w-4 animate-spin mr-1.5" />Confirming...</>

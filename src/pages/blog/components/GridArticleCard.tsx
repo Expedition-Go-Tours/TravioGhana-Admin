@@ -41,14 +41,14 @@ export function GridArticleCard({ article, onPreview, onEdit, onDelete, onToggle
   const hasImage = !!article.featuredImage
 
   return (
-    <div className="group relative rounded-sm bg-surface-base shadow-lg ring-1 ring-border/30 overflow-hidden transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 cursor-pointer">
+    <div className="group relative overflow-hidden rounded-xl border border-border bg-surface-base transition-colors cursor-pointer">
       <div className="relative h-60 overflow-hidden bg-surface-muted" onClick={onPreview}>
         {hasImage ? (
           <OptimizedImage
             src={article.featuredImage!}
             alt={article.title}
             width={800}
-            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+            className="h-full w-full object-cover"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
@@ -56,7 +56,7 @@ export function GridArticleCard({ article, onPreview, onEdit, onDelete, onToggle
               <div className="rounded-xl bg-surface-muted p-3">
                 <BookOpen className="h-6 w-6 text-text-tertiary" />
               </div>
-              <span className="text-xs font-medium text-text-tertiary uppercase tracking-wider">No image</span>
+              <span className="text-xs font-medium text-text-tertiary ">No image</span>
             </div>
           </div>
         )}
@@ -64,7 +64,7 @@ export function GridArticleCard({ article, onPreview, onEdit, onDelete, onToggle
         <div className="absolute top-3 right-3" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
             <DropdownMenuTrigger asChild>
-              <button className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-base/90 backdrop-blur-sm shadow-sm ring-1 ring-border/30 opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-surface-base">
+              <button className="flex h-8 w-8 items-center justify-center rounded-full bg-surface-base/90  ring-1 ring-border/30  hover:bg-surface-base">
                 <MoreVertical className="h-4 w-4 text-text-secondary" />
               </button>
             </DropdownMenuTrigger>
@@ -92,7 +92,7 @@ export function GridArticleCard({ article, onPreview, onEdit, onDelete, onToggle
                 {article.status === "PUBLISHED" ? "Unpublish" : "Publish"}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={onDelete} className="text-red-600 focus:text-red-600 focus:bg-red-50">
+              <DropdownMenuItem onClick={onDelete} className="text-status-rejected-text focus:text-status-rejected-text focus:bg-status-rejected/10">
                 <Trash2 className="h-4 w-4" />
                 Delete
               </DropdownMenuItem>
@@ -101,7 +101,7 @@ export function GridArticleCard({ article, onPreview, onEdit, onDelete, onToggle
         </div>
 
         <div className="absolute top-3 left-3" onClick={(e) => e.stopPropagation()}>
-          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium bg-surface-base/90 backdrop-blur-sm shadow-sm ring-1 ring-border/30`}>
+          <span className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-medium bg-surface-base/90  ring-1 ring-border/30`}>
             <span className={`h-1.5 w-1.5 rounded-full ${status.dot}`} />
             {status.label}
           </span>
@@ -119,7 +119,7 @@ export function GridArticleCard({ article, onPreview, onEdit, onDelete, onToggle
           <h3 className="text-xl font-semibold text-text-primary leading-snug line-clamp-2 group-hover:text-primary transition-colors duration-200">
             {article.title}
           </h3>
-          <ArrowUpRight className="h-5 w-5 min-w-5 text-text-tertiary mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+          <ArrowUpRight className="h-5 w-5 min-w-5 text-text-tertiary mt-1 " />
         </div>
 
         {article.excerpt && (
@@ -133,7 +133,7 @@ export function GridArticleCard({ article, onPreview, onEdit, onDelete, onToggle
             {article.author?.photoURL ? (
               <OptimizedImage src={article.author.photoURL} alt="" width={40} className="h-full w-full object-cover" />
             ) : (
-              <div className="h-full w-full bg-gradient-to-br from-surface-muted to-surface-muted/60" />
+              <div className="h-full w-full bg-surface-muted" />
             )}
           </div>
           <div className="min-w-0">

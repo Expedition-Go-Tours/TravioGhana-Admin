@@ -4,8 +4,8 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { AlertTriangle, MapPin } from "lucide-react";
 
 const TILE_STYLE = "https://tiles.openfreemap.org/styles/liberty";
-const ZONE_FILL = "hsl(var(--green-500) / 0.18)";
-const ZONE_LINE = "hsl(var(--green-600))";
+const ZONE_FILL = "hsl(var(--primary) / 0.18)";
+const ZONE_LINE = "hsl(var(--primary))";
 const EXCL_FILL = "rgba(225, 29, 72, 0.18)";
 const EXCL_LINE = "#e11d48";
 
@@ -33,7 +33,7 @@ function toFeatureCollection(list: LatLngTuple[][]) {
 
 /**
  * Read-only rendered pickup geoshapes for admin/moderation views: drawn
- * service zones (green) plus no-pickup exclusions (rose). Production-safe:
+ * service zones (indigo) plus no-pickup exclusions (rose). Production-safe:
  * WebGL failure and tile/style outages degrade to a textual fallback
  * instead of a blank box or a crashed page.
  */
@@ -133,7 +133,7 @@ export function PickupZoneMap({ areas = [], height = 240, showLegend = true }: {
 
   return (
     <div>
-      <div className="relative overflow-hidden rounded-lg border border-border">
+      <div className="relative overflow-hidden rounded-xl border border-border">
         <div ref={containerRef} style={{ height }} className="w-full" />
         {failed && (
           <div className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-surface-base/95 px-4 text-center">
@@ -145,7 +145,7 @@ export function PickupZoneMap({ areas = [], height = 240, showLegend = true }: {
           </div>
         )}
         {mapReady && showLegend && (
-          <div className="absolute left-2 top-2 z-10 flex flex-col gap-1.5 rounded-lg bg-surface-base/90 px-2.5 py-2 text-[10px] font-medium text-text-primary shadow-soft backdrop-blur-sm">
+          <div className="absolute left-2 top-2 z-10 flex flex-col gap-1.5 rounded-xl bg-surface-base/90 px-2.5 py-2 text-[10px] font-medium text-text-primary  ">
             <span className="flex items-center gap-1.5">
               <span className="h-2 w-2 rounded-sm" style={{ background: ZONE_LINE }} /> Pickup zone
             </span>
@@ -158,11 +158,11 @@ export function PickupZoneMap({ areas = [], height = 240, showLegend = true }: {
         )}
       </div>
       <div className="mt-2 flex flex-wrap gap-2">
-        <span className="inline-flex items-center gap-1 rounded-full bg-green-50 px-2.5 py-1 text-[11px] font-medium text-green-700">
+        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-1 text-[11px] font-medium text-primary">
           <MapPin size={11} /> {zones.length} pickup zone{zones.length === 1 ? "" : "s"}
         </span>
         {exclusions.length > 0 && (
-          <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-1 text-[11px] font-medium text-rose-600">
+          <span className="inline-flex items-center gap-1 rounded-full bg-status-rejected/10 px-2.5 py-1 text-[11px] font-medium text-status-rejected-text">
             <MapPin size={11} /> {exclusions.length} no-pickup zone{exclusions.length === 1 ? "" : "s"}
           </span>
         )}

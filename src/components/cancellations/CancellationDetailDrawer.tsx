@@ -1,5 +1,4 @@
 import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import {
   X,
@@ -38,7 +37,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
     <div className="mb-2 flex items-center gap-2">
       <div className="h-px flex-1 bg-border" />
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">{children}</span>
+      <span className="text-[10px] font-semibold text-text-tertiary">{children}</span>
       <div className="h-px flex-1 bg-border" />
     </div>
   );
@@ -101,25 +100,15 @@ export function CancellationDetailDrawer({
 
   return createPortal(
     <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-40 bg-black/30"
-        onClick={onClose}
-      />
-      <motion.aside
-        initial={{ x: "100%" }}
-        animate={{ x: 0 }}
-        exit={{ x: "100%" }}
-        transition={{ type: "spring", damping: 30, stiffness: 300 }}
+      <div 
+        className="fixed inset-0 z-40 bg-text-primary/30"
+        onClick={onClose} />
+      <aside 
         className="fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-border bg-surface-base shadow-[-4px_0_16px_rgba(0,0,0,0.08)] sm:w-[480px] md:w-[540px]"
-        aria-label="Cancellation request detail"
-      >
+        aria-label="Cancellation request detail">
         <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
+            <p className="text-[10px] font-semibold text-text-tertiary">
               Cancellation Request
             </p>
             <h2 className="mt-0.5 truncate font-mono text-base font-semibold text-text-primary">
@@ -212,16 +201,16 @@ export function CancellationDetailDrawer({
                     {preview?.countsTowardRate ?? booking?.countsTowardRate ? "Yes" : "No"}
                   </Field>
                   {payload?.explanation ? (
-                    <div className="rounded-lg bg-surface-muted/60 p-3">
-                      <p className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
+                    <div className="rounded-xl bg-surface-muted p-3">
+                      <p className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold text-text-tertiary">
                         <MessageSquare className="h-3 w-3" /> Supplier explanation
                       </p>
                       <p className="whitespace-pre-wrap text-xs text-text-secondary">{String(payload.explanation)}</p>
                     </div>
                   ) : null}
                   {payload?.supplierNotes ? (
-                    <div className="rounded-lg bg-surface-muted/60 p-3">
-                      <p className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">
+                    <div className="rounded-xl bg-surface-muted p-3">
+                      <p className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold text-text-tertiary">
                         <FileText className="h-3 w-3" /> Supplier notes
                       </p>
                       <p className="whitespace-pre-wrap text-xs text-text-secondary">{String(payload.supplierNotes)}</p>
@@ -251,7 +240,7 @@ export function CancellationDetailDrawer({
                     {formatCurrency(preview?.fee ?? 0, currency)}
                   </InfoRow>
                   {preview?.refund?.note ? (
-                    <p className="mt-2 rounded-lg bg-surface-muted/60 p-2 text-[11px] text-text-tertiary">
+                    <p className="mt-2 rounded-xl bg-surface-muted p-2 text-[11px] text-text-tertiary">
                       {preview.refund.note}
                     </p>
                   ) : null}
@@ -300,7 +289,7 @@ export function CancellationDetailDrawer({
                       {request.decidedAt ? formatDateTime(request.decidedAt) : "—"}
                     </InfoRow>
                     {request.decisionNote ? (
-                      <div className="mt-2 rounded-lg bg-surface-muted/60 p-3">
+                      <div className="mt-2 rounded-xl bg-surface-muted p-3">
                         <p className="whitespace-pre-wrap text-xs text-text-secondary">{request.decisionNote}</p>
                       </div>
                     ) : null}
@@ -348,7 +337,7 @@ export function CancellationDetailDrawer({
             You can view this request but need <span className="font-medium text-text-secondary">cancellations.approve</span> to decide.
           </div>
         )}
-      </motion.aside>
+      </aside>
     </>,
     document.body,
   );

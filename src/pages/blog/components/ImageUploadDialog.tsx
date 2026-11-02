@@ -74,7 +74,7 @@ export function ImageUploadDialog({ open, onOpenChange, onImageSelect, title = "
         </DialogHeader>
         <div className="space-y-4 py-4">
           <div
-            className={`relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors ${
+            className={`relative flex flex-col items-center justify-center rounded-xl border-2 border-dashed p-8 transition-colors ${
               dragOver ? "border-status-processing bg-surface-muted" : "border-border hover:border-text-secondary/40"
             } ${preview ? "py-4" : "py-8"}`}
             onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
@@ -83,7 +83,7 @@ export function ImageUploadDialog({ open, onOpenChange, onImageSelect, title = "
           >
             {preview ? (
               <div className="relative w-full">
-                <img src={preview} alt="Preview" className="mx-auto max-h-48 rounded-lg object-contain" />
+                <img src={preview} alt="Preview" className="mx-auto max-h-48 rounded-xl object-contain" />
                 <Button variant="ghost" size="sm" className="absolute top-1 right-1 h-6 w-6 rounded-full bg-black/50 p-0 text-white hover:bg-black/70" onClick={() => { setFile(null); setPreview(null); }}>
                   <X className="h-3 w-3" />
                 </Button>
@@ -119,7 +119,7 @@ export function ImageUploadDialog({ open, onOpenChange, onImageSelect, title = "
                 <span>{progress}%</span>
               </div>
               <div className="h-1.5 w-full overflow-hidden rounded-full bg-surface-muted">
-                <div className="h-full rounded-full bg-status-processing transition-all duration-300" style={{ width: `${progress}%` }} />
+                <div className="h-full rounded-full bg-status-processing transition-all duration-150" style={{ width: `${progress}%` }} />
               </div>
             </div>
           )}

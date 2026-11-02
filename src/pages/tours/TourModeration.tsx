@@ -213,11 +213,11 @@ export default function TourModeration() {
   return (
     <div className="flex h-[calc(100vh-4rem)] flex-col">
       {/* Top bar */}
-      <div className="flex shrink-0 items-center justify-between border-b border-border/40 bg-surface-base px-6 py-4">
+      <div className="flex shrink-0 items-center justify-between border-b border-border bg-surface-base px-6 py-4">
         <div>
           <div className="flex items-center gap-3">
             <LayoutDashboard className="h-5 w-5 text-primary" />
-            <h1 className="text-xl font-bold text-foreground">Tour Moderation</h1>
+            <h1 className="text-[26px] font-light leading-8 tracking-[-0.26px] text-text-primary">Tour Moderation</h1>
           </div>
           <p className="mt-0.5 text-sm text-muted-foreground">
             {totalCount} total tours
@@ -251,13 +251,13 @@ export default function TourModeration() {
       </div>
 
       {/* Mobile toggle */}
-      <div className="flex border-b border-border/40 bg-surface-base px-4 py-2 lg:hidden">
+      <div className="flex border-b border-border bg-surface-base px-4 py-2 lg:hidden">
         <div className="flex w-full rounded-xl bg-surface-muted p-1">
           <button
             onClick={() => setMobilePanel('list')}
-            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
+            className={`flex-1 rounded-xl py-2 text-sm font-medium transition-colors ${
               mobilePanel === 'list'
-                ? 'bg-surface-base text-foreground shadow-sm'
+                ? 'bg-surface-base text-foreground '
                 : 'text-muted-foreground'
             }`}
           >
@@ -265,9 +265,9 @@ export default function TourModeration() {
           </button>
           <button
             onClick={() => setMobilePanel('detail')}
-            className={`flex-1 rounded-lg py-2 text-sm font-medium transition-colors ${
+            className={`flex-1 rounded-xl py-2 text-sm font-medium transition-colors ${
               mobilePanel === 'detail'
-                ? 'bg-surface-base text-foreground shadow-sm'
+                ? 'bg-surface-base text-foreground '
                 : 'text-muted-foreground'
             }`}
           >

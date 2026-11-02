@@ -124,8 +124,18 @@ const lastFeedCall = () => {
   return call[0] ?? {};
 };
 
-const notificationRail = () =>
-  within(screen.getByRole("navigation", { name: "Notification filters" }));
+const notificationFilters = () =>
+  within(screen.getByRole("group", { name: "Notification filters" }));
+
+async function chooseFilter(value: string) {
+  await userEvent.selectOptions(
+    notificationFilters().getByRole("combobox", { name: "Filter notifications" }),
+    value,
+  );
+}
+
+const unreadToggle = () =>
+  notificationFilters().getByRole("button", { name: /^Unread/ });
 
 // ── Tests ──────────────────────────────────────────────────────────────────
 
@@ -198,7 +208,7 @@ describe("NotificationsPage", () => {
     await screen.findByText("Payout needs approval");
     vi.mocked(getNotifications).mockClear();
 
-    await userEvent.click(notificationRail().getByRole("button", { name: /Needs action/ }));
+    await chooseFilter("action");
 
     const types: readonly string[] | undefined = lastFeedCall().types;
     expect(types).toBeDefined();
@@ -220,7 +230,7 @@ describe("NotificationsPage", () => {
     await screen.findByText("Payout needs approval");
     vi.mocked(getNotifications).mockClear();
 
-    await userEvent.click(notificationRail().getByRole("checkbox", { name: /Unread only/ }));
+    await userEvent.click(unreadToggle());
 
     expect(lastFeedCall().unreadOnly).toBe(true);
     expect(screen.getByTestId("location")).toHaveTextContent("unread=1");
@@ -230,9 +240,7 @@ describe("NotificationsPage", () => {
     renderPage();
 
     await screen.findByText("Payout needs approval");
-    await userEvent.click(
-      notificationRail().getByRole("button", { name: /Payments & payouts/ }),
-    );
+    await chooseFilter("payments");
 
     expect(screen.getByTestId("location")).toHaveTextContent("filter=payments");
     expect(screen.getByTestId("location").textContent).not.toContain("page=");
@@ -248,9 +256,7 @@ describe("NotificationsPage", () => {
     ]);
     expect(lastFeedCall().unreadOnly).toBe(true);
     expect(lastFeedCall().search).toBe("maintenance");
-    expect(
-      notificationRail().getByRole("checkbox", { name: /Unread only/ }),
-    ).toBeChecked();
+    expect(unreadToggle()).toHaveAttribute("aria-pressed", "true");
   });
 
   it("debounces typing into the query rather than firing per keystroke", async () => {
@@ -294,15 +300,20 @@ describe("NotificationsPage", () => {
     await screen.findByText("Payout needs approval");
     await userEvent.click(screen.getByText("Payout needs approval"));
 
-    expect(screen.getByTestId("location")).toHaveTextContent("/admin/payouts");
+    // The row opens the preview; the explicit action performs navigation.
+    const openActions = screen.getAllByRole("button", { name: /Open record/ });
+    expect(openActions.length).toBeGreaterThan(0);
     expect(vi.mocked(markAsRead).mock.calls[0][0]).toBe("n1");
+
+    await userEvent.click(openActions[0]);
+    expect(screen.getByTestId("location")).toHaveTextContent("/admin/payouts");
   });
 
   it("marks everything as read in one action", async () => {
     renderPage();
 
     await screen.findByText("Payout needs approval");
-    await userEvent.click(screen.getByRole("button", { name: /Mark all as read/ }));
+    await userEvent.click(screen.getByRole("button", { name: /Mark all read/ }));
 
     expect(markAllAsRead).toHaveBeenCalledTimes(1);
     await waitFor(() => expect(invalidateNotificationQueries).toHaveBeenCalled());
@@ -391,12 +402,12 @@ describe("NotificationsPage", () => {
     expect(lastFeedCall().page).toBe(2);
   });
 
-  it("hides rail counts until statistics arrive rather than showing zeroes", () => {
+  it("does not invent counts while statistics are still loading", () => {
     vi.mocked(getNotificationStats).mockReturnValue(new Promise(() => {}));
 
     renderPage();
 
-    expect(screen.queryByText("1,204")).not.toBeInTheDocument();
-    expect(screen.getAllByText("–").length).toBeGreaterThan(0);
+    expect(screen.getByText("Loading notification summary")).toBeInTheDocument();
+    expect(screen.queryByText("1,204 total · 12 unread · 48 need action")).not.toBeInTheDocument();
   });
 });

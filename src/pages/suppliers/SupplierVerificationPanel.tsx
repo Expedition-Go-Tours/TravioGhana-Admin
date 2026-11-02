@@ -92,7 +92,7 @@ export default function SupplierVerificationPanel({ supplierId }: { supplierId: 
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-surface-muted/40 px-4 py-3">
+      <div className="flex flex-wrap items-center gap-2 rounded-xl border border-border bg-surface-muted px-4 py-3">
         <Building2 className="h-4 w-4 text-text-secondary" />
         <span className="text-sm text-text-secondary">Supplier type:</span>
         <span className="text-sm font-semibold text-text-primary">{supplierTypeLabel(data?.supplierType)}</span>
@@ -144,7 +144,7 @@ function RequirementChecklist({ requirements, documents }: { requirements: Requi
   );
 
   return (
-    <div className="rounded-lg border border-border bg-surface-base">
+    <div className="rounded-xl border border-border bg-surface-base">
       <div className="flex flex-wrap items-center justify-between gap-2 border-b border-border px-4 py-3">
         <span className="text-sm font-semibold text-text-primary">Verification requirements</span>
         {missing.length > 0 ? (
@@ -231,9 +231,9 @@ function DocumentRow({ doc, editable, onMutated }: { doc: Doc; editable: boolean
   };
 
   return (
-    <div className="rounded-lg border border-border bg-surface-base">
+    <div className="rounded-xl border border-border bg-surface-base">
       <div className="flex flex-wrap items-center gap-4 px-4 py-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-text-tertiary">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-muted text-text-tertiary">
           <FileText className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
@@ -334,9 +334,9 @@ function VehicleRow({ vehicle, editable, onMutated }: { vehicle: Vehicle; editab
   };
 
   return (
-    <div className="rounded-lg border border-border bg-surface-base">
+    <div className="rounded-xl border border-border bg-surface-base">
       <div className="flex flex-wrap items-center gap-4 px-4 py-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-muted text-text-tertiary">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-muted text-text-tertiary">
           <Car className="h-5 w-5" />
         </div>
         <div className="min-w-0 flex-1">
@@ -404,7 +404,7 @@ function GuideRow({ guide, editable, onMutated }: { guide: Guide; editable: bool
     }
   };
   return (
-    <div className="rounded-lg border border-border bg-surface-base">
+    <div className="rounded-xl border border-border bg-surface-base">
       <div className="flex flex-wrap items-center gap-4 px-4 py-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-muted text-text-tertiary">
           <IdCard className="h-5 w-5" />

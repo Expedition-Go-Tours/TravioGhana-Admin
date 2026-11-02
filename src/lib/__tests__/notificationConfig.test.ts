@@ -89,10 +89,10 @@ describe("notificationConfig severity", () => {
     // The reminder flag is what drives the hotter colour, not the severity.
     expect(
       getNotificationTypeConfig("SUPPLIER_CANCELLATION_REQUEST", { reminder: true }).color,
-    ).toContain("red");
+    ).toContain("status-rejected");
     expect(
       getNotificationTypeConfig("SUPPLIER_CANCELLATION_REQUEST", { reminder: false }).color,
-    ).toContain("amber");
+    ).toContain("status-pending");
   });
 
   it("exposes only declared action and warning buckets", () => {

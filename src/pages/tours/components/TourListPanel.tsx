@@ -48,7 +48,7 @@ export const TourListPanel = forwardRef<HTMLDivElement, TourListPanelProps>(func
   ref
 ) {
   return (
-    <div ref={ref} className="flex h-full flex-col border-r border-border/40 bg-surface-base">
+    <div ref={ref} className="flex h-full flex-col border-r border-border bg-surface-base">
       <div className="p-4 pb-3">
         <div className="relative mb-3">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -56,7 +56,7 @@ export const TourListPanel = forwardRef<HTMLDivElement, TourListPanelProps>(func
             placeholder="Search tours..."
             value={searchValue}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="h-10 rounded-xl border-border/60 bg-surface-muted/50 pl-9 text-sm placeholder:text-muted-foreground/60 focus:border-text-secondary/50 focus:ring-text-secondary/20"
+            className="h-10 rounded-xl border-border bg-surface-muted pl-9 text-sm placeholder:text-muted-foreground/60 focus:border-text-secondary/50 focus:ring-text-secondary/20"
           />
         </div>
 
@@ -77,7 +77,7 @@ export const TourListPanel = forwardRef<HTMLDivElement, TourListPanelProps>(func
                 key={f.key}
                 onClick={() => onStatusFilterChange(f.key)}
                 className={cn(
-                  'flex items-center gap-1.5 whitespace-nowrap rounded-lg px-2.5 py-1.5 text-xs font-medium transition-colors',
+                  'flex items-center gap-1.5 whitespace-nowrap rounded-xl px-2.5 py-1.5 text-xs font-medium transition-colors',
                   isActive
                     ? 'bg-primary/10 text-primary'
                     : 'text-muted-foreground hover:bg-surface-muted hover:text-foreground'
@@ -86,7 +86,7 @@ export const TourListPanel = forwardRef<HTMLDivElement, TourListPanelProps>(func
                 {f.label}
                 <span
                   className={cn(
-                    'rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums',
+                    'rounded-full px-1.5 py-0.5 text-[10px] font-semibold tnum',
                     isActive ? 'bg-primary/15 text-primary' : 'bg-surface-muted text-muted-foreground'
                   )}
                 >
@@ -124,10 +124,10 @@ export const TourListPanel = forwardRef<HTMLDivElement, TourListPanelProps>(func
                 data-tour-id={tour.id}
                 onClick={() => onSelect(tour.id)}
                 className={cn(
-                  'mb-1 flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-all duration-150',
+                  'mb-1 flex w-full items-start gap-3 rounded-xl px-3 py-3 text-left transition-colors duration-150',
                   isSelected
                     ? 'border-l-[3px] border-l-primary bg-accent/40 pl-[9px]'
-                    : 'border-l-[3px] border-l-transparent hover:bg-surface-muted/60'
+                    : 'border-l-[3px] border-l-transparent hover:bg-surface-muted'
                 )}
               >
                 <div className={cn('mt-1.5 h-2 w-2 shrink-0 rounded-full', config.dot)} />

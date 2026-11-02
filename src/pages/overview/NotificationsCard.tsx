@@ -15,10 +15,13 @@ import {
   resolveNotificationRoute,
 } from "@/lib/notificationConfig";
 import { timeAgo, cn } from "@/lib/utils";
+import { SectionError } from "@/components/shared/SectionError";
 
 interface NotificationsCardProps {
   data?: NotificationStats;
   loading?: boolean;
+  error?: boolean;
+  onRetry?: () => void;
 }
 
 const statItems = [
@@ -29,20 +32,20 @@ const statItems = [
 ];
 
 const numberColor = [
-  "text-amber-600 dark:text-amber-400",
-  "text-amber-600 dark:text-amber-400",
-  "text-blue-600 dark:text-blue-400",
+  "text-status-pending-text dark:text-status-pending-text",
+  "text-status-pending-text dark:text-status-pending-text",
+  "text-status-approved-text dark:text-status-approved-text",
   "text-status-active-text",
 ];
 
 const iconBg = [
-  "bg-amber-50 dark:bg-amber-950/40",
-  "bg-amber-50 dark:bg-amber-950/40",
-  "bg-blue-50 dark:bg-blue-950/40",
-  "bg-green-50 dark:bg-green-950/40",
+  "bg-status-pending/10 dark:bg-status-pending/10",
+  "bg-status-pending/10 dark:bg-status-pending/10",
+  "bg-status-approved/10 dark:bg-status-approved/10",
+  "bg-primary/10 dark:bg-primary/10",
 ];
 
-export function NotificationsCard({ data, loading }: NotificationsCardProps) {
+export function NotificationsCard({ data, loading, error, onRetry }: NotificationsCardProps) {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
@@ -58,7 +61,7 @@ export function NotificationsCard({ data, loading }: NotificationsCardProps) {
 
   if (loading) {
     return (
-      <Card className="h-full border border-border/60 shadow-soft bg-surface-base rounded-2xl">
+      <Card className="h-full border border-border  bg-surface-base rounded-xl">
         <CardHeader className="pb-3 pt-5 px-5">
           <div className="flex items-center justify-between">
             <Skeleton className="h-5 w-28" />
@@ -87,21 +90,21 @@ export function NotificationsCard({ data, loading }: NotificationsCardProps) {
 
   const unacknowledged = data?.unacknowledged ?? 0;
   const recent = data?.recent ?? [];
-  const hasAnyContent = unacknowledged > 0 || recent.length > 0;
+  const hasAnyContent = !error && (unacknowledged > 0 || recent.length > 0);
 
   return (
-    <Card className="h-full border border-border/60 shadow-soft bg-surface-base rounded-2xl">
+    <Card className="h-full border border-border  bg-surface-base rounded-xl">
       <CardHeader className="pb-3 pt-5 px-5">
         <div className="flex items-center justify-between">
           <CardTitle className="text-[15px] font-semibold text-text-primary flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300">
+            <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-status-pending/10 dark:bg-status-pending/10 text-status-pending-text dark:text-status-pending-text">
               <Bell className="h-4 w-4" />
             </span>
             Notifications
           </CardTitle>
           <div className="flex items-center gap-3">
             {unacknowledged > 0 && (
-              <span className="text-[11px] font-semibold text-white bg-gradient-to-r from-red-500 to-red-400 px-2 py-0.5 rounded-full shadow-sm">
+              <span className="tnum rounded-full bg-status-rejected px-2 py-0.5 text-[11px] font-semibold text-white">
                 {unacknowledged}
               </span>
             )}
@@ -119,7 +122,9 @@ export function NotificationsCard({ data, loading }: NotificationsCardProps) {
         </div>
       </CardHeader>
       <CardContent className="px-5 pb-5">
-        {hasAnyContent ? (
+        {error ? (
+          <SectionError message="Failed to load notifications" onRetry={onRetry} />
+        ) : hasAnyContent ? (
           <div className="space-y-5">
             <div className="flex gap-2.5">
               {statItems.map((item, idx) => {
@@ -131,19 +136,19 @@ export function NotificationsCard({ data, loading }: NotificationsCardProps) {
                     key={item.type}
                     onClick={() => navigate(item.route)}
                     className={cn(
-                      "flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border transition-all",
+                      "flex-1 flex flex-col items-center gap-1.5 py-3 px-2 rounded-xl border transition-colors",
                       has
-                        ? "bg-surface-base border-border hover:border-primary/30 hover:shadow-sm"
-                        : "bg-surface-base border-border/50 hover:border-border"
+                        ? "border-border bg-surface-base hover:border-primary/30"
+                        : "bg-surface-base border-border hover:border-border"
                     )}
                   >
-                    <div className={cn("p-1.5 rounded-lg", has ? iconBg[idx] : "bg-surface-muted")}>
+                    <div className={cn("p-1.5 rounded-xl", has ? iconBg[idx] : "bg-surface-muted")}>
                       <Icon className={cn("h-3.5 w-3.5", has ? numberColor[idx] : "text-text-tertiary")} />
                     </div>
                     {has ? (
-                      <span className={cn("text-lg font-bold leading-none", numberColor[idx])}>{count}</span>
+                      <span className={cn("tnum text-lg font-semibold leading-none", numberColor[idx])}>{count}</span>
                     ) : (
-                      <span className="text-lg font-bold leading-none text-text-tertiary">&ndash;</span>
+                      <span className="text-lg font-semibold leading-none text-text-tertiary">&ndash;</span>
                     )}
                     <span className={cn("text-[10px] font-medium", has ? "text-text-secondary" : "text-text-tertiary")}>
                       {item.label}
@@ -154,7 +159,7 @@ export function NotificationsCard({ data, loading }: NotificationsCardProps) {
             </div>
 
             {recent.length > 0 && (
-              <div className="divide-y divide-border/50">
+              <div className="divide-y divide-border">
                 {recent.slice(0, 8).map((n) => (
                   <button
                     key={n.id}
@@ -164,7 +169,7 @@ export function NotificationsCard({ data, loading }: NotificationsCardProps) {
                     }}
                     className={cn(
                       "w-full flex items-center gap-3 py-2.5 text-left transition-colors",
-                      "hover:bg-surface-muted -mx-5 px-5 rounded-lg",
+                      "hover:bg-surface-muted -mx-5 px-5 rounded-xl",
                       hasNotificationRoute(n.type, n.data) ? "cursor-pointer" : "cursor-default"
                     )}
                   >
@@ -172,7 +177,7 @@ export function NotificationsCard({ data, loading }: NotificationsCardProps) {
                     <p
                       className={cn(
                         "text-sm flex-1 min-w-0 truncate",
-                        n.acknowledged ? "text-text-secondary" : "text-text-primary font-medium"
+                        n.acknowledged ? "text-text-secondary" : "text-text-primary font-semibold"
                       )}
                     >
                       {n.title}
@@ -185,8 +190,8 @@ export function NotificationsCard({ data, loading }: NotificationsCardProps) {
           </div>
         ) : (
           <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="p-2.5 rounded-full bg-green-50 dark:bg-green-950/40 mb-2.5">
-              <CheckCheck className="h-5 w-5 text-green-400" />
+            <div className="p-2.5 rounded-full bg-primary/10 dark:bg-primary/10 mb-2.5">
+              <CheckCheck className="h-5 w-5 text-primary" />
             </div>
             <p className="text-sm font-medium text-text-secondary">All clear</p>
             <p className="text-xs text-text-tertiary mt-0.5">No pending notifications</p>

@@ -19,7 +19,7 @@ export function ConfirmDialog({ open, onOpenChange, onConfirm, title, descriptio
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
-        <p className="text-sm text-[#5d5b54] py-2">{description}</p>
+        <p className="text-sm text-text-secondary py-2">{description}</p>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={loading}>Cancel</Button>
           <Button variant={confirmVariant} onClick={onConfirm} disabled={loading}>{loading ? `${confirmLabel}...` : confirmLabel}</Button>

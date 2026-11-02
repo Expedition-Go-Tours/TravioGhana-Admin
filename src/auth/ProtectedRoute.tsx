@@ -13,7 +13,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // admin shell for a user whose token has actually expired.
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-surface-muted/50">
+      <div className="flex min-h-screen items-center justify-center bg-surface-muted">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );

@@ -1,5 +1,4 @@
 ﻿import { useState, useMemo, useCallback } from "react";
-import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
@@ -26,7 +25,6 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import api from "@/lib/axios";
-import { staggerContainer } from "@/lib/animations";
 import { formatNumber, formatDate } from "@/lib/utils";
 import OptimizedImage from "@/components/shared/OptimizedImage";
 import {
@@ -98,14 +96,14 @@ function GrowthTooltip({ active, payload, label, granularity, compare }: GrowthT
   ];
 
   return (
-    <div className="min-w-[180px] rounded-lg border border-border bg-surface-base p-3 shadow-soft-lg">
+    <div className="min-w-[180px] rounded-xl border border-border bg-surface-base p-3 shadow-lg">
       <p className="mb-2 text-xs font-medium text-text-tertiary">{formatTooltipLabel(label, granularity)}</p>
       <div className="space-y-1">
         {rows.map((row) => (
           <div key={row.name} className="flex items-center gap-2 text-sm">
             <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ backgroundColor: row.color }} />
             <span className="text-text-secondary">{row.name}:</span>
-            <span className="font-semibold text-text-primary tabular-nums">{row.display}</span>
+            <span className="font-semibold text-text-primary tnum">{row.display}</span>
           </div>
         ))}
         {compare && prev != null && (
@@ -113,7 +111,7 @@ function GrowthTooltip({ active, payload, label, granularity, compare }: GrowthT
             <div className="flex items-center gap-2 text-sm">
               <span className="h-0 w-3 shrink-0 border-t border-dashed border-text-tertiary" />
               <span className="text-text-secondary">Previous total:</span>
-              <span className="font-semibold text-text-primary tabular-nums">{formatNumber(prev)}</span>
+              <span className="font-semibold text-text-primary tnum">{formatNumber(prev)}</span>
             </div>
           </div>
         )}
@@ -240,12 +238,8 @@ export default function UserGrowthPage() {
         Customers grow demand for tours; suppliers grow the supply of them. A healthy marketplace adds both. Cards compare the selected period against the previous one, the trend chart stacks registrations by role (click any bar to see exactly who signed up), and the "Previous period" toggle overlays the equal window before it for context. The latest bucket is still in progress, so its numbers are partial.
       </PageInsight>
 
-      <motion.div
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-2 gap-4 lg:grid-cols-4"
-      >
+      <div 
+        className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
           label="Total New Users"
           value={isLoading ? "..." : formatNumber(totals.total)}
@@ -291,7 +285,7 @@ export default function UserGrowthPage() {
           sparkline={{ data: series.total, color: chartColors.violet }}
           subtitle={growth.length ? `over ${growth.length} ${bucketNoun.toLowerCase()}s` : undefined}
         />
-      </motion.div>
+      </div>
 
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
@@ -313,7 +307,8 @@ export default function UserGrowthPage() {
           <div className="flex shrink-0 items-center gap-2">
             {totals.total > 0 && (
               <span className="hidden text-xs text-text-tertiary sm:inline">
-                Total: {formatNumber(totals.total)} · last {PERIOD_WINDOW_LABEL[period]}
+                Total: <span className="tnum font-semibold text-text-secondary">{formatNumber(totals.total)}</span>
+                {" · last "}{PERIOD_WINDOW_LABEL[period]}
               </span>
             )}
             <Button
@@ -409,16 +404,16 @@ export default function UserGrowthPage() {
                 </ComposedChart>
               </ResponsiveContainer>
               <div className="flex flex-wrap justify-center gap-6 pt-2">
-                <div className="flex items-center gap-1.5 text-xs text-text-secondary">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-text-secondary">
                   <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: chartColors.blue }} />
                   Customers
                 </div>
-                <div className="flex items-center gap-1.5 text-xs text-text-secondary">
+                <div className="flex items-center gap-1.5 text-xs font-medium text-text-secondary">
                   <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: chartColors.amber }} />
                   Suppliers
                 </div>
                 {compare && (
-                  <div className="flex items-center gap-1.5 text-xs text-text-secondary">
+                  <div className="flex items-center gap-1.5 text-xs font-medium text-text-secondary">
                     <span className="w-3 border-t border-dashed" style={{ borderColor: chartAxis.tick }} />
                     Previous period
                   </div>
@@ -453,7 +448,7 @@ export default function UserGrowthPage() {
               <div className="divide-y divide-border">
                 {dialogUsers.map((u) => (
                   <div key={u.id} className="flex items-start gap-3 py-3.5 first:pt-0">
-                    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-xs font-bold text-white">
+                    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-semibold text-white">
                       <span>{(u.name || u.email || "?").charAt(0).toUpperCase()}</span>
                       {u.photoURL && (
                         <OptimizedImage

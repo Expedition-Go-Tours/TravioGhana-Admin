@@ -1,8 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useLocation, Link, useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
-import { LogOut, Loader2, Settings, UserCircle, Menu, ChevronRight, Sun, Moon } from "lucide-react";
+import { LogOut, Loader2, Settings, UserCircle, Menu, ChevronRight, Sun, Moon, Search } from "lucide-react";
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { SearchDropdown } from "./SearchDropdown";
 import { useAuth } from "@/auth/useAuth";
@@ -10,11 +9,11 @@ import { isSuperAdmin, hasPermission } from "@/hooks/usePermission";
 import { useTheme } from "@/hooks/useTheme";
 import api from "@/lib/axios";
 import { cn } from "@/lib/utils";
+import travioBadge from "@/assets/travio-ghana-badge.png";
 
 const breadcrumbMap: Record<string, string> = {
   overview: "Overview",
   "revenue-trend": "Revenue Trend",
-  "search-analytics": "Search Analytics",
   "user-growth": "User Growth",
   clv: "Customer Lifetime Value",
   funnel: "Conversion Funnel",
@@ -91,20 +90,28 @@ export function Header({ onMenuClick }: HeaderProps) {
   }, [logout]);
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between border-b border-border/60 bg-surface-base/80 px-3 backdrop-blur-xl md:px-6">
+    <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between gap-2 border-b border-border bg-surface-base px-3 md:px-6">
       <div className="flex items-center gap-2 min-w-0">
         <button
           onClick={onMenuClick}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl text-text-secondary hover:bg-surface-muted transition-colors lg:hidden"
+          className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md text-text-secondary hover:bg-surface-muted hover:text-text-primary lg:hidden"
           aria-label="Open sidebar"
         >
           <Menu className="h-5 w-5" />
         </button>
 
+        <Link
+          to="/admin/overview"
+          className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full md:hidden"
+          aria-label="Travio Ghana dashboard"
+        >
+          <img src={travioBadge} alt="" className="h-8 w-8 object-cover" />
+        </Link>
+
         <SearchDropdown />
 
-        <nav aria-label="Breadcrumb" className="hidden sm:flex items-center gap-1.5 text-sm text-text-secondary min-w-0">
-          <Link to="/admin/overview" className="shrink-0 hover:text-text-primary transition-colors">
+        <nav aria-label="Breadcrumb" className="hidden sm:flex items-center gap-1.5 text-[13px] text-text-tertiary min-w-0">
+          <Link to="/admin/overview" className="shrink-0 hover:text-text-primary">
             Home
           </Link>
           {segments.slice(1).map((seg, idx) => {
@@ -113,10 +120,10 @@ export function Header({ onMenuClick }: HeaderProps) {
             const displayLabel = isLast ? (isTourDetail ? tourTitle || tourId : isSupplierDetail ? supplierName || supplierId : label) : label;
             return (
               <span key={seg} className="flex items-center gap-1.5 min-w-0">
-                <ChevronRight className="h-3 w-3 shrink-0 text-text-tertiary" />
+                <ChevronRight className="h-3 w-3 shrink-0 text-text-tertiary/60" />
                 <span className={cn(
                   "truncate",
-                  isLast ? "text-text-primary font-medium" : "text-text-secondary"
+                  isLast ? "text-text-primary font-medium" : "text-text-tertiary"
                 )}>
                   {displayLabel}
                 </span>
@@ -127,55 +134,54 @@ export function Header({ onMenuClick }: HeaderProps) {
       </div>
 
       <div className="flex items-center gap-1 md:gap-2">
+        <button
+          onClick={() => window.dispatchEvent(new Event("open-command-palette"))}
+          className="flex h-9 w-9 items-center justify-center rounded-full text-text-secondary hover:bg-surface-muted hover:text-text-primary md:hidden"
+          aria-label="Search"
+        >
+          <Search className="h-4 w-4" />
+        </button>
         {hasPermission('notifications.view') && <NotificationBell />}
         <button
           onClick={toggle}
-          className="flex h-10 w-10 items-center justify-center rounded-xl text-text-secondary hover:bg-surface-muted transition-colors"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-text-secondary hover:bg-surface-muted hover:text-text-primary"
           aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
         >
-          {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
+          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
         </button>
         <div className="relative" ref={menuRef}>
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="flex h-10 items-center gap-2 rounded-xl px-3 text-sm text-text-secondary hover:bg-surface-muted transition-all duration-200"
+            className="flex h-9 items-center gap-2 rounded-full px-2.5 text-sm text-text-secondary hover:bg-surface-muted hover:text-text-primary"
           >
             <UserCircle className="h-5 w-5" />
             <span className="hidden md:inline">Admin</span>
           </button>
-          <AnimatePresence>
-            {menuOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: -4, scale: 0.96 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -4, scale: 0.96 }}
-                transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
-                className="absolute right-0 top-full mt-2 w-48 rounded-xl border border-border bg-surface-base shadow-soft-lg py-1 z-50 overflow-hidden"
-              >
-                {superAdmin && (
-                  <button
-                    onClick={() => { navigate("/admin/settings"); setMenuOpen(false); }}
-                    className="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-text-primary hover:bg-surface-muted transition-colors"
-                  >
-                    <Settings className="h-4 w-4 text-text-tertiary" /> Settings
-                  </button>
-                )}
+          {menuOpen && (
+            <div className="absolute right-0 top-full mt-2 w-48 overflow-hidden rounded-xl border border-border bg-surface-base py-1 shadow-lg z-50">
+              {superAdmin && (
                 <button
-                  onClick={handleSignOut}
-                  disabled={signingOut}
-                  className="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-destructive hover:bg-destructive/5 transition-colors"
+                  onClick={() => { navigate("/admin/settings"); setMenuOpen(false); }}
+                  className="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-text-primary hover:bg-surface-muted"
                 >
-                  {signingOut ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <LogOut className="h-4 w-4" />
-                  )}
-                  {signingOut ? "Signing out..." : "Sign Out"}
+                  <Settings className="h-4 w-4 text-text-tertiary" /> Settings
                 </button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+              )}
+              <button
+                onClick={handleSignOut}
+                disabled={signingOut}
+                className="flex w-full items-center gap-3 px-3 py-2.5 text-sm text-destructive hover:bg-destructive/5"
+              >
+                {signingOut ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <LogOut className="h-4 w-4" />
+                )}
+                {signingOut ? "Signing out..." : "Sign Out"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </header>

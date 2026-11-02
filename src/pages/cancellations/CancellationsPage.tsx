@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 import { toast } from "sonner";
 import {
   Calendar,
@@ -236,7 +235,7 @@ export default function CancellationsPage() {
             <ShieldCheck className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-lg font-semibold text-text-primary">Cancellations</h1>
+            <h1 className="text-[26px] font-light leading-8 tracking-[-0.26px] text-text-primary">Cancellations</h1>
             <p className="text-sm text-text-secondary">
               Supplier cancellation requests — approve to run the full refund path
             </p>
@@ -274,7 +273,7 @@ export default function CancellationsPage() {
                 setSelectedIds(new Set());
               }}
               className={cn(
-                "inline-flex items-center gap-1.5 rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors focus:outline-none",
+                "inline-flex items-center gap-1.5 rounded-xl px-3.5 py-1.5 text-sm font-medium transition-colors focus:outline-none",
                 active
                   ? "bg-primary text-primary-foreground"
                   : "border border-border bg-surface-base text-text-secondary hover:text-text-primary",
@@ -284,7 +283,7 @@ export default function CancellationsPage() {
               {count != null && (
                 <span
                   className={cn(
-                    "rounded-full px-1.5 py-0.5 text-[10px] font-semibold tabular-nums",
+                    "rounded-full px-1.5 py-0.5 text-[10px] font-semibold tnum",
                     active ? "bg-white/20 text-white" : "bg-surface-muted text-text-tertiary",
                   )}
                 >
@@ -318,7 +317,7 @@ export default function CancellationsPage() {
         </div>
 
         {canDecide && selectedIds.size > 0 && (
-          <div className="flex items-center gap-2 rounded-lg border border-primary/30 bg-primary/5 px-3 py-1.5">
+          <div className="flex items-center gap-2 rounded-xl border border-primary/30 bg-primary/5 px-3 py-1.5">
             <CheckSquare className="h-4 w-4 text-primary" />
             <span className="text-xs font-medium text-text-primary">
               {selectedIds.size} selected
@@ -338,11 +337,11 @@ export default function CancellationsPage() {
       </div>
 
       {/* Table */}
-      <div className="rounded-lg border border-border bg-surface-base overflow-hidden">
+      <div className="rounded-xl border border-border bg-surface-base overflow-hidden">
         <div className="overflow-x-auto scrollbar-thin">
           <table className="w-full min-w-[1080px] border-collapse">
             <thead>
-              <tr className="border-b border-border/60 bg-surface-muted/60">
+              <tr className="border-b border-border bg-surface-base">
                 {canDecide && (
                   <th className="w-10 px-4 py-3">
                     <input
@@ -355,20 +354,20 @@ export default function CancellationsPage() {
                     />
                   </th>
                 )}
-                <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold text-text-secondary">Booking</th>
-                <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold text-text-secondary">Tour / Supplier</th>
-                <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold text-text-secondary">Customer</th>
-                <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold text-text-secondary">Requested</th>
-                <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold text-text-secondary">Reason</th>
-                <th className="whitespace-nowrap px-4 py-3 text-right text-xs font-semibold text-text-secondary">Refund / Fee</th>
-                <th className="whitespace-nowrap px-4 py-3 text-center text-xs font-semibold text-text-secondary">Stop-sell</th>
-                <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-semibold text-text-secondary">Decided</th>
+                <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-text-tertiary">Booking</th>
+                <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-text-tertiary">Tour / Supplier</th>
+                <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-text-tertiary">Customer</th>
+                <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-text-tertiary">Requested</th>
+                <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-text-tertiary">Reason</th>
+                <th className="whitespace-nowrap px-4 py-3 text-right text-xs font-medium text-text-tertiary">Refund / Fee</th>
+                <th className="whitespace-nowrap px-4 py-3 text-center text-xs font-medium text-text-tertiary">Stop-sell</th>
+                <th className="whitespace-nowrap px-4 py-3 text-left text-xs font-medium text-text-tertiary">Decided</th>
               </tr>
             </thead>
             <tbody>
               {isLoading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="border-b border-border/50">
+                  <tr key={i} className="border-b border-border">
                     <td colSpan={canDecide ? 9 : 8} className="px-4 py-3">
                       <Skeleton className="h-10 w-full" />
                     </td>
@@ -384,7 +383,7 @@ export default function CancellationsPage() {
                 <tr>
                   <td colSpan={canDecide ? 9 : 8}>
                     <div className="flex flex-col items-center justify-center py-16 text-center">
-                      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-lg bg-surface-muted">
+                      <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-surface-muted">
                         <Inbox className="h-6 w-6 text-text-tertiary" />
                       </div>
                       <p className="text-sm font-medium text-text-primary">No {activeTabLabel} requests</p>
@@ -400,17 +399,13 @@ export default function CancellationsPage() {
                   const currency = booking?.currency || "USD";
                   const selectable = canDecide && isSelectable(request);
                   return (
-                    <motion.tr
-                      key={request.id}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      transition={{ duration: 0.15 }}
+                    <tr
+                      key={request.id} 
                       onClick={() => openDetail(request.id)}
                       className={cn(
-                        "cursor-pointer border-b border-border/50 transition-colors hover:bg-surface-muted/40",
+                        "cursor-pointer border-b border-border transition-colors hover:bg-surface-muted",
                         selectedIds.has(request.id) && "bg-primary/5",
-                      )}
-                    >
+                      )}>
                       {canDecide && (
                         <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
                           <input
@@ -479,10 +474,10 @@ export default function CancellationsPage() {
                         ) : null}
                       </td>
                       <td className="px-4 py-3 text-right">
-                        <p className="text-xs font-semibold text-text-primary tabular-nums">
+                        <p className="text-xs font-semibold text-text-primary tnum">
                           {formatCurrency(request.preview?.refund?.amount ?? 0, currency)}
                         </p>
-                        <p className="text-[10px] text-text-tertiary tabular-nums">
+                        <p className="text-[10px] text-text-tertiary tnum">
                           fee {formatCurrency(request.preview?.fee ?? 0, currency)}
                         </p>
                       </td>
@@ -508,7 +503,7 @@ export default function CancellationsPage() {
                           <span className="text-[10px] text-text-tertiary">Awaiting decision</span>
                         )}
                       </td>
-                    </motion.tr>
+                    </tr>
                   );
                 })
               )}

@@ -84,9 +84,9 @@ interface SchedulesPayload {
 }
 
 const CYCLE_BADGE: Record<string, string> = {
-  WEEKLY: "bg-sky-500/10 text-sky-600 dark:text-sky-400",
-  TWICE_MONTHLY: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-  MONTHLY: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
+  WEEKLY: "bg-status-approved/10 text-status-approved-text dark:text-status-approved-text",
+  TWICE_MONTHLY: "bg-primary/10 text-primary dark:text-primary",
+  MONTHLY: "bg-status-processing/10 text-status-processing-text dark:text-status-processing-text",
 };
 
 const CYCLE_FALLBACK: PlanOption[] = [
@@ -123,7 +123,7 @@ function relativeRunLabel(value: string | null): { label: string; today: boolean
  */
 function reasonClass(r: PayoutReadiness | undefined): string {
   if (!r) return "text-text-tertiary";
-  if (r.code === "SCHEDULER_PAUSED") return "text-amber-700 dark:text-amber-300";
+  if (r.code === "SCHEDULER_PAUSED") return "text-status-pending-text dark:text-status-pending-text";
   if (r.kind === "blocked") return "text-status-rejected-text";
   return "text-text-tertiary";
 }
@@ -207,14 +207,14 @@ export function PayoutSchedulesTab() {
         return (
           <div>
             <div className="flex items-center gap-2">
-              <p className="text-sm tabular-nums text-text-primary">{r.plan.nextRunAt ? formatDate(r.plan.nextRunAt) : "—"}</p>
+              <p className="text-sm tnum text-text-primary">{r.plan.nextRunAt ? formatDate(r.plan.nextRunAt) : "—"}</p>
               {soon && (
                 <span
                   className={cn(
                     "inline-flex items-center rounded-md px-1.5 py-0.5 text-[11px] font-semibold",
                     soon.today
-                      ? "bg-amber-500/10 text-amber-700 dark:text-amber-300"
-                      : "bg-sky-500/10 text-sky-700 dark:text-sky-300",
+                      ? "bg-status-pending/10 text-status-pending-text dark:text-status-pending-text"
+                      : "bg-status-approved/10 text-status-approved-text dark:text-status-approved-text",
                   )}
                 >
                   {soon.label}
@@ -245,7 +245,7 @@ export function PayoutSchedulesTab() {
         if (amount <= 0) {
           return (
             <div>
-              <p className="text-sm font-semibold tabular-nums text-text-tertiary">
+              <p className="text-sm font-semibold tnum text-text-tertiary">
                 {formatCurrency(0, currency)}
               </p>
               <p className={cn("text-xs font-medium", reasonClass(r.readiness))}>
@@ -257,10 +257,10 @@ export function PayoutSchedulesTab() {
 
         return (
           <div>
-            <p className="text-sm font-semibold tabular-nums text-text-primary">
+            <p className="text-sm font-semibold tnum text-text-primary">
               {formatCurrency(amount, currency)}
             </p>
-            <p className="text-xs tabular-nums text-text-tertiary">
+            <p className="text-xs tnum text-text-tertiary">
               {count} booking{count === 1 ? "" : "s"}
             </p>
             {/* Money is present but the scheduler will still skip it — the
@@ -294,9 +294,9 @@ export function PayoutSchedulesTab() {
       hideBelow: "lg",
       render: (r) =>
         r.plan.pendingCycle ? (
-          <span className="inline-flex items-center gap-1 rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-700 dark:text-amber-300">
+          <span className="inline-flex items-center gap-1 rounded-md bg-status-pending/10 px-2 py-0.5 text-xs font-medium text-status-pending-text dark:text-status-pending-text">
             {optionFor(options, r.plan.pendingCycle)?.shortLabel || r.plan.pendingCycle}
-            <span className="font-normal tabular-nums">· {formatDate(r.plan.pendingEffectiveAt)}</span>
+            <span className="font-normal tnum">· {formatDate(r.plan.pendingEffectiveAt)}</span>
           </span>
         ) : null,
     },
@@ -304,7 +304,7 @@ export function PayoutSchedulesTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <StatCard
           label="Enrolled Suppliers"
           value={isLoading ? "..." : String(summary?.enrolled ?? 0)}
@@ -337,9 +337,9 @@ export function PayoutSchedulesTab() {
       </div>
 
       {paused && (
-        <div className="flex items-start gap-2.5 rounded-lg border border-amber-500/20 bg-amber-500/10 px-4 py-3">
-          <PauseCircle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
-          <p className="text-sm text-amber-700 dark:text-amber-300">
+        <div className="flex items-start gap-2.5 rounded-xl border border-status-pending/30 bg-status-pending/10 px-4 py-3">
+          <PauseCircle className="mt-0.5 h-4 w-4 shrink-0 text-status-pending-text dark:text-status-pending-text" />
+          <p className="text-sm text-status-pending-text dark:text-status-pending-text">
             Automatic payout runs are <strong>paused</strong> (Settings → Commission &amp; Fees). Enrolled suppliers keep
             their schedule and can request a payout manually until it is switched back on.
           </p>
@@ -375,7 +375,7 @@ export function PayoutSchedulesTab() {
                 ))}
               </SelectContent>
             </Select>
-            <span className="ml-auto text-xs tabular-nums text-text-tertiary">
+            <span className="ml-auto text-xs tnum text-text-tertiary">
               {rows.length} of {data?.pagination?.totalCount ?? rows.length} suppliers · soonest payout first
             </span>
           </div>

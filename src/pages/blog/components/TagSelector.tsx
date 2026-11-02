@@ -45,7 +45,7 @@ export function TagSelector({ tags, selectedIds, onChange }: TagSelectorProps) {
             <Badge
               key={tag.id}
               variant={selectedIds.includes(tag.id) ? "default" : "outline"}
-              className="cursor-pointer select-none transition-all hover:opacity-80"
+              className="cursor-pointer select-none transition-colors hover:opacity-80"
               onClick={() => toggle(tag.id)}
             >
               {tag.name}

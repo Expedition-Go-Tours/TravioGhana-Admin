@@ -130,7 +130,7 @@ export function PayoutsMethodsTab() {
         const photoUrl = r.photoURL || r.user?.photoURL;
         return (
           <div className="flex items-center gap-2.5">
-            <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-blue-400 to-blue-600 text-xs font-bold text-white">
+            <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-semibold text-white">
               <span>{initial}</span>
               {photoUrl && (
                 <OptimizedImage
@@ -150,7 +150,7 @@ export function PayoutsMethodsTab() {
     },
     { key: "email", header: "Email", render: (r) => r.email || r.user?.email || "—" },
     { key: "status", header: "Status", render: (r) => <StatusBadge status={r.supplierProfile?.status || r.status || "UNKNOWN"} /> },
-    { key: "methodsCount", header: "Methods Count", align: "right", render: (r) => <span className="tabular-nums">{String(r.payoutMethods?.length ?? r.methodsCount ?? 0)}</span> },
+    { key: "methodsCount", header: "Methods Count", align: "right", render: (r) => <span className="tnum">{String(r.payoutMethods?.length ?? r.methodsCount ?? 0)}</span> },
     { key: "defaultMethod", header: "Default Method", render: (r) => r.payoutMethods?.find((m) => m.isDefault)?.type?.replace(/_/g, " ") || r.defaultMethod || <span className="italic text-text-tertiary">Not set</span> },
     {
       key: "actions",
@@ -167,7 +167,7 @@ export function PayoutsMethodsTab() {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
         <StatCard
           label="Supplier Coverage"
           value={isLoading ? "..." : formatCoverage(coverMeta?.withMethod, coverMeta?.totalSuppliers)}
@@ -244,7 +244,7 @@ export function PayoutsMethodsTab() {
                 ))}
               </SelectContent>
             </Select>
-            <span className="ml-auto text-xs text-text-tertiary tabular-nums">
+            <span className="ml-auto text-xs text-text-tertiary tnum">
               {filteredSuppliers.length} of {pagination?.totalCount ?? suppliers.length} suppliers
             </span>
           </div>
@@ -264,9 +264,9 @@ export function PayoutsMethodsTab() {
 
       <Dialog open={!!viewSupplierId} onOpenChange={(v) => { if (!v) setViewSupplierId(null); }}>
         <DialogContent className="max-w-2xl p-0 gap-0 overflow-y-auto max-h-[90vh] scrollbar-none border-0">
-          <div className="bg-gradient-to-r from-green-700 to-green-600 px-6 pt-6 pb-8">
+          <div className="bg-text-primary px-6 pt-6 pb-8">
             <div className="flex items-center gap-4">
-              <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 text-base font-bold text-white shadow-inner">
+              <div className="relative flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 text-base font-semibold text-white">
                 <span>{(selectedSupplier?.name || selectedSupplier?.user?.name)?.charAt(0)?.toUpperCase() || "?"}</span>
                 {(selectedSupplier?.photoURL || selectedSupplier?.user?.photoURL) && (
                   <OptimizedImage
@@ -281,7 +281,7 @@ export function PayoutsMethodsTab() {
               </div>
               <div className="min-w-0">
                 <DialogTitle className="text-lg font-semibold text-white">{selectedSupplier?.name || selectedSupplier?.user?.name || "Supplier"}</DialogTitle>
-                <DialogDescription className="mt-1 text-sm text-green-100">
+                <DialogDescription className="mt-1 text-sm text-primary">
                   {selectedSupplier?.email || selectedSupplier?.user?.email || ""}
                 </DialogDescription>
               </div>
@@ -291,7 +291,7 @@ export function PayoutsMethodsTab() {
           <div className="px-6 py-5">
             {methodsLoading ? (
               <div className="space-y-4">
-                {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-lg" />)}
+                {Array.from({ length: 2 }).map((_, i) => <Skeleton key={i} className="h-40 w-full rounded-xl" />)}
               </div>
             ) : !methodsData?.data?.methods?.length ? (
               <SectionEmpty message="No payout methods set up yet" />

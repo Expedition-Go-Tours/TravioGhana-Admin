@@ -1,10 +1,8 @@
-import { useState, useCallback } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Outlet, useLocation } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
 import { Sidebar } from "./Sidebar";
 import { Header } from "./Header";
 import { CommandPalette } from "./CommandPalette";
-import { pageTransition } from "@/lib/animations";
 import { useAdminRole } from "@/auth/useAdminRole";
 import { useTokenRefresh } from "@/hooks/useTokenRefresh";
 import { useSessionTimeout } from "@/hooks/useSessionTimeout";
@@ -18,26 +16,26 @@ export function AppLayout() {
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), []);
 
+  // A new route starts at the top of its own content. Without this, opening a
+  // record from a long list inherited the previous page's scroll offset.
+  useEffect(() => {
+    document.querySelector("main")?.scrollTo({ top: 0, behavior: "auto" });
+  }, [location.pathname]);
+
   return (
-    <div className="flex h-screen flex-col bg-surface-muted/50">
+    <div className="flex h-screen flex-col bg-surface-muted">
       <div className="flex flex-1 overflow-hidden">
-        <Sidebar open={sidebarOpen} onClose={closeSidebar} onOpen={() => setSidebarOpen(true)} />
+        <Sidebar open={sidebarOpen} onClose={closeSidebar} />
         <div className="flex min-w-0 flex-1 flex-col">
           <Header onMenuClick={() => setSidebarOpen(true)} />
           <CommandPalette />
           <main className="flex flex-1 flex-col overflow-y-auto p-4 md:p-6 lg:p-8">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={location.pathname}
-                variants={pageTransition}
-                initial="initial"
-                animate="animate"
-                exit="exit"
-                className="mx-auto w-full max-w-[1440px] flex-1 min-h-0"
-              >
-                <Outlet />
-              </motion.div>
-            </AnimatePresence>
+            <div
+              key={location.pathname}
+              className="mx-auto min-h-0 w-full max-w-[1440px] flex-1 animate-in fade-in duration-200 motion-reduce:animate-none"
+            >
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

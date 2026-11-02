@@ -112,40 +112,40 @@ const ACTION_ICONS: Record<string, React.ComponentType<{ className?: string }>> 
 };
 
 const ACTION_COLORS: Record<string, string> = {
-  "auth.login": "bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300",
-  "auth.login_failed": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
-  "auth.register": "bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300",
-  "settings.updated": "bg-sky-100 text-sky-700 dark:bg-sky-900 dark:text-sky-300",
-  "admin.granted": "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300",
-  "admin.revoked": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
-  "admin.role_changed": "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
-  "admin_role.created": "bg-emerald-100 text-emerald-700 dark:bg-emerald-900 dark:text-emerald-300",
-  "admin_role.updated": "bg-amber-100 text-amber-700 dark:bg-amber-900 dark:text-amber-300",
-  "admin_role.deleted": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
-  "security.": "bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300",
-  "booking.": "bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300",
-  "payment.": "bg-cyan-100 text-cyan-700 dark:bg-cyan-900 dark:text-cyan-300",
-  "user.deleted_by_admin": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
-  "tour.deleted": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
-  "tour.photo.deleted": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
-  "review.deleted": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
-  "payout_method.deleted": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
-  "special-offer.deleted": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
-  "api.error": "bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300",
+  "auth.login": "bg-primary/10 text-primary dark:bg-primary/10 dark:text-primary",
+  "auth.login_failed": "bg-status-rejected/10 text-status-rejected-text dark:bg-status-rejected/10 dark:text-status-rejected-text",
+  "auth.register": "bg-status-approved/10 text-status-approved-text dark:bg-status-approved/10 dark:text-status-approved-text",
+  "settings.updated": "bg-status-approved/10 text-status-approved-text dark:bg-status-approved/10 dark:text-status-approved-text",
+  "admin.granted": "bg-primary/10 text-primary dark:bg-primary/10 dark:text-primary",
+  "admin.revoked": "bg-status-rejected/10 text-status-rejected-text dark:bg-status-rejected/10 dark:text-status-rejected-text",
+  "admin.role_changed": "bg-status-pending/10 text-status-pending-text dark:bg-status-pending/10 dark:text-status-pending-text",
+  "admin_role.created": "bg-primary/10 text-primary dark:bg-primary/10 dark:text-primary",
+  "admin_role.updated": "bg-status-pending/10 text-status-pending-text dark:bg-status-pending/10 dark:text-status-pending-text",
+  "admin_role.deleted": "bg-status-rejected/10 text-status-rejected-text dark:bg-status-rejected/10 dark:text-status-rejected-text",
+  "security.": "bg-status-processing/10 text-status-processing-text dark:bg-status-processing/10 dark:text-status-processing-text",
+  "booking.": "bg-primary/10 text-primary dark:bg-primary/10 dark:text-primary",
+  "payment.": "bg-status-approved/10 text-status-approved-text dark:bg-status-approved/10 dark:text-status-approved-text",
+  "user.deleted_by_admin": "bg-status-rejected/10 text-status-rejected-text dark:bg-status-rejected/10 dark:text-status-rejected-text",
+  "tour.deleted": "bg-status-rejected/10 text-status-rejected-text dark:bg-status-rejected/10 dark:text-status-rejected-text",
+  "tour.photo.deleted": "bg-status-rejected/10 text-status-rejected-text dark:bg-status-rejected/10 dark:text-status-rejected-text",
+  "review.deleted": "bg-status-rejected/10 text-status-rejected-text dark:bg-status-rejected/10 dark:text-status-rejected-text",
+  "payout_method.deleted": "bg-status-rejected/10 text-status-rejected-text dark:bg-status-rejected/10 dark:text-status-rejected-text",
+  "special-offer.deleted": "bg-status-rejected/10 text-status-rejected-text dark:bg-status-rejected/10 dark:text-status-rejected-text",
+  "api.error": "bg-status-rejected/10 text-status-rejected-text dark:bg-status-rejected/10 dark:text-status-rejected-text",
 };
 
 const STAT_CARD_COLORS: Record<string, { bg: string }> = {
   totalActivities: {
-    bg: "bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900",
+    bg: "bg-status-approved/10",
   },
   uniqueUsers: {
-    bg: "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900",
+    bg: "bg-primary/10",
   },
   thisWeek: {
-    bg: "bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950 dark:to-amber-900",
+    bg: "bg-status-pending/10",
   },
   today: {
-    bg: "bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900",
+    bg: "bg-status-processing/10",
   },
 };
 
@@ -168,18 +168,16 @@ function getActionMeta(action: string) {
 
 function StatCard({ title, value, subtitle, icon: Icon, color }: StatCardProps) {
   return (
-    <Card className={`shadow-sm border-0 ${color}`}>
+    <Card className="border-border">
       <CardContent className="p-5">
-        <div className="flex items-start justify-between">
-          <div className="space-y-1.5">
-            <p className="text-sm font-medium text-muted-foreground">{title}</p>
-            <p className="text-3xl font-bold tracking-tight">{value}</p>
-            {subtitle && (
-              <p className="text-xs text-muted-foreground">{subtitle}</p>
-            )}
+        <div className="flex items-start justify-between gap-4">
+          <div className="min-w-0 space-y-1.5">
+            <p className="text-[13px] font-medium leading-snug text-text-tertiary">{title}</p>
+            <p className="tnum text-[26px] font-light leading-tight tracking-[-0.26px] text-text-primary">{value}</p>
+            {subtitle && <p className="text-xs text-text-tertiary">{subtitle}</p>}
           </div>
-          <div className="p-3 rounded-xl bg-primary/10 text-primary">
-            <Icon className="h-5 w-5" />
+          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${color}`}>
+            <Icon className="h-4 w-4" />
           </div>
         </div>
       </CardContent>
@@ -302,12 +300,12 @@ export default function ActivityLogPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl sm:text-3xl font-bold">Activity Log</h1>
-          <p className="text-muted-foreground mt-1">Audit trail — who did what and when (admins & system)</p>
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-[26px] font-light leading-8 tracking-[-0.26px] sm:text-[32px]">Activity Log</h1>
+          <p className="mt-1 text-sm text-text-tertiary">Audit trail — who did what and when (admins & system)</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Button variant="outline" size="sm" onClick={handleVerify} disabled={verifying}>
             <ShieldCheck className="h-4 w-4 mr-2" />
             {verifying ? "Verifying..." : "Verify Integrity"}
@@ -321,10 +319,10 @@ export default function ActivityLogPage() {
 
       {verifyResult && (
         <div
-          className={`flex items-start gap-2 px-4 py-3 rounded-lg border text-sm ${
+          className={`flex items-start gap-2 px-4 py-3 rounded-xl border text-sm ${
             verifyResult.valid
-              ? "bg-green-50 border-green-200 text-green-800 dark:bg-green-950 dark:border-green-800 dark:text-green-300"
-              : "bg-red-50 border-red-200 text-red-800 dark:bg-red-950 dark:border-red-800 dark:text-red-300"
+              ? "bg-primary/10 border-border text-primary dark:bg-primary/10 dark:border-border dark:text-primary"
+              : "bg-status-rejected/10 border-status-rejected/30 text-status-rejected-text dark:bg-status-rejected/10 dark:border-status-rejected/30 dark:text-status-rejected-text"
           }`}
         >
           {verifyResult.valid ? (
@@ -347,28 +345,28 @@ export default function ActivityLogPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           <StatCard
             title="Total Activities"
-            value={stats.totalActivities.toLocaleString()}
+            value={(stats.totalActivities ?? 0).toLocaleString()}
             subtitle="All time"
             icon={Activity}
             color={STAT_CARD_COLORS.totalActivities.bg}
           />
           <StatCard
             title="Unique Users"
-            value={stats.uniqueUsers.toLocaleString()}
+            value={(stats.uniqueUsers ?? 0).toLocaleString()}
             subtitle="Distinct actors"
             icon={Users}
             color={STAT_CARD_COLORS.uniqueUsers.bg}
           />
           <StatCard
             title="This Week"
-            value={stats.thisWeek.toLocaleString()}
+            value={(stats.thisWeek ?? 0).toLocaleString()}
             subtitle="Last 7 days"
             icon={CalendarDays}
             color={STAT_CARD_COLORS.thisWeek.bg}
           />
           <StatCard
             title="Today"
-            value={stats.today.toLocaleString()}
+            value={(stats.today ?? 0).toLocaleString()}
             subtitle={new Date().toLocaleDateString("en-GB")}
             icon={Clock}
             color={STAT_CARD_COLORS.today.bg}
@@ -387,24 +385,24 @@ export default function ActivityLogPage() {
       )}
 
       {/* Action Breakdown */}
-      {stats && stats.actionBreakdown.length > 0 && (
-        <Card className="shadow-sm rounded-lg border-0 bg-card">
+      {stats && (stats.actionBreakdown?.length ?? 0) > 0 && (
+        <Card className="rounded-xl border-0 bg-card">
           <CardContent className="p-5">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider mb-4">
+            <h3 className="text-sm font-semibold text-muted-foreground mb-4">
               Actions Breakdown
             </h3>
             <div className="flex flex-wrap gap-2">
-              {stats.actionBreakdown.map((item) => {
+              {(stats.actionBreakdown ?? []).map((item) => {
                 const meta = getActionMeta(item.action);
                 const Icon = meta.icon;
                 return (
                   <div
                     key={item.action}
-                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${meta.color}`}
+                    className={`inline-flex items-center gap-2 px-3 py-2 rounded-xl text-sm ${meta.color}`}
                   >
                     <Icon className="h-4 w-4 shrink-0" />
                     <span className="font-medium">{meta.label}</span>
-                    <span className="font-bold tabular-nums">{item.count.toLocaleString()}</span>
+                    <span className="font-semibold tnum">{item.count.toLocaleString()}</span>
                   </div>
                 );
               })}
@@ -414,7 +412,7 @@ export default function ActivityLogPage() {
       )}
 
       {/* Filters */}
-      <Card className="shadow-sm">
+      <Card className="">
         <CardContent className="p-4">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
@@ -480,7 +478,7 @@ export default function ActivityLogPage() {
         </div>
       ) : (
         <>
-          <div className="rounded-lg border bg-card shadow-sm overflow-hidden min-w-0">
+          <div className="rounded-xl border bg-card overflow-hidden min-w-0">
             <div className="divide-y divide-border/60">
               {logs.length === 0 ? (
                 <div className="text-center text-muted-foreground py-12">No activity found</div>
@@ -496,8 +494,8 @@ export default function ActivityLogPage() {
                     : entry.details || "";
                   const endpoint = getEndpoint(entry);
                   return (
-                    <div key={entry.id} className="flex items-start gap-3 px-4 py-3 hover:bg-surface-muted/40 transition-colors">
-                      <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg ${meta.color}`}>
+                    <div key={entry.id} className="flex items-start gap-3 px-4 py-3 hover:bg-surface-muted transition-colors">
+                      <div className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-xl ${meta.color}`}>
                         <Icon className="h-3.5 w-3.5" />
                       </div>
                       <div className="flex-1 min-w-0">

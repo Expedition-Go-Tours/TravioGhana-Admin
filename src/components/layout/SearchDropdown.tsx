@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import { Search, CornerDownLeft, Clock, ArrowRight, X, Package, Building2, Loader2 } from "lucide-react";
 import { getNavGroups } from "@/components/layout/navConfig";
 import { usePermission } from "@/hooks/usePermission";
@@ -107,7 +106,7 @@ function highlightMatch(text: string, query: string) {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 rounded px-0.5">{text.slice(idx, idx + query.length)}</mark>
+      <mark className="rounded bg-primary/10 px-0.5 text-primary">{text.slice(idx, idx + query.length)}</mark>
       {text.slice(idx + query.length)}
     </>
   );
@@ -120,7 +119,7 @@ export function SearchDropdown() {
   const inputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const { can, isSuperAdmin } = usePermission();
+  const { can } = usePermission();
 
   const canSearchTours = can("tours.view");
   const canSearchSuppliers = can("suppliers.view");
@@ -129,21 +128,10 @@ export function SearchDropdown() {
     suppliersEnabled: canSearchSuppliers,
   });
 
-  const adminItems = useMemo<PageItem[]>(
-    () =>
-      isSuperAdmin
-        ? [
-            { kind: "page", label: "Activity Log", path: "/admin/activity-log", group: "Administration", keywords: ["activity", "audit", "log", "history"] },
-            { kind: "page", label: "Settings", path: "/admin/settings", group: "Administration", keywords: ["settings", "config", "preferences"] },
-          ]
-        : [],
-    [isSuperAdmin],
-  );
-
   const items = useMemo(() => {
-    const groups = [...getNavGroups(can), { group: "Administration", items: adminItems }];
+    const groups = getNavGroups(can);
     return [...flatten(groups), ...getInPageItems(can)];
-  }, [can, adminItems]);
+  }, [can]);
 
   const validPaths = useMemo(() => new Set(items.map((i) => i.path)), [items]);
 
@@ -291,10 +279,10 @@ export function SearchDropdown() {
           setOpen(!open);
         }}
         className={cn(
-          "hidden md:flex h-9 items-center gap-2 rounded-xl border px-3 text-sm transition-colors",
+          "hidden md:flex h-9 items-center gap-2 rounded-full border px-3 text-sm transition-colors",
           open
-            ? "border-primary/40 bg-surface-base text-text-primary shadow-sm"
-            : "border-border/60 bg-surface-muted/60 text-text-tertiary hover:border-border hover:text-text-secondary",
+            ? "border-primary/40 bg-surface-base text-text-primary"
+            : "border-border bg-surface-muted text-text-tertiary hover:border-text-tertiary hover:text-text-secondary",
         )}
         aria-label="Search pages, tours and suppliers"
         aria-expanded={open}
@@ -309,14 +297,9 @@ export function SearchDropdown() {
         )}
       </button>
 
-      <AnimatePresence>
-        {open && (
-          <motion.div
-            initial={{ opacity: 0, y: -6, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -6, scale: 0.97 }}
-            transition={{ duration: 0.15, ease: [0.32, 0.72, 0, 1] }}
-            className="absolute left-0 top-full mt-2 w-[380px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-2xl border border-border bg-surface-base shadow-soft-lg z-50"
+      {open && (
+          <div
+            className="absolute left-0 top-full mt-2 w-[380px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-xl border border-border bg-surface-base shadow-lg z-50"
             role="dialog"
             aria-modal="true"
             aria-label="Search"
@@ -366,7 +349,7 @@ export function SearchDropdown() {
                     <div className="mb-1">
                       <div className="flex items-center gap-2 px-3 py-1.5">
                         <Clock className="h-3 w-3 text-text-tertiary" />
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
+                        <span className="text-[11px] font-medium tracking-[0.08em] text-text-tertiary">
                           Recent
                         </span>
                       </div>
@@ -376,7 +359,7 @@ export function SearchDropdown() {
                     <div key={group} className="mb-1">
                       {query.trim() && (
                         <div className="flex items-center gap-2 px-3 py-1.5">
-                          <span className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
+                          <span className="text-[11px] font-medium tracking-[0.08em] text-text-tertiary">
                             {group}
                           </span>
                         </div>
@@ -390,7 +373,7 @@ export function SearchDropdown() {
                             onClick={() => navigateTo(item)}
                             onMouseEnter={() => setHighlight(idx)}
                             className={cn(
-                              "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors",
+                              "flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors",
                               active ? "bg-accent text-accent-foreground" : "text-text-primary hover:bg-surface-muted",
                             )}
                           >
@@ -399,9 +382,9 @@ export function SearchDropdown() {
                                 <SafeImage
                                   src={item.coverPhoto || undefined}
                                   alt=""
-                                  className="h-9 w-9 shrink-0 rounded-lg object-cover ring-1 ring-border/60"
+                                  className="h-9 w-9 shrink-0 rounded-xl object-cover ring-1 ring-border/60"
                                   fallback={
-                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted">
+                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-muted">
                                       <Package className="h-4 w-4 text-text-tertiary" />
                                     </div>
                                   }
@@ -477,9 +460,8 @@ export function SearchDropdown() {
                 open full search
               </button>
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
     </div>
   );
 }

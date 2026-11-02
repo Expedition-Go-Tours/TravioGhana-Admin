@@ -12,13 +12,13 @@ export function RevenueTrendChart({ data, loading }: RevenueTrendChartProps) {
   const chartData = data || [];
 
   return (
-    <div className="rounded-2xl bg-surface-base border border-border/60 shadow-soft p-5">
+    <div className="rounded-xl bg-surface-base border border-border  p-5">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-text-secondary" />
           <h3 className="text-[15px] font-semibold text-text-primary">Revenue Trend</h3>
         </div>
-        <span className="text-xs text-text-secondary bg-surface-muted px-3 py-1.5 rounded-lg font-medium">24 months</span>
+        <span className="text-xs text-text-secondary bg-surface-muted px-3 py-1.5 rounded-xl font-medium">24 months</span>
       </div>
       
       {loading ? (
@@ -92,7 +92,7 @@ export function RevenueTrendChart({ data, loading }: RevenueTrendChartProps) {
             Revenue
           </span>
           <span className="inline-flex items-center gap-2 text-xs text-text-secondary">
-            <span className="h-2.5 w-2.5 rounded-full bg-indigo-500" />
+            <span className="h-2.5 w-2.5 rounded-full bg-primary" />
             Commission
           </span>
         </div>

@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
 
 interface TimelineStep {
@@ -15,7 +14,7 @@ interface BookingTimelineProps {
 const dotColors = {
   active: "bg-primary border-primary/30",
   completed: "bg-status-active border-status-active/30",
-  pending: "bg-border border-border/60",
+  pending: "bg-border border-border",
 };
 
 export function BookingTimeline({ steps }: BookingTimelineProps) {
@@ -34,19 +33,13 @@ export function BookingTimeline({ steps }: BookingTimelineProps) {
               )} />
             )}
             <div className="flex flex-col items-center shrink-0 pt-0.5">
-              <motion.div
-                initial={{ scale: 0 }}
-                animate={{ scale: 1 }}
-                className={cn("h-[22px] w-[22px] rounded-full border-2 flex items-center justify-center", dotClass)}
-              >
+              <div 
+                className={cn("h-[22px] w-[22px] rounded-full border-2 flex items-center justify-center", dotClass)}>
                 {step.date && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="h-2 w-2 rounded-full bg-current"
-                  />
+                  <div 
+                    className="h-2 w-2 rounded-full bg-current" />
                 )}
-              </motion.div>
+              </div>
             </div>
             <div className={cn("pb-5", isLast && "pb-0")}>
               <p className={cn(

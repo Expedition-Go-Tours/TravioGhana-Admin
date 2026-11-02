@@ -1,5 +1,5 @@
-import { useState, type ReactNode } from "react";
-import { AnimatePresence, motion } from "framer-motion";
+import type { ReactNode } from "react";
+import { useSearchParams } from "react-router-dom";
 import { ErrorBoundary } from "react-error-boundary";
 import { RefreshCw, AlertTriangle, SlidersHorizontal, ShieldCheck, Users, Server } from "lucide-react";
 import { useAdminRole } from "@/auth/useAdminRole";
@@ -13,31 +13,64 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { PageHeader } from "@/components/shared/PageHeader";
 import { cn } from "@/lib/utils";
 
-const TABS: { id: string; label: string; desc: string; icon: ReactNode; adminOnly: boolean }[] = [
-  { id: "general", label: "General", desc: "Platform, branding, booking rules", icon: <SlidersHorizontal className="h-4 w-4" />, adminOnly: false },
-  { id: "roles", label: "Admin Roles", desc: "Manage roles and permissions", icon: <ShieldCheck className="h-4 w-4" />, adminOnly: true },
-  { id: "users", label: "Admin Users", desc: "Manage admin accounts", icon: <Users className="h-4 w-4" />, adminOnly: true },
-  { id: "system", label: "System", desc: "Maintenance and health", icon: <Server className="h-4 w-4" />, adminOnly: true },
-];
+type TabGroup = "Workspace" | "Access" | "System";
 
-const contentVariants = {
-  initial: { opacity: 0, y: 8 },
-  animate: { opacity: 1, y: 0, transition: { duration: 0.3, ease: "easeOut" as const } },
-  exit: { opacity: 0, y: -4, transition: { duration: 0.15, ease: "easeIn" as const } },
-};
+const TAB_GROUPS: TabGroup[] = ["Workspace", "Access", "System"];
+
+const TABS: {
+  id: string;
+  label: string;
+  desc: string;
+  icon: ReactNode;
+  group: TabGroup;
+  adminOnly: boolean;
+}[] = [
+  {
+    id: "general",
+    label: "General",
+    desc: "Platform identity, money rules, and booking defaults.",
+    icon: <SlidersHorizontal className="h-4 w-4" />,
+    group: "Workspace",
+    adminOnly: false,
+  },
+  {
+    id: "roles",
+    label: "Admin roles",
+    desc: "Define what each admin can see and do.",
+    icon: <ShieldCheck className="h-4 w-4" />,
+    group: "Access",
+    adminOnly: true,
+  },
+  {
+    id: "users",
+    label: "Admin users",
+    desc: "Grant, change, or revoke admin access.",
+    icon: <Users className="h-4 w-4" />,
+    group: "Access",
+    adminOnly: true,
+  },
+  {
+    id: "system",
+    label: "System",
+    desc: "Operational status and maintenance controls.",
+    icon: <Server className="h-4 w-4" />,
+    group: "System",
+    adminOnly: true,
+  },
+];
 
 function TabFallback({ error, resetErrorBoundary }: { error: unknown; resetErrorBoundary: () => void }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-xl border border-border/60 bg-surface-base px-6 py-16 text-center">
-      <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-red-500/20 to-red-600/10 mb-4 ring-1 ring-red-500/20">
-        <AlertTriangle className="h-6 w-6 text-red-500" />
+    <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-surface-base px-6 py-16 text-center">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-lg bg-status-rejected/10">
+        <AlertTriangle className="h-6 w-6 text-status-rejected-text" />
       </div>
-      <h3 className="text-base font-semibold text-text-primary mb-1">Something went wrong</h3>
-      <p className="text-sm text-text-secondary mb-6 max-w-md">
-        {(error instanceof Error ? error.message : "An unexpected error occurred while rendering this section.")}
+      <h3 className="mb-1 text-base font-semibold text-text-primary">This section could not load</h3>
+      <p className="mb-6 max-w-md text-sm leading-relaxed text-text-secondary">
+        {error instanceof Error ? error.message : "An unexpected error occurred while rendering this section."}
       </p>
-      <Button variant="outline" size="sm" onClick={resetErrorBoundary} className="gap-2 shadow-sm">
-        <RefreshCw className="h-4 w-4" /> Try Again
+      <Button variant="outline" size="sm" onClick={resetErrorBoundary} className="gap-2">
+        <RefreshCw className="h-4 w-4" /> Try again
       </Button>
     </div>
   );
@@ -45,33 +78,43 @@ function TabFallback({ error, resetErrorBoundary }: { error: unknown; resetError
 
 function SettingsSkeleton() {
   return (
-    <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
-      <div className="w-full lg:w-60 lg:shrink-0 space-y-1">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="flex items-center gap-3 px-3 py-2.5 rounded-lg">
-            <Skeleton className="h-8 w-8 rounded-lg" />
-            <div className="space-y-1 flex-1">
-              <Skeleton className={cn("h-3.5", i === 0 ? "w-20" : i === 1 ? "w-24" : "w-16")} />
-              <Skeleton className="h-2.5 w-28" />
-            </div>
+    <div className="grid grid-cols-1 gap-6 lg:grid-cols-[212px_minmax(0,1fr)] lg:gap-8">
+      <div className="hidden space-y-6 lg:block">
+        {Array.from({ length: 3 }).map((_, group) => (
+          <div key={group} className="space-y-1.5">
+            <Skeleton className="ml-3 h-2.5 w-16" />
+            {Array.from({ length: group === 1 ? 2 : 1 }).map((_, item) => (
+              <div key={item} className="flex items-center gap-2.5 px-3 py-2">
+                <Skeleton className="h-4 w-4 rounded" />
+                <Skeleton className="h-3.5 w-24" />
+              </div>
+            ))}
           </div>
         ))}
       </div>
-      <div className="flex-1 min-w-0 grid grid-cols-1 md:grid-cols-2 gap-6">
-        {Array.from({ length: 4 }).map((_, s) => (
-          <div key={s} className="rounded-xl border border-border/60 bg-surface-base p-6 space-y-5 shadow-sm">
-            <div className="flex items-center gap-3">
+      <div className="min-w-0 space-y-5">
+        <div className="border-b border-border pb-5">
+          <Skeleton className="h-3 w-20" />
+          <Skeleton className="mt-2.5 h-6 w-36" />
+          <Skeleton className="mt-2 h-4 w-72 max-w-full" />
+        </div>
+        {Array.from({ length: 2 }).map((_, card) => (
+          <div key={card} className="overflow-hidden rounded-xl border border-border bg-surface-base">
+            <div className="flex items-center gap-3 px-6 py-4">
               <Skeleton className="h-9 w-9 rounded-lg" />
               <div className="space-y-1.5">
                 <Skeleton className="h-4 w-32" />
-                <Skeleton className="h-3 w-44" />
+                <Skeleton className="h-3 w-64 max-w-full" />
               </div>
             </div>
-            <div className="space-y-4">
-              {Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="space-y-2">
-                  <Skeleton className="h-3.5 w-24" />
-                  <Skeleton className="h-10 w-full rounded-lg" />
+            <div className="space-y-5 border-t border-border px-6 py-5">
+              {Array.from({ length: 3 }).map((_, row) => (
+                <div key={row} className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="space-y-1.5">
+                    <Skeleton className="h-3.5 w-28" />
+                    <Skeleton className="h-3 w-56 max-w-full" />
+                  </div>
+                  <Skeleton className="h-10 w-full rounded-md sm:w-[260px]" />
                 </div>
               ))}
             </div>
@@ -83,22 +126,31 @@ function SettingsSkeleton() {
 }
 
 export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState("general");
+  const [searchParams, setSearchParams] = useSearchParams();
   const superAdmin = isSuperAdmin();
   const { isLoading: roleLoading } = useAdminRole(true);
 
-  const visibleTabs = TABS.filter((t) => !t.adminOnly || superAdmin);
-  const activeTabId = !superAdmin ? "general" : activeTab;
+  const visibleTabs = TABS.filter((tab) => !tab.adminOnly || superAdmin);
+  const requestedTab = searchParams.get("tab");
+  const activeTabId =
+    !superAdmin || !requestedTab || !visibleTabs.some((tab) => tab.id === requestedTab)
+      ? "general"
+      : requestedTab;
+  const activeTab = TABS.find((tab) => tab.id === activeTabId) ?? TABS[0];
+
+  function selectTab(id: string) {
+    const next = new URLSearchParams(searchParams);
+    if (id === "general") next.delete("tab");
+    else next.set("tab", id);
+    setSearchParams(next, { replace: true });
+  }
 
   if (roleLoading) {
     return (
-      <div className="space-y-6 max-w-6xl mx-auto">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-8 w-40" />
-          <div className="space-y-1.5">
-            <Skeleton className="h-5 w-36" />
-            <Skeleton className="h-4 w-64" />
-          </div>
+      <div className="mx-auto max-w-[1180px] space-y-6">
+        <div className="space-y-2">
+          <Skeleton className="h-8 w-32" />
+          <Skeleton className="h-4 w-80 max-w-full" />
         </div>
         <SettingsSkeleton />
       </div>
@@ -106,71 +158,70 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="mx-auto max-w-[1180px] space-y-6">
       <PageHeader
-        title="System Settings"
-        subtitle="Configure and manage all system preferences"
+        title="Settings"
+        subtitle="Workspace configuration, access control, and platform health."
       />
 
-      <div className="flex flex-col lg:flex-row gap-8 lg:gap-10">
-        <nav className="w-full lg:w-60 lg:shrink-0" aria-label="Settings sections">
-          <div className="flex lg:flex-col gap-0.5 overflow-x-auto scrollbar-none">
-            {visibleTabs.map((tab) => {
-              const isActive = activeTabId === tab.id;
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[212px_minmax(0,1fr)] lg:gap-8">
+        <nav aria-label="Settings sections" className="min-w-0 lg:sticky lg:top-20 lg:self-start">
+          <div className="grid grid-cols-2 gap-1.5 lg:flex lg:flex-col lg:gap-6">
+            {TAB_GROUPS.map((group) => {
+              const tabs = visibleTabs.filter((tab) => tab.group === group);
+              if (tabs.length === 0) return null;
+
               return (
-                <button
-                  key={tab.id}
-                  type="button"
-                  onClick={() => setActiveTab(tab.id)}
-                  className={cn(
-                    "relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-left transition-colors shrink-0",
-                    isActive
-                      ? "bg-text-primary/10 font-medium"
-                      : "text-text-secondary hover:bg-surface-muted/60 hover:text-text-primary",
-                  )}
-                >
-                  {isActive && (
-                    <motion.div
-                      layoutId="settingsNavActive"
-                      className="absolute left-0 top-1 bottom-1 w-0.5 rounded-full bg-text-primary hidden lg:block"
-                      transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                    />
-                  )}
-                  <div className={cn(
-                    "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
-                    isActive ? "bg-text-primary/10 text-text-primary" : "bg-surface-muted text-text-secondary",
-                  )}>
-                    {tab.icon}
-                  </div>
-                  <div className="min-w-0">
-                    <div className={cn("text-sm truncate", isActive ? "font-semibold text-text-primary" : "text-text-primary")}>
-                      {tab.label}
-                    </div>
-                    <div className="text-[11px] text-text-tertiary truncate leading-tight hidden lg:block">{tab.desc}</div>
-                  </div>
-                </button>
+                <div key={group} className="contents lg:flex lg:flex-col lg:gap-0.5">
+                  <p className="hidden px-3 pb-2 text-[10px] font-semibold uppercase tracking-[0.08em] text-text-tertiary lg:block">
+                    {group}
+                  </p>
+                  {tabs.map((tab) => {
+                    const active = tab.id === activeTabId;
+                    return (
+                      <button
+                        key={tab.id}
+                        type="button"
+                        onClick={() => selectTab(tab.id)}
+                        aria-current={active ? "page" : undefined}
+                        className={cn(
+                          "flex shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-left text-[13px] transition-colors",
+                          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
+                          active
+                            ? "bg-primary/10 font-semibold text-primary"
+                            : "font-medium text-text-secondary hover:bg-surface-muted hover:text-text-primary",
+                        )}
+                      >
+                        <span className={cn("flex h-4 w-4 items-center justify-center", active ? "text-primary" : "text-text-tertiary")}>
+                          {tab.icon}
+                        </span>
+                        {tab.label}
+                      </button>
+                    );
+                  })}
+                </div>
               );
             })}
           </div>
         </nav>
 
-        <div className="flex-1 min-w-0 max-w-4xl">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTabId}
-              variants={contentVariants}
-              initial="initial"
-              animate="animate"
-              exit="exit"
-            >
-              <ErrorBoundary FallbackComponent={TabFallback} key={activeTabId}>
-                {activeTabId === "general" && <GeneralTab />}
-                {activeTabId === "roles" && superAdmin && <RolesTab />}
-                {activeTabId === "users" && superAdmin && <AdminUsersTab />}
-                {activeTabId === "system" && superAdmin && <SystemTab />}
-              </ErrorBoundary>
-            </motion.div>
-          </AnimatePresence>
+        <div className="min-w-0">
+          <div className="mb-5 border-b border-border pb-5">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.08em] text-text-tertiary">
+              {activeTab.group}
+            </p>
+            <h2 className="mt-1.5 text-[22px] font-semibold leading-7 tracking-[-0.02em] text-text-primary">
+              {activeTab.label}
+            </h2>
+            <p className="mt-1 text-sm leading-relaxed text-text-tertiary">{activeTab.desc}</p>
+          </div>
+
+          <ErrorBoundary FallbackComponent={TabFallback} resetKeys={[activeTabId]}>
+            {activeTabId === "general" && <GeneralTab />}
+            {activeTabId === "roles" && superAdmin && <RolesTab />}
+            {activeTabId === "users" && superAdmin && <AdminUsersTab />}
+            {activeTabId === "system" && superAdmin && <SystemTab />}
+          </ErrorBoundary>
         </div>
       </div>
     </div>

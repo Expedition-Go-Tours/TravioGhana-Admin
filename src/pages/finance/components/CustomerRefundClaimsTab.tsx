@@ -11,6 +11,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { DataTable } from "@/components/shared/DataTable";
 import type { Column } from "@/components/shared/DataTable";
 import { ConfirmModal } from "@/components/shared/ConfirmModal";
+import { PayoutStatusTabs } from "@/components/payouts/PayoutStatusTabs";
 import { usePermission } from "@/hooks/usePermission";
 import api from "@/lib/axios";
 import { cn, formatCurrency, formatDate } from "@/lib/utils";
@@ -89,24 +90,24 @@ function ClaimDetail({ claim }: { claim: RefundClaim }) {
   const booking = claim.booking || {};
   const paidTotal = Number(booking.grossAmount || 0);
   return (
-    // DataTable's <td> already paints `bg-surface-muted/30` and is `p-0`, so
+    // DataTable's <td> already paints `bg-surface-muted` and is `p-0`, so
     // this supplies only the padding; stacking a second 30% tint would render
     // a visibly different shade from the requests table above it.
     <div className="px-5 py-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Customer</p>
+          <p className="text-[11px] font-semibold text-text-tertiary">Customer</p>
           <p className="mt-1 truncate text-sm text-text-secondary">
             {booking.customer?.name || "—"}
             {booking.customer?.email ? <span className="text-xs text-text-tertiary"> · {booking.customer.email}</span> : null}
           </p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Supplier</p>
+          <p className="text-[11px] font-semibold text-text-tertiary">Supplier</p>
           <p className="mt-1 truncate text-sm text-text-secondary">{booking.tour?.supplier?.name || "—"}</p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Requested</p>
+          <p className="text-[11px] font-semibold text-text-tertiary">Requested</p>
           <p className="mt-1 text-sm text-text-secondary">
             {claim.type === "FULL"
               ? `Full · ${formatCurrency(paidTotal, booking.currency)}`
@@ -114,18 +115,18 @@ function ClaimDetail({ claim }: { claim: RefundClaim }) {
           </p>
         </div>
       </div>
-      <div className="mt-3 rounded-md border border-border/60 bg-surface-base px-3 py-2">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">{REASON_LABELS[claim.reason] || claim.reason}</p>
+      <div className="mt-3 rounded-md border border-border bg-surface-base px-3 py-2">
+        <p className="text-[11px] font-semibold text-text-tertiary">{REASON_LABELS[claim.reason] || claim.reason}</p>
         {claim.details && <p className="mt-1 whitespace-pre-wrap text-sm text-text-secondary">{claim.details}</p>}
       </div>
       {claim.status === "RELEASED" && (
-        <div className="mt-3 flex items-center gap-1.5 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
+        <div className="mt-3 flex items-center gap-1.5 rounded-md bg-primary/10 px-3 py-2 text-sm text-primary dark:text-primary">
           <CheckCircle2 className="h-4 w-4" />
           Released {formatCurrency(Number(claim.releasedAmount || 0), booking.currency)} on {claim.createdAt ? formatDate(claim.createdAt) : ""}
         </div>
       )}
       {claim.reviewNote && (
-        <div className="mt-3 rounded-md bg-red-500/5 px-3 py-2 text-sm text-red-700 dark:text-red-400">
+        <div className="mt-3 rounded-md bg-status-rejected/5 px-3 py-2 text-sm text-status-rejected-text dark:text-status-rejected-text">
           Decision note: {claim.reviewNote}
         </div>
       )}
@@ -309,7 +310,7 @@ export function CustomerRefundClaimsTab() {
         const paidTotal = Number(booking.grossAmount || 0);
         return (
           <span className="block">
-            <span className="block text-sm font-semibold text-text-primary tabular-nums">{formatCurrency(paidTotal, booking.currency)}</span>
+            <span className="block text-sm font-semibold text-text-primary tnum">{formatCurrency(paidTotal, booking.currency)}</span>
             <span className="block text-xs text-text-tertiary">paid</span>
           </span>
         );
@@ -348,23 +349,17 @@ export function CustomerRefundClaimsTab() {
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center gap-2">
-        {STATUS_TABS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setStatusTab(key)}
-            className={cn(
-              "rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors focus:outline-none",
-              statusTab === key
-                ? "bg-primary text-primary-foreground"
-                : "border border-border bg-surface-base text-text-secondary hover:text-text-primary"
-            )}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="flex items-center gap-3">
+        <PayoutStatusTabs
+          tabs={STATUS_TABS}
+          active={statusTab}
+          onChange={(key) => setStatusTab(key as ClaimStatus | "ALL")}
+          className="min-w-0 flex-1"
+        />
         {!isLoading && !isError && claims.length > 0 && (
-          <span className="ml-auto text-xs text-text-tertiary tabular-nums">{claims.length} request(s)</span>
+          <span className="shrink-0 pr-1 text-xs text-text-tertiary tnum">
+            {claims.length} {claims.length === 1 ? "claim" : "claims"}
+          </span>
         )}
       </div>
 

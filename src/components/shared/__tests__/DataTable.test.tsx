@@ -77,7 +77,7 @@ describe("DataTable structure", () => {
     const th = screen.getByRole("columnheader", { name: "Amount" });
     expect(th.className).toContain("text-right");
     const firstRow = screen.getAllByRole("row")[1];
-    expect(firstRow.children[1].className).toContain("tabular-nums");
+    expect(firstRow.children[1].className).toContain("tnum");
     expect(firstRow.children[1].className).toContain("text-right");
   });
 

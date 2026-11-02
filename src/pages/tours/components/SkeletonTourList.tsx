@@ -6,7 +6,7 @@ export function SkeletonTourList() {
       {Array.from({ length: 6 }).map((_, i) => (
         <div
           key={i}
-          className="flex items-start gap-3 rounded-xl border border-border/40 p-4"
+          className="flex items-start gap-3 rounded-xl border border-border p-4"
         >
           <Skeleton className="h-2.5 w-2.5 rounded-full mt-1.5 shrink-0" />
           <div className="flex-1 space-y-2">

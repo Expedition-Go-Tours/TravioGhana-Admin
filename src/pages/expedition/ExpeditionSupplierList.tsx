@@ -1,5 +1,4 @@
 import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import {
   Search, X, Globe, CheckCircle, ExternalLink, Building2, ChevronRight,
@@ -8,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SafeImage } from "@/components/shared/SafeImage";
 import { SectionError } from "@/components/shared/SectionError";
-import { staggerContainer, fadeIn, fadeInDown, fadeInUp } from "@/lib/animations";
 import { formatNumber } from "@/lib/utils";
 import api from "@/lib/axios";
 
@@ -25,7 +23,7 @@ interface Supplier {
 
 function SupplierCardSkeleton() {
   return (
-    <div className="rounded-xl border border-border/80 bg-surface-base p-5 shadow-soft animate-pulse">
+    <div className="rounded-xl border border-border bg-surface-base p-5  animate-pulse">
       <div className="flex items-center gap-3.5">
         <Skeleton className="h-12 w-12 rounded-full" />
         <div className="flex-1 space-y-2">
@@ -33,7 +31,7 @@ function SupplierCardSkeleton() {
           <Skeleton className="h-3 w-1/2" />
         </div>
       </div>
-      <Skeleton className="mt-4 h-14 w-full rounded-lg" />
+      <Skeleton className="mt-4 h-14 w-full rounded-xl" />
       <div className="mt-3 flex items-center justify-between">
         <Skeleton className="h-5 w-20 rounded-full" />
         <Skeleton className="h-4 w-16" />
@@ -76,21 +74,11 @@ export default function ExpeditionSupplierList({ onSelectSupplier }: SupplierLis
   const hasData = Boolean(!isLoading && !isError && data);
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0, transition: { duration: 0.15 } }}
-      className="space-y-6"
-    >
+    <div 
+      className="space-y-6">
       {/* Hero */}
-      <motion.div
-        variants={fadeInDown}
-        initial="hidden"
-        animate="visible"
-        className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 via-emerald-700 to-emerald-950 p-6 text-white shadow-lg sm:p-8"
-      >
-        <div className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-white/10 blur-3xl" />
-        <div className="pointer-events-none absolute -bottom-28 right-28 h-56 w-56 rounded-full bg-emerald-400/20 blur-3xl" />
+      <div 
+        className="relative overflow-hidden rounded-xl bg-brand-dark p-6 text-white sm:p-8">
         <Globe className="pointer-events-none absolute -bottom-8 -right-4 h-48 w-48 text-white/5" />
 
         <div className="relative flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -99,58 +87,47 @@ export default function ExpeditionSupplierList({ onSelectSupplier }: SupplierLis
               <Globe className="h-3.5 w-3.5" />
               Expedition Go
             </span>
-            <h1 className="mt-3 text-2xl font-bold tracking-tight sm:text-[28px]">Tour Distribution</h1>
+            <h1 className="mt-3 text-[26px] font-light leading-8 tracking-[-0.26px] sm:text-[28px]">Tour Distribution</h1>
             <p className="mt-2 text-sm leading-relaxed text-white/75">
               Control which supplier tours are published on Expedition Go and manage direct booking availability, all from one place.
             </p>
           </div>
 
-          <div className="flex shrink-0 items-center gap-3 rounded-xl bg-white/10 px-4 py-3 ring-1 ring-inset ring-white/15 backdrop-blur-sm">
-            <span className="relative flex h-2.5 w-2.5">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-300 opacity-60" />
-              <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-emerald-300" />
-            </span>
+          <div className="flex shrink-0 items-center gap-3 rounded-xl bg-white/10 px-4 py-3 ring-1 ring-inset ring-white/15 ">
+            <span className="h-2.5 w-2.5 rounded-full bg-status-active ring-2 ring-white/20" />
             <div>
-              <p className="text-[10px] font-semibold uppercase tracking-wider text-white/60">Distribution</p>
+              <p className="text-[10px] font-semibold text-white/60">Distribution</p>
               <p className="text-sm font-semibold">
                 {isLoading ? "Loading…" : isError ? "Needs attention" : `${formatNumber(stats.active)} tours live`}
               </p>
             </div>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* KPI Cards */}
       {hasData && (
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-          className="grid grid-cols-2 gap-4 lg:grid-cols-4"
-        >
+        <div 
+          className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {[
-            { label: "Suppliers", value: stats.total, icon: Building2, color: "bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/40 dark:to-blue-900/40" },
-            { label: "On Expedition", value: stats.onExp, icon: Globe, color: "bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/40 dark:to-emerald-900/40" },
-            { label: "Active on EG", value: stats.active, icon: CheckCircle, color: "bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950/40 dark:to-green-900/40" },
-            { label: "Direct Booking", value: stats.direct, icon: ExternalLink, color: "bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/40 dark:to-amber-900/40" },
+            { label: "Suppliers", value: stats.total, icon: Building2, tone: "bg-status-approved/10 text-status-approved-text" },
+            { label: "On Expedition", value: stats.onExp, icon: Globe, tone: "bg-primary/10 text-primary" },
+            { label: "Active on EG", value: stats.active, icon: CheckCircle, tone: "bg-primary/10 text-primary" },
+            { label: "Direct Booking", value: stats.direct, icon: ExternalLink, tone: "bg-status-pending/10 text-status-pending-text" },
           ].map((k) => (
-            <motion.div
-              key={k.label}
-              variants={fadeIn}
-              className={`rounded-lg shadow-sm border-0 p-5 ${k.color}`}
-            >
-              <div className="flex items-start justify-between">
-                <div className="space-y-1.5">
-                  <p className="text-sm font-medium text-muted-foreground">{k.label}</p>
-                  <p className="text-3xl font-bold tracking-tight text-text-primary">{formatNumber(k.value)}</p>
+            <div key={k.label} className="rounded-xl border border-border bg-surface-base p-5">
+              <div className="flex items-start justify-between gap-4">
+                <div className="min-w-0 space-y-1.5">
+                  <p className="text-[13px] font-medium leading-snug text-text-tertiary">{k.label}</p>
+                  <p className="tnum text-[26px] font-light leading-tight tracking-[-0.26px] text-text-primary">{formatNumber(k.value)}</p>
                 </div>
-                <div className="p-3 rounded-xl bg-primary/10 text-primary">
-                  <k.icon className="h-5 w-5" />
+                <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${k.tone}`}>
+                  <k.icon className="h-4 w-4" />
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
-        </motion.div>
+        </div>
       )}
 
       {/* Toolbar */}
@@ -189,13 +166,10 @@ export default function ExpeditionSupplierList({ onSelectSupplier }: SupplierLis
 
       {/* Error */}
       {isError && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="rounded-xl border border-border bg-surface-base"
-        >
+        <div 
+          className="rounded-xl border border-border bg-surface-base">
           <SectionError message="Failed to load suppliers" onRetry={() => refetch()} />
-        </motion.div>
+        </div>
       )}
 
       {/* Loading */}
@@ -207,23 +181,15 @@ export default function ExpeditionSupplierList({ onSelectSupplier }: SupplierLis
 
       {/* Supplier cards */}
       {hasData && suppliers.length > 0 && (
-        <motion.div
-          variants={staggerContainer}
-          initial="hidden"
-          animate="visible"
-          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"
-        >
+        <div 
+          className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {suppliers.map((supplier) => {
             const live = supplier.activeOnExpedition > 0;
             return (
-              <motion.button
-                key={supplier.id}
-                variants={fadeInUp}
-                whileHover={{ y: -3, boxShadow: "0 10px 30px rgba(0,0,0,0.08)" }}
-                whileTap={{ scale: 0.985 }}
+              <button
+                key={supplier.id} 
                 onClick={() => onSelectSupplier(supplier)}
-                className="group relative w-full rounded-xl border border-border/80 bg-surface-base p-5 text-left shadow-soft transition-colors hover:border-primary/40"
-              >
+                className="group relative w-full rounded-xl border border-border bg-surface-base p-5 text-left  transition-colors hover:border-primary/40">
                 <div className="flex items-center gap-3.5">
                   <div className="relative shrink-0">
                     <SafeImage
@@ -231,7 +197,7 @@ export default function ExpeditionSupplierList({ onSelectSupplier }: SupplierLis
                       alt={supplier.name}
                       className="h-12 w-12 rounded-full object-cover ring-2 ring-border"
                       fallback={
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-sm font-bold text-white ring-2 ring-emerald-100 dark:ring-emerald-800">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white ring-2 ring-primary/30 dark:ring-primary/30">
                           {supplier.name.charAt(0).toUpperCase()}
                         </div>
                       }
@@ -248,18 +214,18 @@ export default function ExpeditionSupplierList({ onSelectSupplier }: SupplierLis
                   </div>
                 </div>
 
-                <div className="mt-4 grid grid-cols-3 divide-x divide-border/70 rounded-lg border border-border/70 bg-surface-muted/40 py-2">
+                <div className="mt-4 grid grid-cols-3 divide-x divide-border/70 rounded-xl border border-border bg-surface-muted py-2">
                   <div className="px-2 text-center">
-                    <p className="text-sm font-semibold text-text-primary tabular-nums">{formatNumber(supplier.totalTours)}</p>
-                    <p className="text-[10px] font-medium uppercase tracking-wide text-text-tertiary">Tours</p>
+                    <p className="text-sm font-semibold text-text-primary tnum">{formatNumber(supplier.totalTours)}</p>
+                    <p className="text-[10px] font-medium text-text-tertiary">Tours</p>
                   </div>
                   <div className="px-2 text-center">
-                    <p className="text-sm font-semibold text-text-primary tabular-nums">{formatNumber(supplier.onExpedition)}</p>
-                    <p className="text-[10px] font-medium uppercase tracking-wide text-text-tertiary">On EG</p>
+                    <p className="text-sm font-semibold text-text-primary tnum">{formatNumber(supplier.onExpedition)}</p>
+                    <p className="text-[10px] font-medium text-text-tertiary">On EG</p>
                   </div>
                   <div className="px-2 text-center">
-                    <p className="text-sm font-semibold text-text-primary tabular-nums">{formatNumber(supplier.directCount)}</p>
-                    <p className="text-[10px] font-medium uppercase tracking-wide text-text-tertiary">Direct</p>
+                    <p className="text-sm font-semibold text-text-primary tnum">{formatNumber(supplier.directCount)}</p>
+                    <p className="text-[10px] font-medium text-text-tertiary">Direct</p>
                   </div>
                 </div>
 
@@ -277,19 +243,16 @@ export default function ExpeditionSupplierList({ onSelectSupplier }: SupplierLis
                     <ChevronRight className="h-3.5 w-3.5" />
                   </span>
                 </div>
-              </motion.button>
+              </button>
             );
           })}
-        </motion.div>
+        </div>
       )}
 
       {/* Empty */}
       {hasData && suppliers.length === 0 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-muted/40 py-16 text-center"
-        >
+        <div 
+          className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-muted py-16 text-center">
           <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-surface-muted">
             <Building2 className="h-6 w-6 text-text-tertiary" />
           </div>
@@ -297,8 +260,8 @@ export default function ExpeditionSupplierList({ onSelectSupplier }: SupplierLis
           <p className="mt-1 text-xs text-text-secondary">
             {search ? "Try a different search term" : "No suppliers with tours yet"}
           </p>
-        </motion.div>
+        </div>
       )}
-    </motion.div>
+    </div>
   );
 }

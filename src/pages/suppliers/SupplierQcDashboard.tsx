@@ -88,7 +88,7 @@ export default function SupplierQcDashboardPage() {
         <Card>
           <CardHeader className="border-b border-border pb-3">
             <CardTitle className="flex items-center gap-2 text-sm font-semibold text-text-primary">
-              <CalendarClock className="h-4 w-4 text-amber-500" /> Expiring soon
+              <CalendarClock className="h-4 w-4 text-status-pending-text" /> Expiring soon
             </CardTitle>
           </CardHeader>
           <CardContent className="p-5">
@@ -101,9 +101,9 @@ export default function SupplierQcDashboardPage() {
                   { label: "Within 30 days", value: d?.expiringSoon?.within30 ?? 0 },
                   { label: "Within 7 days", value: d?.expiringSoon?.within7 ?? 0 },
                 ].map((row) => (
-                  <div key={row.label} className="flex items-center justify-between rounded-lg border border-border bg-surface-base px-4 py-3">
+                  <div key={row.label} className="flex items-center justify-between rounded-xl border border-border bg-surface-base px-4 py-3">
                     <span className="text-sm text-text-secondary">{row.label}</span>
-                    <span className="text-sm font-semibold text-text-primary tabular-nums">{formatNumber(row.value)}</span>
+                    <span className="text-sm font-semibold text-text-primary tnum">{formatNumber(row.value)}</span>
                   </div>
                 ))}
               </div>
@@ -126,9 +126,9 @@ export default function SupplierQcDashboardPage() {
                   { label: "Guides awaiting verification", icon: <IdCard className="h-4 w-4 text-text-tertiary" />, value: d?.guidesAwaitingVerification ?? 0 },
                   { label: "Vehicles awaiting verification", icon: <Bus className="h-4 w-4 text-text-tertiary" />, value: d?.vehiclesAwaitingVerification ?? 0 },
                 ].map((row) => (
-                  <div key={row.label} className="flex items-center justify-between rounded-lg border border-border bg-surface-base px-4 py-3">
+                  <div key={row.label} className="flex items-center justify-between rounded-xl border border-border bg-surface-base px-4 py-3">
                     <span className="flex items-center gap-2 text-sm text-text-secondary">{row.icon}{row.label}</span>
-                    <span className="text-sm font-semibold text-text-primary tabular-nums">{formatNumber(row.value)}</span>
+                    <span className="text-sm font-semibold text-text-primary tnum">{formatNumber(row.value)}</span>
                   </div>
                 ))}
               </div>

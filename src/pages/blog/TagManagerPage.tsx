@@ -37,7 +37,7 @@ export default function TagManagerPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-text-primary">Tags</h1>
+          <h1 className="text-[26px] font-light leading-8 tracking-[-0.26px] text-text-primary">Tags</h1>
           <p className="mt-1 text-sm text-text-secondary">Manage article tags</p>
         </div>
         <Button onClick={() => { setEditingTag(null); setDialogOpen(true); }} className="bg-status-processing hover:bg-status-processing/90">

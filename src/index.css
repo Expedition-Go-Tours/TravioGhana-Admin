@@ -4,183 +4,148 @@
 
 @layer base {
   :root {
-    --background: 0 0% 98%;
-    --foreground: 210 20% 12%;
+    /* Stripe product palette. Indigo is the only brand accent; ink carries all
+       text; hairlines do the structural work. */
+    --background: 0 0% 100%;
+    --foreground: 210 65% 14.5%;
     --card: 0 0% 100%;
-    --card-foreground: 210 20% 12%;
+    --card-foreground: 210 65% 14.5%;
     --popover: 0 0% 100%;
-    --popover-foreground: 210 20% 12%;
+    --popover-foreground: 210 65% 14.5%;
 
-    /* Foreground tokens are the *label* colour for their matching fill, so each
-       pair is contrast-checked together (see audit_foreground_pairs.py). At the
-       previous 32%/50% lightnesses, white-on-primary was 3.70:1 and
-       white-on-warning 2.41:1 -- both below SC 1.4.3 AA for normal text, on
-       every primary button in the app. The lightnesses below are the closest
-       values that reach 4.5:1 while keeping the hue and saturation. */
-    --primary: 163 85% 28.6%;
+    /* #533afd on #ffffff = 6.19:1. Every fill/label pair below is AA. */
+    --primary: 248 98% 61%;
+    /* Fixed dark surface for inverted panels; stays dark in both themes. */
+    --brand-dark: 210 65% 14.5%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 210 16% 96%;
-    --secondary-foreground: 210 15% 25%;
-    --muted: 210 14% 95%;
-    --muted-foreground: 210 12% 44%;
-    --accent: 163 85% 94%;
-    --accent-foreground: 163 45% 28%;
-    --destructive: 0 70% 50%;
+    --secondary: 210 50% 97.6%;
+    --secondary-foreground: 210 65% 14.5%;
+    --muted: 210 45% 96%;
+    --muted-foreground: 217 17% 46%;
+    --accent: 250 100% 97%;
+    --accent-foreground: 248 70% 42%;
+    --destructive: 340 80% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 163 85% 28.6%;
+    --success: 248 80% 52%;
     --success-foreground: 0 0% 100%;
-    --warning: 38 75% 35%;
+    --warning: 32 90% 38%;
     --warning-foreground: 0 0% 100%;
 
-    --border: 210 14% 90%;
-    --input: 210 14% 90%;
-    --ring: 163 85% 42%;
+    --border: 213 24% 91%;
+    --input: 210 35% 76%;
+    --ring: 248 98% 61%;
     --radius: 8px;
 
-    /* Text ramp, re-spaced so every step clears WCAG 2.2 SC 1.4.3 (4.5:1) on
-       BOTH --surface-base and --surface-muted, while keeping three visually
-       distinct steps. Measured: primary 16.65/14.83, secondary 6.33/5.64,
-       tertiary 5.05/4.50. Do not narrow these gaps — 45%/60% used to collapse
-       into each other and tertiary landed at 2.90:1. */
-    --text-primary: 210 20% 12%;
-    --text-secondary: 210 12% 38%;
-    --text-tertiary: 210 10% 44%;
+    /* Ink ramp. primary 15.6:1 on white, secondary 11.2:1, tertiary 4.8:1 on
+       white and 4.6:1 on #f6f9fc. Keep tertiary at 46% or darker. */
+    --text-primary: 210 65% 14.5%;
+    --text-secondary: 214 35% 23.5%;
+    --text-tertiary: 217 17% 46%;
     --surface-base: 0 0% 100%;
-    --surface-muted: 210 14% 95%;
-    --border-muted: 210 12% 88%;
+    --surface-muted: 210 50% 97.6%;
+    --border-muted: 213 20% 86%;
 
-    --status-pending: 38 75% 50%;
-    --status-approved: 210 60% 50%;
-    --status-active: 163 85% 32%;
-    --status-rejected: 0 65% 50%;
-    --status-suspended: 210 5% 45%;
-    --status-flagged: 25 70% 50%;
-    --status-processing: 270 40% 55%;
+    --status-pending: 32 90% 48%;
+    --status-approved: 214 90% 52%;
+    --status-active: 248 80% 52%;
+    --status-rejected: 340 80% 52%;
+    --status-suspended: 215 12% 48%;
+    --status-flagged: 20 85% 50%;
+    --status-processing: 262 60% 58%;
 
-    /* Label steps for status badges. The chroma above is tuned to sit at 10%
-       alpha as a fill/tint/border, which is far too light to carry text — all
-       seven measured 2.2-4.3:1 as a label. These are the dark equivalents used
-       for the label only, following the Polaris and Carbon tag recipe
-       (dark text step + light tint of the same hue). */
-    --status-pending-text: 30 95% 22%;
-    --status-approved-text: 214 85% 28%;
-    --status-active-text: 163 90% 18%;
-    --status-rejected-text: 0 78% 30%;
-    --status-suspended-text: 210 10% 28%;
-    --status-flagged-text: 18 92% 26%;
-    --status-processing-text: 268 60% 32%;
+    /* Label steps for status badges. The fills above sit at 10% alpha behind
+       the badge; these darker steps carry the text and stay above 4.5:1. */
+    --status-pending-text: 30 90% 26%;
+    --status-approved-text: 214 90% 32%;
+    --status-active-text: 248 80% 36%;
+    --status-rejected-text: 340 80% 32%;
+    --status-suspended-text: 215 15% 30%;
+    --status-flagged-text: 18 90% 30%;
+    --status-processing-text: 262 70% 38%;
 
-    --chart-1: 163 85% 38%;
-    --chart-2: 210 55% 50%;
-    --chart-3: 38 70% 52%;
-    --chart-4: 25 65% 50%;
-    --chart-5: 270 35% 52%;
+    /* Data ramp: indigo first, then blue, amber, ruby, navy. */
+    --chart-1: 248 98% 61%;
+    --chart-2: 210 90% 52%;
+    --chart-3: 32 85% 48%;
+    --chart-4: 340 80% 55%;
+    --chart-5: 238 50% 35%;
 
-    --green-50: 163 60% 93%;
-    --green-100: 163 55% 84%;
-    --green-200: 163 50% 70%;
-    --green-300: 163 48% 58%;
-    --green-400: 163 50% 48%;
-    --green-500: 163 60% 40%;
-    --green-600: 163 85% 32%;
-    --green-700: 163 80% 24%;
-    --green-800: 163 75% 18%;
-    --green-900: 163 70% 12%;
-    --green-950: 163 65% 7%;
 
-    --font-display: "Space Grotesk", "Plus Jakarta Sans", system-ui, sans-serif;
+    --font-display: "Inter", system-ui, sans-serif;
 
-    --sidebar-bg: 163 80% 24%;
-    --sidebar-surface: 163 70% 18%;
-    --sidebar-border: 163 60% 28%;
-    --sidebar-text: 163 30% 72%;
-    --sidebar-text-active: 0 0% 100%;
+    --sidebar-bg: 0 0% 100%;
+    --sidebar-surface: 210 50% 97.6%;
+    --sidebar-border: 213 24% 91%;
+    --sidebar-text: 217 17% 46%;
+    --sidebar-text-active: 210 65% 14.5%;
   }
 
   .dark {
-    --background: 210 20% 7%;
-    --foreground: 210 12% 82%;
-    --card: 210 18% 10%;
-    --card-foreground: 210 12% 82%;
-    --popover: 210 18% 10%;
-    --popover-foreground: 210 12% 82%;
+    --background: 222 35% 7%;
+    --foreground: 210 25% 92%;
+    --card: 222 30% 10%;
+    --card-foreground: 210 25% 92%;
+    --popover: 222 30% 11%;
+    --popover-foreground: 210 25% 92%;
 
-    /* Dark theme keeps the BRIGHT fills -- on a dark page a saturated accent is
-       what makes a button read as actionable -- and flips the label to a
-       near-black tinted with the same hue. White on these fills was 2.7-3.0:1,
-       below AA for normal text. Near-black is 5.9-6.6:1 on the same fills.
-       (The alternative, darkening the fills to ~29%, makes dark-mode buttons
-       darker than the page surface and indistinguishable from light mode.) */
-    --primary: 163 80% 38%;
-    --primary-foreground: 163 40% 8%;
-    --secondary: 210 12% 15%;
-    --secondary-foreground: 210 12% 72%;
-    --muted: 210 12% 14%;
-    --muted-foreground: 210 8% 54.4%;
-    --accent: 163 30% 12%;
-    --accent-foreground: 163 40% 62%;
-    --destructive: 0 60% 42%;
+    /* #6b5cf0 on white text = 4.8:1. Fills stay bright; labels stay white. */
+    --primary: 248 82% 65%;
+    --brand-dark: 222 45% 12%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 222 22% 15%;
+    --secondary-foreground: 210 22% 86%;
+    --muted: 222 20% 14%;
+    --muted-foreground: 215 15% 62%;
+    --accent: 248 40% 20%;
+    --accent-foreground: 248 90% 84%;
+    --destructive: 340 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 163 75% 38%;
-    --success-foreground: 163 40% 8%;
-    --warning: 38 70% 48%;
-    --warning-foreground: 38 40% 8%;
+    --success: 248 82% 68%;
+    --success-foreground: 248 40% 8%;
+    --warning: 32 80% 52%;
+    --warning-foreground: 32 40% 8%;
 
-    --border: 210 12% 16%;
-    --input: 210 12% 16%;
-    --ring: 163 80% 42%;
+    --border: 222 18% 19%;
+    --input: 222 18% 24%;
+    --ring: 248 82% 65%;
 
-    /* Dark ramp — same re-spacing rule as the light block above. */
-    --text-primary: 210 12% 82%;
-    --text-secondary: 210 8% 62%;
-    --text-tertiary: 210 6% 55%;
-    --surface-base: 210 18% 10%;
-    --surface-muted: 210 14% 14%;
-    --border-muted: 210 12% 18%;
+    /* Dark ink ramp — same spacing rule as the light block. */
+    --text-primary: 210 25% 92%;
+    --text-secondary: 215 16% 70%;
+    --text-tertiary: 215 12% 58%;
+    --surface-base: 222 30% 10%;
+    --surface-muted: 222 32% 8%;
+    --border-muted: 222 18% 24%;
 
-    --status-pending: 38 65% 48%;
-    --status-approved: 210 45% 48%;
-    --status-active: 163 75% 38%;
-    --status-rejected: 0 55% 48%;
-    --status-suspended: 210 5% 42%;
-    --status-flagged: 25 60% 48%;
-    --status-processing: 270 30% 52%;
+    --status-pending: 32 80% 55%;
+    --status-approved: 214 85% 62%;
+    --status-active: 248 82% 68%;
+    --status-rejected: 340 70% 60%;
+    --status-suspended: 215 10% 55%;
+    --status-flagged: 20 80% 56%;
+    --status-processing: 262 60% 62%;
 
-    /* Dark-mode label steps — same rule as the light block: lighter than the
-       fill is unusable as text on a near-black surface, so the label steps up
-       instead. */
-    --status-pending-text: 40 90% 68%;
-    --status-approved-text: 210 90% 76%;
-    --status-active-text: 163 65% 62%;
-    --status-rejected-text: 0 85% 74%;
-    --status-suspended-text: 210 12% 74%;
-    --status-flagged-text: 28 90% 70%;
-    --status-processing-text: 270 80% 78%;
+    --status-pending-text: 32 90% 72%;
+    --status-approved-text: 214 90% 76%;
+    --status-active-text: 248 90% 82%;
+    --status-rejected-text: 340 85% 74%;
+    --status-suspended-text: 215 12% 74%;
+    --status-flagged-text: 24 90% 72%;
+    --status-processing-text: 262 80% 80%;
 
-    --chart-1: 163 75% 40%;
-    --chart-2: 210 40% 48%;
-    --chart-3: 38 60% 48%;
-    --chart-4: 25 55% 48%;
-    --chart-5: 270 30% 48%;
+    --chart-1: 248 82% 68%;
+    --chart-2: 210 90% 62%;
+    --chart-3: 32 85% 58%;
+    --chart-4: 340 80% 64%;
+    --chart-5: 238 45% 74%;
 
-    --green-50: 163 30% 10%;
-    --green-100: 163 30% 13%;
-    --green-200: 163 28% 18%;
-    --green-300: 163 30% 26%;
-    --green-400: 163 40% 36%;
-    --green-500: 163 50% 42%;
-    --green-600: 163 55% 38%;
-    --green-700: 163 50% 34%;
-    --green-800: 163 45% 26%;
-    --green-900: 163 40% 18%;
-    --green-950: 163 38% 12%;
 
-    --sidebar-bg: 163 65% 14%;
-    --sidebar-surface: 163 55% 10%;
-    --sidebar-border: 163 45% 18%;
-    --sidebar-text: 163 30% 72%;
+    --sidebar-bg: 222 35% 7%;
+    --sidebar-surface: 222 32% 6%;
+    --sidebar-border: 222 18% 19%;
+    --sidebar-text: 215 15% 65%;
     --sidebar-text-active: 0 0% 100%;
   }
 }
@@ -216,6 +181,11 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .tnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1, "ss01" 1;
+  }
 }
 
 @layer base {
@@ -225,18 +195,19 @@
 
   html {
     -webkit-tap-highlight-color: transparent;
-    scroll-behavior: smooth;
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
-    font-family: "Plus Jakarta Sans", system-ui, sans-serif;
-    font-weight: 500;
+    font-family: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+    font-weight: 400;
+    font-feature-settings: "ss01" 1, "cv11" 1;
+    text-rendering: optimizeLegibility;
   }
 
   ::selection {
-    background: hsl(var(--primary) / 0.2);
-    color: hsl(var(--primary));
+    background: hsl(var(--primary) / 0.14);
+    color: hsl(var(--text-primary));
   }
 
   :focus-visible {
@@ -249,36 +220,7 @@
   }
 }
 
-@layer components {
-  .noise-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 9999;
-    pointer-events: none;
-    opacity: 0.025;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-    background-size: 256px 256px;
-  }
-
-  .double-bezel {
-    @apply relative;
-    background: hsl(var(--surface-muted));
-    padding: 1.5px;
-    border-radius: calc(0.5rem + 2px);
-  }
-  .double-bezel-inner {
-    @apply bg-surface-base rounded-[0.5rem];
-    box-shadow: inset 0 1px 1px rgba(255,255,255,0.6);
-  }
-
-  .glass-panel {
-    background: hsl(var(--surface-base) / 0.7);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
-    border: 1px solid hsl(var(--border));
-  }
-}
+/* Stripe surface utilities live on the primitives; no decorative layers. */
 
 @media (pointer: coarse) {
   html {

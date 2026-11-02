@@ -28,23 +28,23 @@ interface ConfirmModalProps {
 const iconConfig = {
   publish: {
     icon: CheckCircle,
-    bg: "bg-green-100",
+    bg: "bg-primary/10",
     color: "text-status-active-text",
   },
   unpublish: {
     icon: XCircle,
-    bg: "bg-red-100",
-    color: "text-red-500",
+    bg: "bg-status-rejected/10",
+    color: "text-status-rejected-text",
   },
   danger: {
     icon: AlertTriangle,
-    bg: "bg-red-100",
-    color: "text-red-500",
+    bg: "bg-status-rejected/10",
+    color: "text-status-rejected-text",
   },
   warning: {
     icon: AlertTriangle,
-    bg: "bg-amber-100",
-    color: "text-amber-600",
+    bg: "bg-status-pending/10",
+    color: "text-status-pending-text",
   },
 };
 
@@ -88,7 +88,7 @@ export function ConfirmModal({
           <DialogHeader className="text-center sm:text-center">
             {ic && (
               <div className="mb-4 flex justify-center">
-                <div className={cn("flex h-14 w-14 items-center justify-center rounded-2xl", ic.bg)}>
+                <div className={cn("flex h-14 w-14 items-center justify-center rounded-xl", ic.bg)}>
                   <ic.icon className={cn("h-7 w-7", ic.color)} />
                 </div>
               </div>
@@ -102,7 +102,7 @@ export function ConfirmModal({
           </DialogHeader>
           {children && <div className="mt-4">{children}</div>}
         </div>
-        <DialogFooter className="px-6 py-4 bg-surface-muted/80 border-t border-border/60 gap-2.5">
+        <DialogFooter className="px-6 py-4 bg-surface-muted border-t border-border gap-2.5">
           <Button
             ref={cancelRef}
             variant="outline"
@@ -118,7 +118,7 @@ export function ConfirmModal({
             disabled={loading || confirmDisabled}
             className={cn(
               "flex-1 sm:flex-none h-10 text-sm font-semibold gap-2",
-              confirmVariant === "destructive" && "bg-red-600 hover:bg-red-700 text-white shadow-sm"
+              confirmVariant === "destructive" && "bg-status-rejected hover:bg-status-rejected text-white "
             )}
           >
             {loading && <Loader2 className="h-4 w-4 animate-spin" />}

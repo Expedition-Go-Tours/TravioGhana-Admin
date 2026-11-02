@@ -400,7 +400,7 @@ export default function SupplierDetailPage() {
           icon={<DollarSign className="h-5 w-5" />}
           accent="emerald"
           loading={!stats}
-          subtitle="Lifetime supplier earnings"
+          subtitle="Completed bookings only"
         />
         <StatCard
           label="Total Bookings"
@@ -416,7 +416,7 @@ export default function SupplierDetailPage() {
           icon={<HandCoins className="h-5 w-5" />}
           accent="amber"
           loading={!stats}
-          subtitle="Platform commission"
+          subtitle="Completed bookings only"
         />
         <StatCard
           label="Average Rating"
@@ -481,19 +481,19 @@ export default function SupplierDetailPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-border bg-surface-muted/40">
-                          <th className="px-4 py-3 text-left text-xs font-semibold text-text-secondary">Tour</th>
-                          <th className="px-4 py-3 text-center text-xs font-semibold text-text-secondary">Status</th>
-                          <th className="px-4 py-3 text-center text-xs font-semibold text-text-secondary">Bookings</th>
-                          <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary">Revenue</th>
-                          <th className="px-4 py-3 text-right text-xs font-semibold text-text-secondary">Commission</th>
+                        <tr className="border-b border-border bg-surface-base">
+                          <th className="px-4 py-3 text-left text-xs font-medium text-text-tertiary">Tour</th>
+                          <th className="px-4 py-3 text-center text-xs font-medium text-text-tertiary">Status</th>
+                          <th className="px-4 py-3 text-center text-xs font-medium text-text-tertiary">Completed</th>
+                          <th className="px-4 py-3 text-right text-xs font-medium text-text-tertiary">Revenue</th>
+                          <th className="px-4 py-3 text-right text-xs font-medium text-text-tertiary">Commission</th>
                         </tr>
                       </thead>
                       <tbody>
                         {(stats?.tourCommissions || []).map((tc) => (
                           <tr
                             key={tc.id}
-                            className="cursor-pointer border-b border-border transition-colors last:border-b-0 hover:bg-surface-muted/30"
+                            className="cursor-pointer border-b border-border transition-colors last:border-b-0 hover:bg-surface-muted"
                             onClick={() => navigate(`/admin/tours/${tc.id}`)}
                           >
                             <td className="px-4 py-3">
@@ -596,7 +596,7 @@ export default function SupplierDetailPage() {
         <TabsContent value="payout">
           <div className="space-y-4">
             {payoutLoading ? (
-              <Card><CardContent className="p-6"><Skeleton className="h-32 w-full rounded-lg" /></CardContent></Card>
+              <Card><CardContent className="p-6"><Skeleton className="h-32 w-full rounded-xl" /></CardContent></Card>
             ) : payoutMethods.length > 0 ? (
               payoutMethods.map((method) => (
                 <PayoutMethodCard key={method.id} method={method} />
@@ -634,7 +634,7 @@ export default function SupplierDetailPage() {
                   { label: "Code of Conduct", value: supplier.compliance?.codeOfConductAccepted },
                   { label: "Data Processing", value: supplier.compliance?.dataProcessingAccepted },
                 ].map((item) => (
-                  <div key={item.label} className="flex items-center justify-between rounded-lg border border-border bg-surface-base px-4 py-3">
+                  <div key={item.label} className="flex items-center justify-between rounded-xl border border-border bg-surface-base px-4 py-3">
                     <span className="text-sm text-text-primary">{item.label}</span>
                     {item.value ? (
                       <span className="inline-flex items-center gap-1.5 text-xs font-medium text-status-active-text">
@@ -699,7 +699,7 @@ export default function SupplierDetailPage() {
 
       {/* Delete User — subtle, at bottom */}
       {can('suppliers.suspend') && (
-        <div className="flex items-center justify-between rounded-lg border border-border-muted bg-surface-base px-5 py-4">
+        <div className="flex items-center justify-between rounded-xl border border-border-muted bg-surface-base px-5 py-4">
           <div>
             <p className="text-sm font-medium text-text-primary">Danger Zone</p>
             <p className="text-xs text-text-tertiary">Permanently delete this user and all associated data</p>
@@ -758,7 +758,7 @@ export default function SupplierDetailPage() {
           onConfirm={() => deleteMutation.mutate()}
           onCancel={() => setModalAction(null)}
         >
-          <div className="rounded-lg bg-surface-muted p-3 text-sm space-y-1">
+          <div className="rounded-xl bg-surface-muted p-3 text-sm space-y-1">
             <p><span className="text-text-secondary">Name:</span> {supplier.name || "—"}</p>
             <p><span className="text-text-secondary">Email:</span> {supplier.email || "—"}</p>
           </div>
@@ -773,7 +773,7 @@ export default function SupplierDetailPage() {
 function SupplierBreadcrumb({ title, onBack, onAll }: { title: string; onBack: () => void; onAll: () => void }) {
   return (
     <div className="flex items-center gap-2 text-sm text-text-tertiary">
-      <button onClick={onBack} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-base text-text-secondary transition-colors hover:bg-surface-muted hover:text-text-primary">
+      <button onClick={onBack} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-base text-text-secondary transition-colors hover:bg-surface-muted hover:text-text-primary">
         <ArrowLeft className="h-4 w-4 text-text-primary" />
       </button>
       <button onClick={onAll} className="transition-colors hover:text-text-primary">Suppliers</button>
@@ -813,12 +813,11 @@ function SupplierHero({
   ];
 
   return (
-    <div className="overflow-hidden rounded-xl border border-border bg-surface-base shadow-soft">
-      <div className="h-1.5 bg-gradient-to-r from-primary via-primary/60 to-primary/30" />
+    <div className="overflow-hidden rounded-xl border border-border bg-surface-base ">
       <div className="p-6">
         <div className="flex flex-col gap-6 lg:flex-row lg:items-center">
           <div className="flex min-w-0 flex-1 items-center gap-4">
-            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary/10 text-xl font-bold text-primary ring-1 ring-primary/20">
+            <div className="relative flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-primary/10 text-xl font-semibold text-primary ring-1 ring-primary/20">
               {supplier.photoURL ? (
                 <SafeImage src={supplier.photoURL} alt={supplier.name || ""} className="absolute inset-0 h-full w-full object-cover" />
               ) : (
@@ -827,7 +826,7 @@ function SupplierHero({
             </div>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2.5">
-                <h1 className="text-xl font-bold tracking-tight text-text-primary">{supplier.name || "Unknown"}</h1>
+                <h1 className="text-[22px] font-light leading-7 tracking-[-0.26px] text-text-primary sm:text-[26px] sm:leading-8">{supplier.name || "Unknown"}</h1>
                 <StatusBadge status={supplier.status} />
               </div>
               <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1.5 text-sm text-text-secondary">
@@ -870,11 +869,11 @@ function SupplierHero({
           <div className="flex items-center gap-7 border-t border-border pt-4 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
             {quickStats.map((s) => (
               <div key={s.label} className="min-w-[64px] text-center">
-                <div className={cn("flex items-center justify-center gap-1 text-xl font-bold tabular-nums tracking-tight", s.emphasize ? "text-primary" : "text-text-primary")}>
+                <div className={cn("flex items-center justify-center gap-1 text-xl font-semibold tnum tracking-tight", s.emphasize ? "text-primary" : "text-text-primary")}>
                   {s.icon}
                   {s.value}
                 </div>
-                <p className="mt-0.5 text-center text-[11px] font-medium uppercase tracking-wider text-text-tertiary">{s.label}</p>
+                <p className="mt-0.5 text-center text-[11px] font-medium text-text-tertiary">{s.label}</p>
               </div>
             ))}
           </div>
@@ -893,7 +892,6 @@ function SupplierHero({
                 <ArrowUpRight className="h-3 w-3" />
               </a>
             )}
-            {!website && !complianceVerified && <span>—</span>}
           </div>
           <div className="flex flex-wrap items-center gap-2">
             {actions.map((btn) => (
@@ -1000,7 +998,7 @@ function BreakdownCard({
   return (
     <Card>
       <CardHeader className="border-b border-border pb-3">
-        <CardTitle className="text-sm font-semibold text-text-primary">{title}</CardTitle>
+        <CardTitle className="text-sm font-medium text-text-primary">{title}</CardTitle>
       </CardHeader>
       <CardContent className="p-5">
         {loading ? (
@@ -1015,7 +1013,7 @@ function BreakdownCard({
                 <div key={item.label}>
                   <div className="mb-1.5 flex items-center justify-between text-xs">
                     <span className="text-text-secondary">{item.label}</span>
-                    <span className="font-semibold text-text-primary tabular-nums">{formatNumber(item.value)}</span>
+                    <span className="font-semibold text-text-primary tnum">{formatNumber(item.value)}</span>
                   </div>
                   <div className="h-2 overflow-hidden rounded-full bg-surface-muted">
                     <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, backgroundColor: item.color }} />
@@ -1042,18 +1040,18 @@ function TourCardGrid({ tours, onOpen }: { tours: SupplierTour[]; onOpen: (id: s
             tabIndex={0}
             onClick={() => onOpen(tour.id)}
             onKeyDown={(e) => { if (e.key === "Enter") onOpen(tour.id); }}
-            className="group cursor-pointer overflow-hidden rounded-xl border border-border bg-surface-base transition-all duration-200 hover:-translate-y-0.5 hover:shadow-soft"
+            className="group cursor-pointer overflow-hidden rounded-xl border border-border bg-surface-base transition-colors"
           >
             <div className="relative h-36 w-full overflow-hidden bg-surface-muted">
               {tour.coverPhoto ? (
-                <SafeImage src={tour.coverPhoto} alt={tour.title} className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105" />
+                <SafeImage src={tour.coverPhoto} alt={tour.title} className="h-full w-full object-cover" />
               ) : (
-                <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-primary/10 to-transparent">
+                <div className="flex h-full w-full items-center justify-center bg-surface-muted">
                   <Building2 className="h-10 w-10 text-primary/40" />
                 </div>
               )}
               <div className="absolute right-2.5 top-2.5">
-                <StatusBadge status={tour.status} className="border-border bg-surface-base/90 backdrop-blur-sm" />
+                <StatusBadge status={tour.status} className="border-border bg-surface-base/90 " />
               </div>
             </div>
             <div className="space-y-2.5 p-4">
@@ -1064,7 +1062,7 @@ function TourCardGrid({ tours, onOpen }: { tours: SupplierTour[]; onOpen: (id: s
                   <span className="truncate">{location || "Unknown"}</span>
                 </span>
                 <span className="inline-flex shrink-0 items-center gap-1">
-                  <Star className="h-3.5 w-3.5 text-amber-500" />
+                  <Star className="h-3.5 w-3.5 text-status-pending-text" />
                   {tour.averageRating != null ? Number(tour.averageRating).toFixed(1) : "—"}
                 </span>
                 <span className="inline-flex shrink-0 items-center gap-1">
@@ -1088,12 +1086,12 @@ function ReviewsTab({ data }: { data: ReviewsResponse }) {
       <Card className="h-fit">
         <CardHeader className="border-b border-border pb-3">
           <CardTitle className="flex items-center gap-2 text-sm font-semibold text-text-primary">
-            <Star className="h-4 w-4 text-amber-500" /> Rating Summary
+            <Star className="h-4 w-4 text-status-pending-text" /> Rating Summary
           </CardTitle>
         </CardHeader>
         <CardContent className="p-5">
           <div className="flex items-end gap-3">
-            <span className="text-4xl font-bold tracking-tight text-text-primary tabular-nums">{Number(data.averageRating).toFixed(1)}</span>
+            <span className="text-4xl font-semibold tracking-tight text-text-primary tnum">{Number(data.averageRating).toFixed(1)}</span>
             <div className="pb-1.5">
               <StarRow rating={Math.round(data.averageRating)} />
               <p className="mt-1 text-xs text-text-tertiary">{formatNumber(total)} reviews</p>
@@ -1107,9 +1105,9 @@ function ReviewsTab({ data }: { data: ReviewsResponse }) {
                 <div key={star} className="flex items-center gap-2.5">
                   <span className="w-8 shrink-0 text-xs font-medium text-text-secondary">{star}★</span>
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-surface-muted">
-                    <div className="h-full rounded-full bg-amber-500" style={{ width: `${pct}%` }} />
+                    <div className="h-full rounded-full bg-status-pending" style={{ width: `${pct}%` }} />
                   </div>
-                  <span className="w-6 shrink-0 text-right text-xs tabular-nums text-text-tertiary">{formatNumber(count)}</span>
+                  <span className="w-6 shrink-0 text-right text-xs tnum text-text-tertiary">{formatNumber(count)}</span>
                 </div>
               );
             })}
@@ -1128,7 +1126,7 @@ function ReviewsTab({ data }: { data: ReviewsResponse }) {
             <article key={review.id} className="py-5 first:pt-4 last:pb-4">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-sm font-bold text-primary">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-sm font-semibold text-primary">
                     {review.customer?.photoURL ? (
                       <SafeImage src={review.customer.photoURL} alt="" className="h-full w-full object-cover" />
                     ) : (
@@ -1157,7 +1155,7 @@ function ReviewsTab({ data }: { data: ReviewsResponse }) {
                 <p className="mt-1.5 text-sm leading-relaxed text-text-secondary">{review.comment}</p>
               )}
               {!!review.supplierResponse && (
-                <div className="mt-3 rounded-lg border border-border bg-surface-muted/40 p-3.5">
+                <div className="mt-3 rounded-xl border border-border bg-surface-muted p-3.5">
                   <p className="mb-1 flex items-center gap-1.5 text-xs font-semibold text-primary">
                     <Quote className="h-3 w-3" /> Supplier response
                   </p>
@@ -1179,7 +1177,7 @@ function StarRow({ rating, size = "md" }: { rating: number; size?: "sm" | "md" }
       {[1, 2, 3, 4, 5].map((i) => (
         <Star
           key={i}
-          className={cn(cls, i <= Math.round(rating) ? "fill-amber-500 text-amber-500" : "text-text-tertiary")}
+          className={cn(cls, i <= Math.round(rating) ? "fill-status-pending text-status-pending-text" : "text-text-tertiary")}
         />
       ))}
     </span>
@@ -1202,15 +1200,15 @@ function DetailTable({ rows }: { rows: Array<{ label: string; value?: string | n
   return (
     <table className="w-full border-collapse text-sm">
       <thead>
-        <tr className="border-b border-border bg-surface-muted/40">
-          <th className="w-2/5 border-r border-border/70 px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-text-secondary">Field</th>
-          <th className="px-5 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-text-secondary">Value</th>
+        <tr className="border-b border-border bg-surface-base">
+          <th className="w-2/5 border-r border-border px-5 py-3 text-left text-[11px] font-semibold text-text-secondary">Field</th>
+          <th className="px-5 py-3 text-left text-[11px] font-semibold text-text-secondary">Value</th>
         </tr>
       </thead>
       <tbody>
         {rows.map((r, idx) => (
-          <tr key={r.label} className={cn("border-b border-border transition-colors last:border-b-0", idx % 2 === 0 ? "bg-surface-base" : "bg-surface-muted/20")}>
-            <td className="w-2/5 border-r border-border/70 px-5 py-3.5 align-middle text-xs font-medium text-text-secondary">{r.label}</td>
+          <tr key={r.label} className={cn("border-b border-border transition-colors last:border-b-0", idx % 2 === 0 ? "bg-surface-base" : "bg-surface-muted")}>
+            <td className="w-2/5 border-r border-border px-5 py-3.5 align-middle text-xs font-medium text-text-secondary">{r.label}</td>
             <td className="px-5 py-3.5 align-middle leading-relaxed text-text-primary">
               {r.value || <span className="italic text-text-tertiary">Not provided</span>}
             </td>
@@ -1248,16 +1246,16 @@ function PayoutMethodCard({ method }: { method: PayoutMethodItem }) {
   const isMobile = typeKey.includes("mobile");
   const isPaypal = typeKey.includes("paypal");
   const scheme = isBank
-    ? { badge: "bg-blue-500", bg: "from-blue-50 to-white dark:from-blue-950/30 dark:to-surface-base", border: "border-blue-100 dark:border-blue-800/30", icon: Building2, iconBg: "bg-blue-100 dark:bg-blue-900/30", iconColor: "text-blue-700 dark:text-blue-300", label: "Bank Account" }
+    ? { badge: "bg-status-approved", bg: "bg-surface-muted", border: "border-status-approved/30 dark:border-status-approved/30", icon: Building2, iconBg: "bg-status-approved/10 dark:bg-status-approved/10", iconColor: "text-status-approved-text dark:text-status-approved-text", label: "Bank Account" }
     : isMobile
-    ? { badge: "bg-emerald-500", bg: "from-emerald-50 to-white dark:from-emerald-950/30 dark:to-surface-base", border: "border-emerald-100 dark:border-emerald-800/30", icon: Smartphone, iconBg: "bg-emerald-100 dark:bg-emerald-900/30", iconColor: "text-emerald-700 dark:text-emerald-300", label: "Mobile Money" }
+    ? { badge: "bg-primary", bg: "bg-surface-muted", border: "border-primary/30 dark:border-primary/30", icon: Smartphone, iconBg: "bg-primary/10 dark:bg-primary/10", iconColor: "text-primary dark:text-primary", label: "Mobile Money" }
     : isPaypal
-    ? { badge: "bg-indigo-500", bg: "from-indigo-50 to-white dark:from-indigo-950/30 dark:to-surface-base", border: "border-indigo-100 dark:border-indigo-800/30", icon: Wallet, iconBg: "bg-indigo-100 dark:bg-indigo-900/30", iconColor: "text-indigo-700 dark:text-indigo-300", label: "PayPal Account" }
-    : { badge: "bg-emerald-500", bg: "from-emerald-50 to-white dark:from-emerald-950/30 dark:to-surface-base", border: "border-emerald-100 dark:border-emerald-800/30", icon: CreditCard, iconBg: "bg-emerald-100 dark:bg-emerald-900/30", iconColor: "text-emerald-700 dark:text-emerald-300", label: "Payment Method" };
+    ? { badge: "bg-primary", bg: "bg-surface-muted", border: "border-primary/30 dark:border-primary/30", icon: Wallet, iconBg: "bg-primary/10 dark:bg-primary/10", iconColor: "text-primary dark:text-primary", label: "PayPal Account" }
+    : { badge: "bg-primary", bg: "bg-surface-muted", border: "border-primary/30 dark:border-primary/30", icon: CreditCard, iconBg: "bg-primary/10 dark:bg-primary/10", iconColor: "text-primary dark:text-primary", label: "Payment Method" };
   const Icon = scheme.icon;
   return (
-    <Card className="overflow-hidden shadow-sm">
-      <div className={cn("flex items-center justify-between border-b bg-gradient-to-r px-5 py-3.5", scheme.bg, scheme.border)}>
+    <Card className="overflow-hidden ">
+      <div className={cn("flex items-center justify-between border-b px-5 py-3.5", scheme.bg, scheme.border)}>
         <div className="flex items-center gap-3">
           <div className={cn("flex h-9 w-9 items-center justify-center rounded-full", scheme.iconBg)}>
             <Icon className={cn("h-5 w-5", scheme.iconColor)} />
@@ -1285,7 +1283,7 @@ function PayoutMethodCard({ method }: { method: PayoutMethodItem }) {
       </div>
       <CardContent className="space-y-4 p-5">
         <div>
-          <p className="mb-2.5 text-[11px] font-semibold uppercase tracking-widest text-text-tertiary">Account Details</p>
+          <p className="mb-2.5 text-[11px] font-semibold text-text-tertiary">Account Details</p>
           <div className="grid grid-cols-2 gap-x-8 gap-y-3">
             {isBank && <Field label="Bank Name" value={method.bankName} />}
             {isBank && <Field label="Account Name" value={method.accountName} />}
@@ -1304,7 +1302,7 @@ function PayoutMethodCard({ method }: { method: PayoutMethodItem }) {
         </div>
         {(method.currency || method.bankCountry) && (
           <div className="flex items-center gap-6 border-t border-border pt-3.5">
-            <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-widest text-text-tertiary">
+            <span className="flex items-center gap-1.5 text-[11px] font-semibold text-text-tertiary">
               <Globe className="h-3 w-3" /> Region
             </span>
             {method.currency && (
@@ -1334,8 +1332,8 @@ function PayoutMethodCard({ method }: { method: PayoutMethodItem }) {
 
 function Field({ label, value }: { label: string; value?: string | null }) {
   return (
-    <div className="rounded-lg bg-surface-muted/50 px-3 py-2">
-      <p className="text-[11px] uppercase tracking-wider text-text-tertiary">{label}</p>
+    <div className="rounded-xl bg-surface-muted px-3 py-2">
+      <p className="text-[11px] text-text-tertiary">{label}</p>
       <p className="mt-0.5 text-sm font-medium text-text-primary">{value || "—"}</p>
     </div>
   );

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState, startTransition } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 import {
   Search,
@@ -84,35 +83,19 @@ interface TourGroup {
 
 const STATUS_PILLS = ["All", "Pending", "Approved", "Rejected", "Flagged"];
 
-const staggerList = {
-  hidden: {},
-  visible: { transition: { staggerChildren: 0.05 } },
-};
-
-const fadeSlide = {
-  hidden: { opacity: 0, y: 12 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.28, ease: [0.25, 0.1, 0.25, 1] as const } },
-};
-
 type StatAccent = "pending" | "flagged" | "active";
 
-const STAT_ACCENT: Record<StatAccent, { bar: string; chip: string; glow: string; icon: string }> = {
+const STAT_ACCENT: Record<StatAccent, { chip: string; icon: string }> = {
   pending: {
-    bar: "from-status-pending to-status-pending/15",
     chip: "bg-status-pending/10 text-status-pending-text ring-status-pending/20",
-    glow: "hover:shadow-tinted-lg",
     icon: "text-status-pending-text",
   },
   flagged: {
-    bar: "from-status-flagged to-status-flagged/15",
     chip: "bg-status-flagged/10 text-status-flagged-text ring-status-flagged/20",
-    glow: "hover:shadow-2",
     icon: "text-status-flagged-text",
   },
   active: {
-    bar: "from-status-active to-status-active/15",
     chip: "bg-status-active/10 text-status-active-text ring-status-active/20",
-    glow: "hover:shadow-tinted",
     icon: "text-status-active-text",
   },
 };
@@ -120,28 +103,22 @@ const STAT_ACCENT: Record<StatAccent, { bar: string; chip: string; glow: string;
 function QueueStat({ label, value, icon: Icon, accent, loading }: { label: string; value: number; icon: typeof Clock; accent: StatAccent; loading?: boolean }) {
   const m = STAT_ACCENT[accent];
   return (
-    <motion.div
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
+    <div 
       className={cn(
-        "relative overflow-hidden rounded-lg border border-border/80 bg-surface-base p-4 shadow-soft transition-all duration-200",
-        m.glow,
-      )}
-    >
-      <div className={cn("pointer-events-none absolute inset-x-0 top-0 h-[3px] bg-gradient-to-r", m.bar)} />
+        "relative overflow-hidden rounded-xl border border-border bg-surface-base p-4",
+      )}>
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">{label}</p>
-          <p className="mt-1.5 text-2xl font-bold tracking-tight text-text-primary tabular-nums leading-tight">
+          <p className="text-[11px] font-semibold text-text-tertiary">{label}</p>
+          <div className="tnum mt-1.5 text-2xl font-semibold leading-tight tracking-tight text-text-primary">
             {loading ? <Skeleton className="inline-block h-6 w-10 align-middle" /> : <AnimatedNumber value={value} />}
-          </p>
+          </div>
         </div>
-        <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ring-1 ring-inset", m.chip)}>
+        <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset", m.chip)}>
           <Icon className={cn("h-4 w-4", m.icon)} />
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -149,7 +126,7 @@ function StatusChip({ status }: { status: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ",
         getStatusColor(status),
       )}
     >
@@ -387,7 +364,7 @@ export default function ReviewModerationPage() {
         {[1, 2, 3, 4, 5].map((i) => (
           <Star
             key={i}
-            className={cn(cls, i <= Math.round(rating) ? "fill-amber-400 text-amber-400" : "text-text-tertiary")}
+            className={cn(cls, i <= Math.round(rating) ? "fill-status-pending text-status-pending-text" : "text-text-tertiary")}
           />
         ))}
       </span>
@@ -395,7 +372,7 @@ export default function ReviewModerationPage() {
   };
 
   const renderAvatar = (url?: string, name?: string) => (
-    <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-xs font-bold text-text-tertiary ring-1 ring-border">
+    <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-surface-muted text-xs font-semibold text-text-tertiary ring-1 ring-border">
       {url ? (
         <OptimizedImage src={url} alt="" width={36} className="absolute inset-0 h-full w-full object-cover" />
       ) : null}
@@ -406,16 +383,13 @@ export default function ReviewModerationPage() {
   const editableStars = (rating: number, onChange: (v: number) => void) => (
     <div className="flex items-center gap-0.5 mt-1.5">
       {[1, 2, 3, 4, 5].map((s) => (
-        <motion.button
+        <button
           key={s}
           type="button"
-          onClick={() => onChange(s)}
-          whileHover={{ scale: 1.15 }}
-          whileTap={{ scale: 0.9 }}
-          className="p-0.5 focus:outline-none"
-        >
-          <Star className={cn("h-5 w-5", s <= rating ? "fill-amber-400 text-amber-400" : "text-text-tertiary")} />
-        </motion.button>
+          onClick={() => onChange(s)} 
+          className="p-0.5 focus:outline-none">
+          <Star className={cn("h-5 w-5", s <= rating ? "fill-status-pending text-status-pending-text" : "text-text-tertiary")} />
+        </button>
       ))}
       <span className="text-sm text-text-secondary ml-2">{rating}/5</span>
     </div>
@@ -423,7 +397,7 @@ export default function ReviewModerationPage() {
 
   const iconBtn = (extra?: string) =>
     cn(
-      "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition-colors",
+      "flex h-8 w-8 shrink-0 items-center justify-center rounded-xl transition-colors",
       extra,
     );
 
@@ -432,20 +406,17 @@ export default function ReviewModerationPage() {
     const isPending = status === "PENDING";
 
     return (
-      <motion.div
-        key={review.id}
-        variants={fadeSlide}
-        layout
+      <div
+        key={review.id} 
         className={cn(
-          "group rounded-xl border bg-surface-base p-5 shadow-soft transition-all duration-200 hover:shadow-soft-lg",
-          isPending ? "border-status-pending/25" : "border-border/80",
-        )}
-      >
+          "group rounded-xl border bg-surface-base p-5",
+          isPending ? "border-status-pending/25" : "border-border",
+        )}>
         <div className="flex items-start justify-between gap-3">
           <div className="flex min-w-0 items-center gap-3">
             <button
               onClick={() => setSelectedCustomerId(review.customer?.id || null)}
-              className="shrink-0 rounded-full ring-2 ring-border transition-all hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              className="shrink-0 rounded-full ring-2 ring-border transition-colors hover:ring-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               title="View customer profile"
             >
               {renderAvatar(review.customer?.photoURL, review.customer?.name)}
@@ -471,7 +442,7 @@ export default function ReviewModerationPage() {
           <div className="flex shrink-0 flex-col items-end gap-1.5">
             <div className="flex items-center gap-1.5">
               {renderStars(review.rating || 0)}
-              <span className="text-sm font-bold text-text-primary tabular-nums">{review.rating || 0}</span>
+              <span className="text-sm font-semibold text-text-primary tnum">{review.rating || 0}</span>
             </div>
             <StatusChip status={status} />
           </div>
@@ -487,23 +458,21 @@ export default function ReviewModerationPage() {
         {review.photos && review.photos.length > 0 && (
           <div className="mt-4 flex flex-wrap gap-2.5">
             {review.photos.map((photo, i) => (
-              <motion.img
+              <img
                 key={i}
                 src={photo}
-                alt=""
-                whileHover={{ scale: 1.04 }}
-                className="h-20 w-20 cursor-pointer rounded-lg border border-border bg-surface-muted object-cover"
+                alt="" 
+                className="h-20 w-20 cursor-pointer rounded-xl border border-border bg-surface-muted object-cover"
                 loading="lazy"
-                onClick={() => setLightbox({ images: review.photos!, index: i })}
-              />
+                onClick={() => setLightbox({ images: review.photos!, index: i })} />
             ))}
           </div>
         )}
 
         {review.supplierResponse && (
-          <div className="mt-4 rounded-r-lg border-l-2 border-l-status-active bg-surface-muted/60 p-4">
+          <div className="mt-4 rounded-r-lg border-l-2 border-l-status-active bg-surface-muted p-4">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-medium uppercase tracking-wide text-text-secondary">
+              <span className="text-[11px] font-medium text-text-secondary">
                 <MessageSquareText className="mr-1 inline h-3 w-3 -mt-0.5" />
                 Response from {review.tour?.supplier?.name || "Supplier"}
                 {review.supplierResponseAt && (
@@ -511,30 +480,24 @@ export default function ReviewModerationPage() {
                 )}
               </span>
               {can("reviews.moderate") && (
-                <div className="flex gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.08 }}
-                    whileTap={{ scale: 0.95 }}
+                <div className="flex gap-1 ">
+                  <button
+                    type="button" 
                     className={iconBtn("text-text-tertiary hover:bg-surface-base hover:text-primary")}
                     title="Edit response"
                     onClick={() => {
                       setEditResponseReview(review);
                       setEditResponseText(review.supplierResponse || "");
-                    }}
-                  >
+                    }}>
                     <Pencil className="h-3.5 w-3.5" />
-                  </motion.button>
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.08 }}
-                    whileTap={{ scale: 0.95 }}
+                  </button>
+                  <button
+                    type="button" 
                     className={iconBtn("text-text-tertiary hover:bg-status-rejected/10 hover:text-status-rejected-text")}
                     title="Delete response"
-                    onClick={() => setDeleteResponseReview(review)}
-                  >
+                    onClick={() => setDeleteResponseReview(review)}>
                     <Trash2 className="h-3.5 w-3.5" />
-                  </motion.button>
+                  </button>
                 </div>
               )}
             </div>
@@ -545,7 +508,7 @@ export default function ReviewModerationPage() {
         {review.status === "FLAGGED" && review.flagReason && (
           <div className="mt-4 rounded-r-lg border-l-2 border-l-status-flagged bg-status-flagged/5 p-4">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-medium uppercase tracking-wide text-status-flagged-text">
+              <span className="text-[11px] font-medium text-status-flagged-text">
                 <Flag className="mr-1 inline h-3 w-3 -mt-0.5" />
                 Flagged by supplier
                 {review.flaggedAt && (
@@ -560,7 +523,7 @@ export default function ReviewModerationPage() {
           </div>
         )}
 
-        <div className="mt-5 flex items-center justify-between gap-3 border-t border-border/70 pt-4">
+        <div className="mt-5 flex items-center justify-between gap-3 border-t border-border pt-4">
           <div className="flex items-center gap-2 text-xs text-text-tertiary">
             {(review.helpfulCount ?? 0) > 0 && (
               <span className="flex items-center gap-1">
@@ -596,43 +559,34 @@ export default function ReviewModerationPage() {
                   </Button>
                 )}
                 {can("reviews.moderate") && (
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.08 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
+                    type="button" 
                     className={iconBtn("text-status-pending-text hover:bg-status-pending/10")}
                     title="Flag"
-                    onClick={() => openModerate("flag", review)}
-                  >
+                    onClick={() => openModerate("flag", review)}>
                     <Flag className="h-4 w-4" />
-                  </motion.button>
+                  </button>
                 )}
                 {can("reviews.moderate") && (
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.08 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
+                    type="button" 
                     className={iconBtn("text-text-tertiary hover:bg-primary/10 hover:text-primary")}
                     title="Edit review"
-                    onClick={() => openEdit(review)}
-                  >
+                    onClick={() => openEdit(review)}>
                     <Pencil className="h-4 w-4" />
-                  </motion.button>
+                  </button>
                 )}
               </>
             ) : (
               <>
                 {can("reviews.moderate") && (
-                  <motion.button
-                    type="button"
-                    whileHover={{ scale: 1.08 }}
-                    whileTap={{ scale: 0.95 }}
+                  <button
+                    type="button" 
                     className={iconBtn("text-text-tertiary hover:bg-primary/10 hover:text-primary")}
                     title="Edit review"
-                    onClick={() => openEdit(review)}
-                  >
+                    onClick={() => openEdit(review)}>
                     <Pencil className="h-4 w-4" />
-                  </motion.button>
+                  </button>
                 )}
                 {can("reviews.moderate") && review.status === "FLAGGED" && (
                   <Button
@@ -659,7 +613,7 @@ export default function ReviewModerationPage() {
             )}
           </div>
         </div>
-      </motion.div>
+      </div>
     );
   };
 
@@ -667,120 +621,89 @@ export default function ReviewModerationPage() {
 
   return (
     <div className="space-y-4 md:space-y-5 w-full h-full flex flex-col">
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-      >
+      <div>
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <button 
               onClick={() => navigate(-1)}
-              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-base hover:bg-surface-muted transition-colors"
-            >
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-base hover:bg-surface-muted transition-colors">
               <ArrowLeft className="h-4 w-4 text-text-secondary" />
-            </motion.button>
+            </button>
             <div className="min-w-0">
-              <p className="text-[10px] font-semibold uppercase tracking-widest text-primary">Moderation Queue</p>
-              <h1 className="text-xl font-bold tracking-tight text-text-primary truncate">Review Moderation</h1>
+              <h1 className="text-[26px] font-light leading-8 tracking-[-0.26px] text-text-primary truncate">Review Moderation</h1>
               <p className="text-sm text-text-secondary truncate">Review, approve, and manage customer feedback across all tours</p>
             </div>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button 
               onClick={() => refetch()}
               disabled={isRefetching}
-              className="inline-flex items-center justify-center h-9 px-3 text-xs font-medium rounded-lg border border-border bg-surface-base text-text-secondary hover:bg-surface-muted transition-colors disabled:opacity-50 gap-1.5"
-            >
+              className="inline-flex items-center justify-center h-9 px-3 text-xs font-medium rounded-xl border border-border bg-surface-base text-text-secondary hover:bg-surface-muted transition-colors disabled:opacity-50 gap-1.5">
               <RefreshCw className={cn("h-3.5 w-3.5", isRefetching && "animate-spin")} />
               <span className="hidden sm:inline">{isRefetching ? "Refreshing..." : "Refresh"}</span>
-            </motion.button>
+            </button>
             <Badge variant="warning" className="px-2.5 py-1 text-xs gap-1.5">
               <span className="h-1.5 w-1.5 rounded-full bg-status-pending inline-block" />
               {pendingCount} pending
             </Badge>
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.05 }}
-        className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4"
-      >
+      <div 
+        className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
         <QueueStat label="Pending" value={pendingCount} icon={Clock} accent="pending" loading={isLoading} />
         <QueueStat label="Flagged" value={flaggedCount} icon={Flag} accent="flagged" loading={isLoading} />
         <QueueStat label="Moderated Today" value={moderatedTodayCount} icon={CheckCheck} accent="active" loading={isLoading} />
-      </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: -8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3, delay: 0.1 }}
-        className="flex flex-col sm:flex-row items-start sm:items-center gap-3"
-      >
+      <div 
+        className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div className="relative w-full sm:flex-1 sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
           <Input
             placeholder="Search reviews, customers, tours..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-10 w-full rounded-lg"
+            className="pl-9 h-10 w-full rounded-xl"
           />
           {searchQuery && (
-            <motion.button
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
+            <button 
               onClick={() => setSearchQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary"
-            >
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary">
               <X className="h-3.5 w-3.5" />
-            </motion.button>
+            </button>
           )}
         </div>
-        <div className="flex gap-1 bg-surface-muted p-0.5 rounded-lg border border-border overflow-x-auto scrollbar-none w-full sm:w-auto">
+        <div className="flex gap-1 bg-surface-muted p-0.5 rounded-xl border border-border overflow-x-auto scrollbar-none w-full sm:w-auto">
           {STATUS_PILLS.map((pill) => (
-            <motion.button
-              key={pill}
-              layout
+            <button
+              key={pill} 
               onClick={() => { setStatusFilter(pill); setPage(1); }}
               className={cn(
                 "relative px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-colors",
                 statusFilter === pill ? "text-primary" : "text-text-secondary hover:text-text-primary",
-              )}
-            >
+              )}>
               {statusFilter === pill && (
-                <motion.span
-                  layoutId="activePill"
-                  className="absolute inset-0 bg-surface-base rounded-md border border-border shadow-sm"
-                  transition={{ type: "spring", stiffness: 380, damping: 30 }}
-                />
+                <span 
+                  className="absolute inset-0 bg-surface-base rounded-md border border-border " />
               )}
               <span className="relative z-10">{pill}</span>
-            </motion.button>
+            </button>
           ))}
         </div>
-      </motion.div>
+      </div>
 
-      <AnimatePresence mode="wait">
+      <>
         {isLoading ? (
-          <motion.div
-            key="loading"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="grid-cols-1 lg:grid-cols-[340px_1fr] gap-5 grid"
-          >
+          <div
+            key="loading" 
+            className="grid-cols-1 lg:grid-cols-[340px_1fr] gap-5 grid">
             <div className="space-y-2">
               {Array.from({ length: 5 }).map((_, i) => (
                 <div key={i} className="border border-border rounded-xl p-4 bg-surface-base">
                   <div className="flex items-center gap-3">
-                    <Skeleton className="h-11 w-11 rounded-lg" />
+                    <Skeleton className="h-11 w-11 rounded-xl" />
                     <div className="space-y-2 flex-1">
                       <Skeleton className="h-4 w-36" />
                       <Skeleton className="h-3 w-24" />
@@ -804,15 +727,11 @@ export default function ReviewModerationPage() {
                 </div>
               ))}
             </div>
-          </motion.div>
+          </div>
         ) : isError ? (
-          <motion.div
-            key="error"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col items-center justify-center py-20"
-          >
+          <div
+            key="error" 
+            className="flex flex-col items-center justify-center py-20">
             <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-status-rejected/10 mb-4">
               <AlertTriangle className="h-7 w-7 text-status-rejected-text" />
             </div>
@@ -821,15 +740,11 @@ export default function ReviewModerationPage() {
             <Button variant="outline" size="sm" onClick={() => refetch()}>
               Try Again
             </Button>
-          </motion.div>
+          </div>
         ) : tourGroups.length === 0 ? (
-          <motion.div
-            key="empty"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            className="flex flex-col items-center justify-center py-20"
-          >
+          <div
+            key="empty" 
+            className="flex flex-col items-center justify-center py-20">
             <div className={cn(
               "flex h-14 w-14 items-center justify-center rounded-xl mb-4",
               query ? "bg-surface-muted" : "bg-status-active/10",
@@ -846,32 +761,24 @@ export default function ReviewModerationPage() {
             <p className="text-xs text-text-tertiary">
               {query ? "Try adjusting your search terms." : "There are no reviews waiting for moderation."}
             </p>
-          </motion.div>
+          </div>
         ) : (
-          <motion.div
-            key={contentKey}
-            variants={staggerList}
-            initial="hidden"
-            animate="visible"
-            exit={{ opacity: 0, transition: { duration: 0.15 } }}
-            className="grid-cols-1 lg:grid-cols-[340px_1fr] gap-5 grid flex-1 min-h-0 overflow-hidden"
-          >
+          <div
+            key={contentKey} 
+            className="grid-cols-1 lg:grid-cols-[340px_1fr] gap-5 grid flex-1 min-h-0 overflow-hidden">
             <div className="overflow-y-auto space-y-2 pr-1">
               {tourGroups.map((group) => {
                 const isSelected = selectedTourId === group.tourId;
                 return (
-                  <motion.div
-                    key={group.tourId}
-                    variants={fadeSlide}
-                    layout
+                  <div
+                    key={group.tourId} 
                     onClick={() => setSelectedTourId(group.tourId)}
                     className={cn(
-                      "relative cursor-pointer rounded-xl border p-3.5 transition-all duration-200",
+                      "relative cursor-pointer rounded-xl border p-3.5 transition-colors duration-200",
                       isSelected
-                        ? "border-primary/30 bg-primary/5 shadow-soft"
-                        : "border-border bg-surface-base hover:border-border-muted hover:bg-surface-muted/40 hover:shadow-soft",
-                    )}
-                  >
+                        ? "border-primary/30 bg-primary/5 "
+                        : "border-border bg-surface-base hover:border-border-muted hover:bg-surface-muted",
+                    )}>
                     <span
                       className={cn(
                         "absolute left-0 top-1/2 h-8 w-1 -translate-y-1/2 rounded-r-full bg-primary transition-opacity duration-200",
@@ -879,11 +786,11 @@ export default function ReviewModerationPage() {
                       )}
                     />
                     <div className="flex items-start gap-3">
-                      <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-muted">
+                      <div className="relative h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-border bg-surface-muted">
                         {group.coverPhoto ? (
                           <OptimizedImage src={group.coverPhoto} alt="" width={44} className="absolute inset-0 w-full h-full object-cover" />
                         ) : (
-                          <div className="w-full h-full flex items-center justify-center text-sm font-bold text-text-tertiary">
+                          <div className="w-full h-full flex items-center justify-center text-sm font-semibold text-text-tertiary">
                             {group.tourTitle.charAt(0)}
                           </div>
                         )}
@@ -892,7 +799,7 @@ export default function ReviewModerationPage() {
                         <div className="flex items-center justify-between gap-1.5">
                           <span className="truncate text-sm font-semibold text-text-primary">{group.tourTitle}</span>
                           {group.pendingReviewCount > 0 && (
-                            <span className="shrink-0 inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-status-pending/15 text-[10px] font-bold text-status-pending-text">
+                            <span className="shrink-0 inline-flex items-center justify-center h-5 min-w-[20px] px-1.5 rounded-full bg-status-pending/15 text-[10px] font-semibold text-status-pending-text">
                               {group.pendingReviewCount}
                             </span>
                           )}
@@ -901,13 +808,13 @@ export default function ReviewModerationPage() {
                           <p className="mt-0.5 truncate text-xs text-text-tertiary">{group.supplierName}</p>
                         )}
                         <div className="mt-1 flex items-center gap-1.5 text-xs text-text-tertiary">
-                          <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                          <span className="font-semibold text-text-primary tabular-nums">{group.avgRating.toFixed(1)}</span>
+                          <Star className="h-3 w-3 fill-status-pending text-status-pending-text" />
+                          <span className="font-semibold text-text-primary tnum">{group.avgRating.toFixed(1)}</span>
                           <span>· {group.totalReviews}</span>
                         </div>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 );
               })}
             </div>
@@ -915,12 +822,12 @@ export default function ReviewModerationPage() {
             <div className="min-h-0 flex flex-col overflow-hidden">
               {selectedTour ? (
                 <>
-                  <div className="mb-5 flex items-center gap-4 rounded-xl border border-border/80 bg-surface-base p-4 shadow-soft">
-                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-border bg-surface-muted">
+                  <div className="mb-5 flex items-center gap-4 rounded-xl border border-border bg-surface-base p-4 ">
+                    <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border border-border bg-surface-muted">
                       {selectedTour.coverPhoto ? (
                         <OptimizedImage src={selectedTour.coverPhoto} alt="" width={56} className="absolute inset-0 w-full h-full object-cover" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center text-lg font-bold text-text-tertiary">
+                        <div className="w-full h-full flex items-center justify-center text-lg font-semibold text-text-tertiary">
                           {selectedTour.tourTitle.charAt(0)}
                         </div>
                       )}
@@ -939,7 +846,7 @@ export default function ReviewModerationPage() {
                         )}
                         <span className="flex items-center gap-1">
                           {renderStars(selectedTour.avgRating)}
-                          <span className="font-semibold text-text-primary tabular-nums">{selectedTour.avgRating.toFixed(1)}</span>
+                          <span className="font-semibold text-text-primary tnum">{selectedTour.avgRating.toFixed(1)}</span>
                         </span>
                         <span>· {selectedTour.totalReviews} review{selectedTour.totalReviews !== 1 ? "s" : ""}</span>
                       </div>
@@ -951,14 +858,10 @@ export default function ReviewModerationPage() {
                     )}
                   </div>
 
-                  <motion.div
-                    variants={staggerList}
-                    initial="hidden"
-                    animate="visible"
-                    className="overflow-y-auto space-y-4 flex-1 pr-1"
-                  >
+                  <div 
+                    className="overflow-y-auto space-y-4 flex-1 pr-1">
                     {selectedTour.reviews.map((review) => renderReviewCard(review))}
-                  </motion.div>
+                  </div>
                 </>
               ) : (
                 <div className="flex flex-col items-center justify-center h-full py-20 text-center">
@@ -970,52 +873,39 @@ export default function ReviewModerationPage() {
                 </div>
               )}
             </div>
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </>
 
       {pagination && pagination.totalPages > 1 && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border border-border rounded-xl bg-surface-base"
-        >
+        <div 
+          className="flex flex-col sm:flex-row items-center justify-between gap-3 px-4 py-3 border border-border rounded-xl bg-surface-base">
           <p className="text-xs text-text-tertiary order-2 sm:order-1">
             Page {pagination.currentPage} of {pagination.totalPages} &middot; {pagination.totalCount} total
           </p>
           <div className="flex gap-2 w-full sm:w-auto order-1 sm:order-2">
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            <button 
               disabled={pagination.currentPage <= 1}
               onClick={() => setPage((p) => p - 1)}
-              className="inline-flex flex-1 sm:flex-none items-center justify-center h-9 px-3 text-xs font-medium rounded-lg border border-border bg-surface-base text-text-secondary hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:pointer-events-none gap-1"
-            >
+              className="inline-flex flex-1 sm:flex-none items-center justify-center h-9 px-3 text-xs font-medium rounded-xl border border-border bg-surface-base text-text-secondary hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:pointer-events-none gap-1">
               <ChevronLeft className="h-3.5 w-3.5" />
               Previous
-            </motion.button>
-            <motion.button
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
+            </button>
+            <button 
               disabled={pagination.currentPage >= pagination.totalPages}
               onClick={() => setPage((p) => p + 1)}
-              className="inline-flex flex-1 sm:flex-none items-center justify-center h-9 px-3 text-xs font-medium rounded-lg border border-border bg-surface-base text-text-secondary hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:pointer-events-none gap-1"
-            >
+              className="inline-flex flex-1 sm:flex-none items-center justify-center h-9 px-3 text-xs font-medium rounded-xl border border-border bg-surface-base text-text-secondary hover:bg-surface-muted transition-colors disabled:opacity-40 disabled:pointer-events-none gap-1">
               Next
               <ChevronRight className="h-3.5 w-3.5" />
-            </motion.button>
+            </button>
           </div>
-        </motion.div>
+        </div>
       )}
 
-      <AnimatePresence>
+      <>
         {lightbox && (
-          <motion.div
-            key="lightbox"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+          <div
+            key="lightbox" 
             className="fixed inset-0 z-[60] flex items-center justify-center bg-black/85"
             onClick={() => setLightbox(null)}
             onKeyDown={(e) => {
@@ -1027,70 +917,53 @@ export default function ReviewModerationPage() {
                   l ? { ...l, index: Math.min(l.images.length - 1, l.index + 1) } : null,
                 );
             }}
-            tabIndex={0}
-          >
-            <motion.button
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.95 }}
+            tabIndex={0}>
+            <button 
               className="absolute top-4 right-4 text-white/70 hover:text-white transition-colors"
-              onClick={() => setLightbox(null)}
-            >
+              onClick={() => setLightbox(null)}>
               <X className="h-6 w-6" />
-            </motion.button>
+            </button>
 
             {lightbox.images.length > 1 && lightbox.index > 0 && (
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
+              <button 
                 className="absolute left-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   setLightbox((l) => (l ? { ...l, index: l.index - 1 } : null));
-                }}
-              >
+                }}>
                 <ChevronLeft className="h-8 w-8" />
-              </motion.button>
+              </button>
             )}
 
-            <motion.img
-              key={lightbox.index}
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.2 }}
+            <img
+              key={lightbox.index} 
               src={lightbox.images[lightbox.index]}
               alt=""
               className="max-h-[90vh] max-w-[90vw] object-contain"
-              onClick={(e) => e.stopPropagation()}
-            />
+              onClick={(e) => e.stopPropagation()} />
 
             {lightbox.images.length > 1 && lightbox.index < lightbox.images.length - 1 && (
-              <motion.button
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.95 }}
+              <button 
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-white/70 hover:text-white transition-colors"
                 onClick={(e) => {
                   e.stopPropagation();
                   setLightbox((l) => (l ? { ...l, index: l.index + 1 } : null));
-                }}
-              >
+                }}>
                 <ChevronRight className="h-8 w-8" />
-              </motion.button>
+              </button>
             )}
 
             {lightbox.images.length > 1 && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="absolute bottom-6 left-1/2 -translate-x-1/2"
-              >
+              <div 
+                className="absolute bottom-6 left-1/2 -translate-x-1/2">
                 <span className="px-3 py-1 rounded-full bg-black/40 text-white/80 text-xs">
                   {lightbox.index + 1} / {lightbox.images.length}
                 </span>
-              </motion.div>
+              </div>
             )}
-          </motion.div>
+          </div>
         )}
-      </AnimatePresence>
+      </>
 
       {actionReview && actionType && actionType !== "approve" && (
         <Dialog open onOpenChange={(open) => { if (!open) closeModerate(); }}>
@@ -1144,7 +1017,7 @@ export default function ReviewModerationPage() {
       {actionReview && actionType === "approve" && (
         <Dialog open onOpenChange={(open) => { if (!open) closeModerate(); }}>
           <DialogContent className="max-w-xl overflow-hidden p-0">
-            <div className="h-1.5 w-full bg-gradient-to-r from-status-active to-status-active/40" />
+            <div className="h-1.5 w-full bg-status-active" />
             <div className="p-6">
               <DialogHeader className="text-left">
                 <div className="flex items-start gap-3">
@@ -1165,9 +1038,9 @@ export default function ReviewModerationPage() {
               </DialogHeader>
 
               <div className="mt-5 space-y-3">
-                <div className="flex items-center gap-2.5 rounded-xl border border-border bg-surface-muted/40 p-3">
+                <div className="flex items-center gap-2.5 rounded-xl border border-border bg-surface-muted p-3">
                   {actionReview.tour?.coverPhoto ? (
-                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-border">
+                    <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-xl border border-border">
                       <OptimizedImage
                         src={actionReview.tour.coverPhoto}
                         alt=""
@@ -1176,7 +1049,7 @@ export default function ReviewModerationPage() {
                       />
                     </div>
                   ) : (
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-border bg-surface-base text-sm font-bold text-text-tertiary">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-border bg-surface-base text-sm font-semibold text-text-tertiary">
                       {(actionReview.tour?.title || "T").charAt(0)}
                     </div>
                   )}
@@ -1211,7 +1084,7 @@ export default function ReviewModerationPage() {
                       </div>
                       <div className="mt-1 flex items-center gap-1.5">
                         {renderStars(actionReview.rating || 0)}
-                        <span className="text-sm font-bold text-text-primary tabular-nums">{actionReview.rating || 0}</span>
+                        <span className="text-sm font-semibold text-text-primary tnum">{actionReview.rating || 0}</span>
                         <span className="text-xs text-text-tertiary">/ 5</span>
                       </div>
                     </div>
@@ -1227,15 +1100,13 @@ export default function ReviewModerationPage() {
                   {actionReview.photos && actionReview.photos.length > 0 && (
                     <div className="mt-3 flex flex-wrap gap-2">
                       {actionReview.photos.map((photo, i) => (
-                        <motion.img
+                        <img
                           key={i}
                           src={photo}
-                          alt=""
-                          whileHover={{ scale: 1.04 }}
-                          className="h-16 w-16 cursor-pointer rounded-lg border border-border bg-surface-muted object-cover"
+                          alt="" 
+                          className="h-16 w-16 cursor-pointer rounded-xl border border-border bg-surface-muted object-cover"
                           loading="lazy"
-                          onClick={() => setLightbox({ images: actionReview.photos!, index: i })}
-                        />
+                          onClick={() => setLightbox({ images: actionReview.photos!, index: i })} />
                       ))}
                     </div>
                   )}
@@ -1271,10 +1142,10 @@ export default function ReviewModerationPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="rounded-xl border border-border bg-surface-muted/40 p-4 space-y-3">
+            <div className="rounded-xl border border-border bg-surface-muted p-4 space-y-3">
               <div className="flex items-center gap-2 pb-1">
                 <div className="h-px flex-1 bg-surface-muted" />
-                <span className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider">Original Review</span>
+                <span className="text-[11px] font-medium text-text-tertiary ">Original Review</span>
                 <div className="h-px flex-1 bg-surface-muted" />
               </div>
               <div className="flex items-start gap-3">
@@ -1292,7 +1163,7 @@ export default function ReviewModerationPage() {
                 <p className="text-sm font-medium text-text-primary">{editReview.title}</p>
               )}
               {editReview.comment && (
-                <div className="rounded-lg bg-surface-base border border-border p-3">
+                <div className="rounded-xl bg-surface-base border border-border p-3">
                   <p className="text-sm text-text-secondary leading-relaxed">{editReview.comment}</p>
                 </div>
               )}
@@ -1301,7 +1172,7 @@ export default function ReviewModerationPage() {
             <div className="space-y-5 pt-1">
               <div className="flex items-center gap-2">
                 <div className="h-px flex-1 bg-surface-muted" />
-                <span className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider">Edit Fields</span>
+                <span className="text-[11px] font-medium text-text-tertiary ">Edit Fields</span>
                 <div className="h-px flex-1 bg-surface-muted" />
               </div>
               <div>
@@ -1342,10 +1213,10 @@ export default function ReviewModerationPage() {
               </DialogDescription>
             </DialogHeader>
 
-            <div className="rounded-xl border border-border bg-surface-muted/40 p-4 space-y-3">
+            <div className="rounded-xl border border-border bg-surface-muted p-4 space-y-3">
               <div className="flex items-center gap-2 pb-1">
                 <div className="h-px flex-1 bg-surface-muted" />
-                <span className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider">Review to Delete</span>
+                <span className="text-[11px] font-medium text-text-tertiary ">Review to Delete</span>
                 <div className="h-px flex-1 bg-surface-muted" />
               </div>
               <div className="flex items-start gap-3">
@@ -1363,7 +1234,7 @@ export default function ReviewModerationPage() {
                 <p className="text-sm font-medium text-text-primary">{deleteReview.title}</p>
               )}
               {deleteReview.comment && (
-                <div className="rounded-lg bg-surface-base border border-border p-3">
+                <div className="rounded-xl bg-surface-base border border-border p-3">
                   <p className="text-sm text-text-secondary leading-relaxed">{deleteReview.comment}</p>
                 </div>
               )}
@@ -1376,7 +1247,7 @@ export default function ReviewModerationPage() {
             <div className="rounded-xl border border-status-rejected/20 bg-status-rejected/5 p-4 space-y-3">
               <div className="flex items-center gap-2">
                 <div className="h-px flex-1 bg-status-rejected/15" />
-                <span className="text-[11px] font-semibold text-status-rejected-text uppercase tracking-wider">Warning</span>
+                <span className="text-[11px] font-semibold text-status-rejected-text ">Warning</span>
                 <div className="h-px flex-1 bg-status-rejected/15" />
               </div>
               <div className="flex items-start gap-3">
@@ -1435,7 +1306,7 @@ export default function ReviewModerationPage() {
               </DialogTitle>
               <DialogDescription>This will permanently remove the supplier's response from this review.</DialogDescription>
             </DialogHeader>
-            <div className="rounded-lg border border-status-rejected/20 bg-status-rejected/5 p-3">
+            <div className="rounded-xl border border-status-rejected/20 bg-status-rejected/5 p-3">
               <p className="text-sm text-status-rejected-text line-clamp-3">{deleteResponseReview.supplierResponse}</p>
             </div>
             <DialogFooter>
@@ -1453,12 +1324,12 @@ export default function ReviewModerationPage() {
       )}
 
       {selectedCustomerId && (
-        <AnimatePresence>
+        <>
           <CustomerProfilePanel
             customerId={selectedCustomerId}
             onClose={() => setSelectedCustomerId(null)}
           />
-        </AnimatePresence>
+        </>
       )}
     </div>
   );

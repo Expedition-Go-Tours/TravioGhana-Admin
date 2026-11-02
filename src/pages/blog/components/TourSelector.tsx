@@ -47,7 +47,7 @@ export function TourSelector({ tours, selectedIds, onChange }: TourSelectorProps
             <Badge
               key={tour.id}
               variant={selectedIds.includes(tour.id) ? "default" : "outline"}
-              className="cursor-pointer select-none transition-all hover:opacity-80"
+              className="cursor-pointer select-none transition-colors hover:opacity-80"
               onClick={() => toggle(tour.id)}
             >
               {tour.title}

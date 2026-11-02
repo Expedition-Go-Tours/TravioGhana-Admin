@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
 import { Search, CornerDownLeft, Package, Building2, Loader2 } from "lucide-react";
 import { getNavGroups } from "@/components/layout/navConfig";
 import { usePermission } from "@/hooks/usePermission";
@@ -80,7 +79,7 @@ function highlightMatch(text: string, query: string) {
   return (
     <>
       {text.slice(0, idx)}
-      <mark className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300 rounded px-0.5">{text.slice(idx, idx + query.length)}</mark>
+      <mark className="rounded bg-primary/10 px-0.5 text-primary">{text.slice(idx, idx + query.length)}</mark>
       {text.slice(idx + query.length)}
     </>
   );
@@ -92,7 +91,7 @@ export function CommandPalette() {
   const [highlight, setHighlight] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const navigate = useNavigate();
-  const { can, isSuperAdmin } = usePermission();
+  const { can } = usePermission();
 
   const canSearchTours = can("tours.view");
   const canSearchSuppliers = can("suppliers.view");
@@ -101,21 +100,10 @@ export function CommandPalette() {
     suppliersEnabled: canSearchSuppliers,
   });
 
-  const adminItems = useMemo<PageItem[]>(
-    () =>
-      isSuperAdmin
-        ? [
-            { kind: "page", label: "Activity Log", path: "/admin/activity-log", group: "Administration", keywords: ["activity", "audit", "log", "history"] },
-            { kind: "page", label: "Settings", path: "/admin/settings", group: "Administration", keywords: ["settings", "config", "preferences"] },
-          ]
-        : [],
-    [isSuperAdmin],
-  );
-
   const items = useMemo(() => {
-    const groups = [...getNavGroups(can), { group: "Administration", items: adminItems }];
+    const groups = getNavGroups(can);
     return [...flatten(groups), ...getInPageItems(can)];
-  }, [can, adminItems]);
+  }, [can]);
 
   const validPaths = useMemo(() => new Set(items.map((i) => i.path)), [items]);
 
@@ -224,25 +212,17 @@ export function CommandPalette() {
   };
 
   return (
-    <AnimatePresence>
+    <>
       {open && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.12 }}
-          className="fixed inset-0 z-50 flex items-start justify-center bg-black/40 px-4 pt-[12vh] backdrop-blur-sm"
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center bg-text-primary/30 px-4 pt-[12vh]"
           onClick={() => setOpen(false)}
           role="dialog"
           aria-modal="true"
           aria-label="Command palette"
         >
-          <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: -8, scale: 0.98 }}
-            transition={{ duration: 0.16, ease: [0.32, 0.72, 0, 1] }}
-            className="w-full max-w-lg overflow-hidden rounded-2xl border border-border bg-surface-base shadow-soft-lg"
+          <div
+            className="w-full max-w-lg overflow-hidden rounded-xl border border-border bg-surface-base shadow-lg"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center gap-3 border-b border-border px-4">
@@ -253,7 +233,7 @@ export function CommandPalette() {
                 onChange={(e) => { setQuery(e.target.value); setHighlight(0); }}
                 onKeyDown={handleKeyDown}
                 placeholder="Search pages, tours, suppliers…"
-                className="h-13 w-full bg-transparent py-4 text-sm text-text-primary placeholder:text-text-tertiary outline-none"
+                className="h-12 w-full bg-transparent py-4 text-sm text-text-primary placeholder:text-text-tertiary outline-none"
               />
               <kbd className="hidden shrink-0 rounded-md border border-border bg-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-text-tertiary sm:block">
                 ESC
@@ -268,7 +248,7 @@ export function CommandPalette() {
                 groups.map(([group, groupItems]) => (
                   <div key={group} className="mb-1">
                     <div className="flex items-center gap-2 px-3 py-1.5">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">{group}</span>
+                      <span className="text-[11px] font-medium tracking-[0.08em] text-text-tertiary">{group}</span>
                     </div>
                     {groupItems.map((item) => {
                       const idx = flatResults.indexOf(item);
@@ -279,7 +259,7 @@ export function CommandPalette() {
                           onClick={() => navigateTo(item)}
                           onMouseEnter={() => setHighlight(idx)}
                           className={cn(
-                            "flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-sm transition-colors",
+                            "flex w-full items-center gap-3 rounded-md px-3 py-2 text-left text-sm transition-colors",
                             active ? "bg-accent text-accent-foreground" : "text-text-primary hover:bg-surface-muted",
                           )}
                         >
@@ -288,9 +268,9 @@ export function CommandPalette() {
                               <SafeImage
                                 src={item.coverPhoto || undefined}
                                 alt=""
-                                className="h-9 w-9 shrink-0 rounded-lg object-cover ring-1 ring-border/60"
+                                className="h-9 w-9 shrink-0 rounded-xl object-cover ring-1 ring-border/60"
                                 fallback={
-                                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-surface-muted">
+                                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-surface-muted">
                                     <Package className="h-4 w-4 text-text-tertiary" />
                                   </div>
                                 }
@@ -339,9 +319,9 @@ export function CommandPalette() {
                 </div>
               )}
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       )}
-    </AnimatePresence>
+    </>
   );
 }

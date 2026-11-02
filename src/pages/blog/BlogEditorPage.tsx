@@ -33,7 +33,7 @@ import OptimizedImage from "@/components/shared/OptimizedImage";
 function SectionDivider({ label }: { label: string }) {
   return (
     <div className="border-t border-border pt-4 mt-4">
-      <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">{label}</p>
+      <p className="text-xs font-semibold text-muted-foreground mb-3">{label}</p>
     </div>
   );
 }
@@ -317,15 +317,15 @@ export default function BlogEditorPage() {
 
       {showError ? (
         <div className="flex-1 flex flex-col items-center justify-center text-center px-4">
-          <div className="rounded-sm border border-destructive/30 bg-destructive/5 p-6 max-w-md">
+          <div className="rounded-xl border border-destructive/30 bg-destructive/5 p-6 max-w-md">
             <h2 className="text-base font-semibold text-foreground mb-1">Failed to load article</h2>
             <p className="text-sm text-muted-foreground mb-4">The article may have been removed or there was a network error.</p>
             <Button variant="outline" size="sm" onClick={() => navigate("/admin/blog")}>Back to articles</Button>
           </div>
         </div>
       ) : loading ? (
-        <div className="flex-1 flex overflow-hidden">
-          <aside className="w-[35%] min-w-[320px] max-w-[420px] border-r border-border p-5 space-y-5 overflow-y-auto">
+        <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
+          <aside className="w-full shrink-0 overflow-y-auto border-b border-border p-5 space-y-5 lg:w-[35%] lg:min-w-[320px] lg:max-w-[420px] lg:border-b-0 lg:border-r">
             {Array.from({ length: 6 }).map((_, i) => (
               <div key={i} className="space-y-3">
                 <Skeleton className="h-4 w-20" />
@@ -334,12 +334,12 @@ export default function BlogEditorPage() {
             ))}
           </aside>
           <main className="flex-1 p-5">
-            <Skeleton className="h-full w-full rounded-sm" />
+            <Skeleton className="h-full w-full rounded-xl" />
           </main>
         </div>
       ) : (
-        <div className="flex-1 flex overflow-hidden">
-          <aside className="w-[35%] min-w-[320px] max-w-[420px] border-r border-border p-5 space-y-5 overflow-y-auto scrollbar-thin">
+        <div className="flex flex-1 flex-col overflow-hidden lg:flex-row">
+          <aside className="w-full shrink-0 overflow-y-auto border-b border-border p-5 space-y-5 scrollbar-thin lg:w-[35%] lg:min-w-[320px] lg:max-w-[420px] lg:border-b-0 lg:border-r">
             <div className="space-y-2">
               <Label className="text-sm font-medium text-foreground">Title</Label>
               <Input
@@ -449,11 +449,11 @@ export default function BlogEditorPage() {
             <SectionDivider label="Featured Image" />
             <div className="space-y-3">
               {featuredImage ? (
-                <div className="relative rounded-sm overflow-hidden border border-border aspect-[3/1]">
+                <div className="relative overflow-hidden rounded-xl border border-border aspect-[3/1]">
                   <OptimizedImage src={featuredImage} alt="Featured" width={800} className="w-full h-full object-cover" />
                 </div>
               ) : (
-                <div className="flex flex-col items-center justify-center rounded-sm border border-dashed border-muted-foreground/30 py-6 text-center">
+                <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-muted-foreground/30 py-6 text-center">
                   <Image className="h-5 w-5 text-muted-foreground/50 mb-1" />
                   <p className="text-xs text-muted-foreground">No image selected</p>
                 </div>

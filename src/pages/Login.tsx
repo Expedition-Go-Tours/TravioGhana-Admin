@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "framer-motion";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,6 +7,8 @@ import { Label } from "@/components/ui/label";
 import { GoogleOAuthProvider, useGoogleOneTapLogin } from "@react-oauth/google";
 import { useAuth } from "@/auth/useAuth";
 import { getDefaultRoute } from "@/lib/permissions";
+import travioWordmark from "@/assets/travio-ghana-wordmark.png";
+import travioWordmarkDark from "@/assets/travio-ghana-wordmark-on-dark.png";
 
 const googleClientId = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 
@@ -79,25 +80,23 @@ export default function LoginPage() {
   return (
     <GoogleOAuthProvider clientId={googleClientId}>
       <OneTapHandler onSuccess={handleSuccess} />
-      <div className="relative flex min-h-[100dvh] items-center justify-center bg-gradient-to-br from-green-100 via-green-50/50 to-green-950/15 p-4 overflow-hidden">
-      <div className="noise-overlay" />
-      <motion.div
-        initial={{ opacity: 0, y: 20, scale: 0.98 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        transition={{ duration: 0.6, ease: [0.32, 0.72, 0, 1] }}
-        className="relative w-full max-w-sm"
-      >
-        <div className="double-bezel">
-          <div className="double-bezel-inner p-8">
-            <div className="mb-8 flex flex-col items-center text-center">
-              <h1 className="font-display text-xl font-semibold tracking-tight text-text-primary">Welcome back</h1>
+      <div className="flex min-h-[100dvh] items-center justify-center bg-surface-muted px-4 py-10">
+        <div className="w-full max-w-[400px]">
+          <div className="mb-6 flex justify-center">
+            <img src={travioWordmark} alt="Travio Ghana" className="h-12 w-auto dark:hidden" />
+            <img src={travioWordmarkDark} alt="" aria-hidden="true" className="hidden h-12 w-auto dark:block" />
+          </div>
+
+          <div className="rounded-xl border border-border bg-surface-base p-6 sm:p-8">
+            <div className="mb-7 text-center">
+              <h1 className="text-[26px] font-light leading-8 tracking-[-0.26px] text-text-primary">Welcome back</h1>
               <p className="mt-1 text-sm text-text-secondary">Sign in to your admin account</p>
             </div>
 
             <button
               onClick={handleGoogleLogin}
               disabled={loading}
-              className="group flex w-full items-center justify-center gap-3 rounded-xl border border-border bg-surface-base px-4 py-3 text-sm font-medium text-text-primary shadow-sm transition-all duration-200 ease-[cubic-bezier(0.32,0.72,0,1)] hover:shadow-soft hover:border-border-muted active:scale-[0.98] disabled:opacity-50"
+              className="flex h-11 w-full items-center justify-center gap-3 rounded-full border border-input bg-surface-base px-4 text-sm font-medium text-text-primary transition-colors hover:border-text-tertiary hover:bg-surface-muted disabled:opacity-50"
             >
               <svg className="h-5 w-5 shrink-0" viewBox="0 0 24 24">
                 <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4" />
@@ -109,14 +108,14 @@ export default function LoginPage() {
             </button>
 
             <div className="my-6 flex items-center gap-4">
-              <div className="flex-1 border-t border-border-muted" />
-              <span className="text-xs font-medium text-text-tertiary">OR</span>
-              <div className="flex-1 border-t border-border-muted" />
+              <div className="h-px flex-1 bg-border" />
+              <span className="text-[11px] font-medium tracking-[0.08em] text-text-tertiary">or</span>
+              <div className="h-px flex-1 bg-border" />
             </div>
 
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email" className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
+              <div className="space-y-1.5">
+                <Label htmlFor="email" className="text-[13px] font-medium text-text-secondary">
                   Email
                 </Label>
                 <Input
@@ -130,12 +129,12 @@ export default function LoginPage() {
                   autoComplete="email"
                 />
               </div>
-              <div className="space-y-2">
+              <div className="space-y-1.5">
                 <div className="flex items-center justify-between">
-                  <Label htmlFor="password" className="text-xs font-semibold text-text-secondary uppercase tracking-wider">
+                  <Label htmlFor="password" className="text-[13px] font-medium text-text-secondary">
                     Password
                   </Label>
-                  <button type="button" className="text-xs font-medium text-primary hover:text-primary/80 transition-colors">
+                  <button type="button" className="text-xs font-medium text-primary transition-colors hover:text-primary/80">
                     Forgot?
                   </button>
                 </div>
@@ -151,16 +150,13 @@ export default function LoginPage() {
                 />
               </div>
               {error && (
-                <motion.div
-                  initial={{ opacity: 0, y: -4 }}
-                  animate={{ opacity: 1, y: 0 }}
+                <div
                   className="rounded-xl border border-destructive/20 bg-destructive/5 px-3.5 py-2.5 text-sm text-destructive"
-                  role="alert"
-                >
+                  role="alert">
                   {error}
-                </motion.div>
+                </div>
               )}
-              <Button type="submit" className="w-full h-11" disabled={loading}>
+              <Button type="submit" className="h-11 w-full" disabled={loading}>
                 {loading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -171,14 +167,13 @@ export default function LoginPage() {
                 )}
               </Button>
             </form>
-
-            <p className="mt-8 text-center text-xs text-text-tertiary/60">
-              Travio Ghana Admin Portal &mdash; Authorized access only
-            </p>
           </div>
+
+          <p className="mt-6 text-center text-xs text-text-tertiary">
+            Travio Ghana Admin Portal &mdash; authorized access only
+          </p>
         </div>
-      </motion.div>
-    </div>
+      </div>
     </GoogleOAuthProvider>
   );
 }

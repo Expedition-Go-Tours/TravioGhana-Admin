@@ -10,6 +10,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { DataTable } from "@/components/shared/DataTable";
 import type { Column } from "@/components/shared/DataTable";
 import { ConfirmModal } from "@/components/shared/ConfirmModal";
+import { PayoutStatusTabs } from "@/components/payouts/PayoutStatusTabs";
 import { usePermission } from "@/hooks/usePermission";
 import { useSocketInvalidate } from "@/hooks/useSocketEvent";
 import api from "@/lib/axios";
@@ -48,34 +49,34 @@ const OUTCOMES: Array<{ value: Outcome; label: string; icon: React.ReactNode; hi
 function DisputeDetail({ dispute: d }: { dispute: Dispute }) {
   const open = d.status === "OPEN" || d.status === "UNDER_REVIEW";
   return (
-    // DataTable's <td> already paints `bg-surface-muted/30` and is `p-0`, so
+    // DataTable's <td> already paints `bg-surface-muted` and is `p-0`, so
     // this supplies only the padding; re-tinting here would stack two 30%
     // layers into a visibly different shade.
     <div className="px-5 py-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Filed by</p>
+          <p className="text-[11px] font-semibold text-text-tertiary">Filed by</p>
           <p className="mt-1 truncate text-sm text-text-secondary">{d.opener?.name || d.opener?.email || "—"}</p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Supplier</p>
+          <p className="text-[11px] font-semibold text-text-tertiary">Supplier</p>
           <p className="mt-1 truncate text-sm text-text-secondary">{d.supplier?.name || d.supplier?.email || "—"}</p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Travel date</p>
+          <p className="text-[11px] font-semibold text-text-tertiary">Travel date</p>
           <p className="mt-1 text-sm text-text-secondary">
             {d.booking?.travelDate ? formatDate(d.booking.travelDate) : "—"}
           </p>
         </div>
       </div>
       {d.description && (
-        <div className="mt-3 rounded-md border border-border/60 bg-surface-base px-3 py-2">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Supplier's explanation</p>
+        <div className="mt-3 rounded-md border border-border bg-surface-base px-3 py-2">
+          <p className="text-[11px] font-semibold text-text-tertiary">Supplier's explanation</p>
           <p className="mt-1 whitespace-pre-wrap text-sm text-text-secondary">{d.description}</p>
         </div>
       )}
       {!open && (
-        <div className="mt-3 rounded-md bg-emerald-500/10 px-3 py-2 text-sm text-emerald-700 dark:text-emerald-400">
+        <div className="mt-3 rounded-md bg-primary/10 px-3 py-2 text-sm text-primary dark:text-primary">
           Resolution: {d.resolution || "—"}
           {d.refundAmount != null && ` · refunded ${formatCurrency(Number(d.refundAmount), d.booking?.currency)}`}
         </div>
@@ -193,7 +194,7 @@ export function DisputesQueueTab() {
       hideBelow: "sm",
       render: (d) => (
         <span className="block">
-          <span className="block text-sm font-semibold text-text-primary tabular-nums">
+          <span className="block text-sm font-semibold text-text-primary tnum">
             {formatCurrency(Number(d.booking?.grossAmount || 0), d.booking?.currency)}
           </span>
           <span className="block text-xs text-text-tertiary">at stake</span>
@@ -232,24 +233,17 @@ export function DisputesQueueTab() {
 
   return (
     <div className="space-y-4">
-      {/* Status tabs */}
-      <div className="flex flex-wrap items-center gap-2">
-        {STATUS_TABS.map(({ key, label }) => (
-          <button
-            key={key}
-            onClick={() => setStatusTab(key)}
-            className={cn(
-              "rounded-lg px-3.5 py-1.5 text-sm font-medium transition-colors focus:outline-none",
-              statusTab === key
-                ? "bg-primary text-primary-foreground"
-                : "border border-border bg-surface-base text-text-secondary hover:text-text-primary"
-            )}
-          >
-            {label}
-          </button>
-        ))}
+      <div className="flex items-center gap-3">
+        <PayoutStatusTabs
+          tabs={STATUS_TABS.map(({ key, label }) => ({ key, label }))}
+          active={statusTab}
+          onChange={setStatusTab}
+          className="min-w-0 flex-1"
+        />
         {!isLoading && !isError && disputes.length > 0 && (
-          <span className="ml-auto text-xs text-text-tertiary tabular-nums">{disputes.length} request(s)</span>
+          <span className="shrink-0 pr-1 text-xs text-text-tertiary tnum">
+            {disputes.length} {disputes.length === 1 ? "request" : "requests"}
+          </span>
         )}
       </div>
 
@@ -288,14 +282,14 @@ export function DisputesQueueTab() {
                 type="button"
                 onClick={() => setOutcome(o.value)}
                 className={cn(
-                  "flex w-full items-start gap-3 rounded-lg border p-3 text-left transition-colors",
+                  "flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors",
                   outcome === o.value
                     ? "border-primary bg-primary/5"
-                    : "border-border hover:border-border hover:bg-surface-muted/40"
+                    : "border-border hover:border-border hover:bg-surface-muted"
                 )}
               >
                 <span className={cn(
-                  "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+                  "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl",
                   outcome === o.value ? "bg-primary/10 text-primary" : "bg-surface-muted text-text-tertiary"
                 )}>
                   {o.icon}

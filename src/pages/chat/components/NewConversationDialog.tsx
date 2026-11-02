@@ -37,7 +37,7 @@ interface NewConversationDialogProps {
 }
 
 function Skeleton({ chatType }: { chatType: "suppliers" | "customers" | "expedition" }) {
-  const bg = chatType === "suppliers" ? "bg-green-100/60" : chatType === "expedition" ? "bg-purple-100/60" : "bg-blue-100/60";
+  const bg = chatType === "suppliers" ? "bg-primary/10" : chatType === "expedition" ? "bg-status-processing/10" : "bg-status-approved/10";
   return (
     <div className="flex items-center gap-3 px-4 py-3">
       <div className={cn("h-10 w-10 animate-pulse rounded-full", bg)} />
@@ -53,13 +53,13 @@ const accent = (type: "suppliers" | "customers" | "expedition") => {
   const isSup = type === "suppliers";
   const isExp = type === "expedition";
   return {
-    bg50: isSup ? "bg-green-50" : isExp ? "bg-purple-50" : "bg-blue-50",
-    bg50slash20: isSup ? "bg-green-50/20" : isExp ? "bg-purple-50/20" : "bg-blue-50/20",
-    text400: isSup ? "text-green-400" : isExp ? "text-purple-400" : "text-blue-400",
-    text600: isSup ? "text-green-600" : isExp ? "text-purple-600" : "text-blue-600",
-    hoverText700: isSup ? "hover:text-green-700" : isExp ? "hover:text-purple-700" : "hover:text-blue-700",
-    gradient: isSup ? "bg-green-500" : isExp ? "bg-purple-500" : "bg-status-approved",
-    border: isSup ? "focus-visible:border-green-400" : isExp ? "focus-visible:border-purple-400" : "focus-visible:border-blue-400",
+    bg50: isSup ? "bg-primary/10" : isExp ? "bg-status-processing/10" : "bg-status-approved/10",
+    bg50slash20: isSup ? "bg-primary/10" : isExp ? "bg-status-processing/10" : "bg-status-approved/10",
+    text400: isSup ? "text-primary" : isExp ? "text-status-processing-text" : "text-status-approved-text",
+    text600: isSup ? "text-primary" : isExp ? "text-status-processing-text" : "text-status-approved-text",
+    hoverText700: isSup ? "hover:text-primary" : isExp ? "hover:text-status-processing-text" : "hover:text-status-approved-text",
+    gradient: isSup ? "bg-primary" : isExp ? "bg-status-processing" : "bg-status-approved",
+    border: isSup ? "focus-visible:border-border" : isExp ? "focus-visible:border-status-processing/30" : "focus-visible:border-status-approved/30",
   };
 };
 
@@ -176,9 +176,9 @@ export function NewConversationDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg p-0 gap-0 overflow-hidden rounded-xl">
-        <div className="border-b border-border/50 px-5 py-4">
+        <div className="border-b border-border px-5 py-4">
           <DialogHeader className="p-0">
-            <DialogTitle className="text-base font-bold text-text-primary">
+            <DialogTitle className="text-base font-semibold text-text-primary">
               {isSuppliers ? "New Supplier Conversation" : "New Customer Conversation"}
             </DialogTitle>
             <DialogDescription className="sr-only">
@@ -194,7 +194,7 @@ export function NewConversationDialog({
           </p>
         </div>
 
-        <div className="relative border-b border-border/50 px-4 py-3">
+        <div className="relative border-b border-border px-4 py-3">
           <Search className="absolute left-7 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
           <input
             ref={inputRef}
@@ -202,7 +202,7 @@ export function NewConversationDialog({
             autoComplete="off"
             onChange={handleSearchChange}
             onKeyDown={handleKeyDown}
-            className={cn("w-full rounded-lg border border-border/60 py-2 pl-9 pr-9 text-sm text-text-primary placeholder:text-text-tertiary focus-visible:outline-none focus-visible:bg-surface-base transition-colors", a.bg50slash20, a.border)}
+            className={cn("w-full rounded-xl border border-border py-2 pl-9 pr-9 text-sm text-text-primary placeholder:text-text-tertiary focus-visible:outline-none focus-visible:bg-surface-base transition-colors", a.bg50slash20, a.border)}
           />
           {query && (
             <button
@@ -218,7 +218,7 @@ export function NewConversationDialog({
         </div>
 
         <div className="flex items-center justify-between px-5 py-2.5">
-          <span className="text-xs font-medium text-text-tertiary uppercase tracking-wider">
+          <span className="text-xs font-medium text-text-tertiary ">
             {searchQuery
               ? `Results (${results.length})`
               : isSuppliers
@@ -290,11 +290,11 @@ export function NewConversationDialog({
                       key={supplier.id}
                       onClick={() => onSelect(supplier.user?.id || supplier.id, name)}
                       className={cn(
-                        "flex w-full items-center gap-3 px-5 py-3 text-left transition-all duration-200 focus-visible:outline-none",
+                        "flex w-full items-center gap-3 px-5 py-3 text-left transition-colors duration-200 focus-visible:outline-none",
                         isFocused && a.bg50
                       )}
                     >
-                      <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br text-sm font-bold text-white shadow-sm", a.gradient)}>
+                      <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white ", a.gradient)}>
                         <span>{initial}</span>
                         {supplier.user?.photoURL && (
                           <OptimizedImage
@@ -313,7 +313,7 @@ export function NewConversationDialog({
                         <div className="flex items-center gap-2">
                           <p className="truncate text-sm font-medium text-text-primary">{name}</p>
                           {supplier.businessInfo?.legalBusinessName && (
-                            <span className="shrink-0 rounded-full bg-blue-50 px-1.5 py-[1px] text-[10px] font-medium text-blue-600">
+                            <span className="shrink-0 rounded-full bg-status-approved/10 px-1.5 py-[1px] text-[10px] font-medium text-status-approved-text">
                               Business
                             </span>
                           )}
@@ -326,7 +326,7 @@ export function NewConversationDialog({
                             <span
                               className={cn(
                                 "shrink-0 rounded-full px-1.5 py-[1px] text-[10px] font-medium",
-                                supplier.status === "ACTIVE" ? a.bg50 + " " + a.text600 : "bg-amber-50 text-amber-600"
+                                supplier.status === "ACTIVE" ? a.bg50 + " " + a.text600 : "bg-status-pending/10 text-status-pending-text"
                               )}
                             >
                               {supplier.status === "ACTIVE" ? "Active" : supplier.status}
@@ -344,11 +344,11 @@ export function NewConversationDialog({
                     key={user.id}
                     onClick={() => onSelect(user.id, name)}
                     className={cn(
-                      "flex w-full items-center gap-3 px-5 py-3 text-left transition-all duration-200 focus-visible:outline-none",
+                      "flex w-full items-center gap-3 px-5 py-3 text-left transition-colors duration-200 focus-visible:outline-none",
                       isFocused && a.bg50
                     )}
                   >
-                    <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br text-sm font-bold text-white shadow-sm", a.gradient)}>
+                    <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white ", a.gradient)}>
                       <span>{initial}</span>
                       {user.photoURL && (
                         <OptimizedImage
@@ -376,7 +376,7 @@ export function NewConversationDialog({
           )}
         </div>
 
-        <div className="border-t border-border/50 px-5 py-3">
+        <div className="border-t border-border px-5 py-3">
           <p className="text-[11px] text-text-tertiary text-center">
             {results.length > 0
               ? "Type to filter · ↑↓ to navigate · Enter to select"

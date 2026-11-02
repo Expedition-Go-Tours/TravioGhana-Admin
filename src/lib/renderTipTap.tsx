@@ -69,7 +69,7 @@ export function renderTipTapNode(node: TipTapNode, key?: number): ReactNode {
 
     case "heading": {
       const level = node.attrs?.level || 1;
-      const styles = ["text-3xl font-bold", "text-2xl font-semibold", "text-xl font-semibold"];
+      const styles = ["text-3xl font-semibold", "text-2xl font-semibold", "text-xl font-semibold"];
       const className = `${styles[Math.min(level - 1, 2)]} text-text-primary`;
       if (level === 1) return <h1 key={key} className={className}>{children}</h1>;
       if (level === 2) return <h2 key={key} className={className}>{children}</h2>;
@@ -95,8 +95,8 @@ export function renderTipTapNode(node: TipTapNode, key?: number): ReactNode {
 
     case "codeBlock":
       return (
-        <pre key={key} className="rounded-lg bg-gray-900 p-4 overflow-x-auto">
-          <code className="text-sm text-gray-100 font-mono">{node.content?.[0]?.text || ""}</code>
+        <pre key={key} className="rounded-xl bg-text-primary p-4 overflow-x-auto">
+          <code className="text-sm text-white font-mono">{node.content?.[0]?.text || ""}</code>
         </pre>
       );
 

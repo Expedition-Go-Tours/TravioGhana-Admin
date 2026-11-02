@@ -149,7 +149,7 @@ function extractBookingInfo(bookingAndTickets: unknown) {
 function EmptyState() {
   return (
     <div className="flex h-full flex-col items-center justify-center text-center">
-      <div className="mb-4 rounded-2xl bg-surface-muted p-4">
+      <div className="mb-4 rounded-xl bg-surface-muted p-4">
         <MapPin className="h-8 w-8 text-muted-foreground/30" />
       </div>
       <h3 className="text-lg font-semibold text-foreground">Select a tour</h3>
@@ -196,13 +196,13 @@ function ItineraryTimeline({ items }: { items: ItineraryStop[] }) {
         const isExpanded = expandedDays.has(day) || days.length <= 1;
 
         return (
-          <div key={day} className="overflow-hidden rounded-xl border border-border/40">
+          <div key={day} className="overflow-hidden rounded-xl border border-border">
             <button
               onClick={() => toggleDay(day)}
-              className="flex w-full items-center justify-between bg-surface-muted/50 px-4 py-3 text-left transition-colors hover:bg-surface-muted"
+              className="flex w-full items-center justify-between bg-surface-muted px-4 py-3 text-left transition-colors hover:bg-surface-muted"
             >
               <div className="flex items-center gap-3">
-                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">
+                <span className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
                   {day}
                 </span>
                 <span className="text-sm font-semibold text-foreground">
@@ -378,7 +378,7 @@ export function TourDetailPanel({
           <div className="mb-6">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0 flex-1">
-                <h2 className="text-xl font-bold text-foreground">{tour.title}</h2>
+                <h2 className="text-xl font-semibold text-foreground">{tour.title}</h2>
                 <p className="mt-1 text-sm text-muted-foreground">
                   Submitted by {tour.supplier?.name || 'Unknown Provider'}
                 </p>
@@ -399,7 +399,7 @@ export function TourDetailPanel({
             </div>
 
             {/* Quick facts bar */}
-            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-border/40 py-3">
+            <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 border-y border-border py-3">
               {tour.category && (
                 <div className="flex items-center gap-1.5 text-sm text-foreground">
                   <Tag className="h-4 w-4 text-muted-foreground" />
@@ -549,7 +549,7 @@ export function TourDetailPanel({
                 <h3 className="mb-3 text-base font-semibold text-foreground">
                   Meeting and Pickup
                 </h3>
-                <div className="space-y-3 rounded-xl border border-border/40 p-4">
+                <div className="space-y-3 rounded-xl border border-border p-4">
                   {content.meetingMode && (
                     <div className="flex items-center gap-2">
                       <Badge variant={content.meetingMode === 'meeting_point' ? 'default' : 'secondary'} className="capitalize">
@@ -591,7 +591,7 @@ export function TourDetailPanel({
                     </div>
                   )}
                   {content.meetingPointPicture && (
-                    <div className="mt-2 overflow-hidden rounded-lg">
+                    <div className="mt-2 overflow-hidden rounded-xl">
                       <OptimizedImage
                         src={content.meetingPointPicture as string}
                         alt="Meeting point"
@@ -610,7 +610,7 @@ export function TourDetailPanel({
                 <h3 className="mb-3 text-base font-semibold text-foreground">
                   Additional Info
                 </h3>
-                <div className="rounded-xl border border-border/40 p-4">
+                <div className="rounded-xl border border-border p-4">
                   <dl className="space-y-3">
                     {content.writingLanguage && (
                       <div className="flex gap-4">
@@ -656,7 +656,7 @@ export function TourDetailPanel({
                   <Utensils className="h-5 w-5 text-primary" />
                   Food & Dining
                 </h3>
-                <div className="rounded-xl border border-border/40 p-4">
+                <div className="rounded-xl border border-border p-4">
                   <dl className="space-y-3">
                     {content.foodProvided !== undefined && (
                       <div className="flex gap-4">
@@ -720,7 +720,7 @@ export function TourDetailPanel({
                   <Truck className="h-5 w-5 text-primary" />
                   Transport & Pickup
                 </h3>
-                <div className="rounded-xl border border-border/40 p-4">
+                <div className="rounded-xl border border-border p-4">
                   <dl className="space-y-3">
                     {(content.pickupProvided !== undefined || content.pickupAvailable !== undefined) && (
                       <div className="flex gap-4">
@@ -836,7 +836,7 @@ export function TourDetailPanel({
                   <Package className="h-5 w-5 text-primary" />
                   What to Bring & Restrictions
                 </h3>
-                <div className="rounded-xl border border-border/40 p-4">
+                <div className="rounded-xl border border-border p-4">
                   <dl className="space-y-3">
                     {content.whatToBring && (
                       <div className="flex gap-4">
@@ -879,7 +879,7 @@ export function TourDetailPanel({
                   <AlertTriangle className="h-5 w-5 text-primary" />
                   Requirements
                 </h3>
-                <div className="rounded-xl border border-border/40 p-4">
+                <div className="rounded-xl border border-border p-4">
                   <dl className="space-y-3">
                     {content.passportRequired && (
                       <div className="flex gap-4">
@@ -938,7 +938,7 @@ export function TourDetailPanel({
                   <BookOpen className="h-5 w-5 text-primary" />
                   Guide Information
                 </h3>
-                <div className="rounded-xl border border-border/40 p-4">
+                <div className="rounded-xl border border-border p-4">
                   <dl className="space-y-3">
                     {content.guideType && (
                       <div className="flex gap-4">
@@ -978,7 +978,7 @@ export function TourDetailPanel({
                   <Phone className="h-5 w-5 text-primary" />
                   Contact & Voucher Info
                 </h3>
-                <div className="rounded-xl border border-border/40 p-4">
+                <div className="rounded-xl border border-border p-4">
                   <dl className="space-y-3">
                     {content.emergencyPhone && (
                       <div className="flex gap-4">
@@ -1015,30 +1015,30 @@ export function TourDetailPanel({
                 </h3>
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
                   {tour.averageRating && (
-                    <div className="flex flex-col items-center rounded-xl border border-border/40 p-3">
+                    <div className="flex flex-col items-center rounded-xl border border-border p-3">
                       <Star className="h-5 w-5 text-warning" />
-                      <span className="mt-1 text-lg font-bold text-foreground">{tour.averageRating as number}</span>
+                      <span className="mt-1 text-lg font-semibold text-foreground">{tour.averageRating as number}</span>
                       <span className="text-[11px] text-muted-foreground">Rating</span>
                     </div>
                   )}
                   {tour.reviewCount !== undefined && (
-                    <div className="flex flex-col items-center rounded-xl border border-border/40 p-3">
+                    <div className="flex flex-col items-center rounded-xl border border-border p-3">
                       <Tag className="h-5 w-5 text-primary" />
-                      <span className="mt-1 text-lg font-bold text-foreground">{tour.reviewCount as number}</span>
+                      <span className="mt-1 text-lg font-semibold text-foreground">{tour.reviewCount as number}</span>
                       <span className="text-[11px] text-muted-foreground">Reviews</span>
                     </div>
                   )}
                   {tour.totalBookings !== undefined && (
-                    <div className="flex flex-col items-center rounded-xl border border-border/40 p-3">
+                    <div className="flex flex-col items-center rounded-xl border border-border p-3">
                       <Ticket className="h-5 w-5 text-primary" />
-                      <span className="mt-1 text-lg font-bold text-foreground">{tour.totalBookings as number}</span>
+                      <span className="mt-1 text-lg font-semibold text-foreground">{tour.totalBookings as number}</span>
                       <span className="text-[11px] text-muted-foreground">Bookings</span>
                     </div>
                   )}
                   {tour.viewCount !== undefined && (
-                    <div className="flex flex-col items-center rounded-xl border border-border/40 p-3">
+                    <div className="flex flex-col items-center rounded-xl border border-border p-3">
                       <TrendingUp className="h-5 w-5 text-primary" />
-                      <span className="mt-1 text-lg font-bold text-foreground">{tour.viewCount as number}</span>
+                      <span className="mt-1 text-lg font-semibold text-foreground">{tour.viewCount as number}</span>
                       <span className="text-[11px] text-muted-foreground">Views</span>
                     </div>
                   )}
@@ -1053,12 +1053,12 @@ export function TourDetailPanel({
                   <DollarSign className="h-5 w-5 text-primary" />
                   Pricing & Availability
                 </h3>
-                <div className="rounded-xl border border-border/40 p-4">
+                <div className="rounded-xl border border-border p-4">
                   {/* Price table */}
                   {pricing.prices.length > 0 && (
                     <div className="mb-4">
                       <div className="mb-2 flex items-center gap-2">
-                        <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                        <span className="text-xs font-medium text-muted-foreground">
                           Price per person
                         </span>
                         {pricing.pricingModel && (
@@ -1067,10 +1067,10 @@ export function TourDetailPanel({
                           </Badge>
                         )}
                       </div>
-                      <div className="overflow-hidden rounded-lg border border-border/30">
+                      <div className="overflow-hidden rounded-xl border border-border">
                         <table className="w-full text-sm">
                           <thead>
-                            <tr className="border-b border-border/30 bg-surface-muted/50">
+                            <tr className="border-b border-border bg-surface-base">
                               <th className="px-3 py-2 text-left text-xs font-medium text-muted-foreground">
                                 Age Group
                               </th>
@@ -1084,7 +1084,7 @@ export function TourDetailPanel({
                           </thead>
                           <tbody>
                             {pricing.prices.map((p, i) => (
-                              <tr key={i} className="border-b border-border/20 last:border-0">
+                              <tr key={i} className="border-b border-border last:border-0">
                                 <td className="px-3 py-2 font-medium text-foreground">
                                   {p.ageGroup}
                                 </td>
@@ -1105,14 +1105,14 @@ export function TourDetailPanel({
                   {/* Schedule */}
                   {pricing.schedules.length > 0 && (
                     <div>
-                      <span className="mb-2 block text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                      <span className="mb-2 block text-xs font-medium text-muted-foreground">
                         Available dates
                       </span>
                       <div className="space-y-2">
                         {pricing.schedules.map((sch, i) => (
                           <div
                             key={i}
-                            className="flex items-center gap-3 rounded-lg bg-surface-muted/50 px-3 py-2"
+                            className="flex items-center gap-3 rounded-xl bg-surface-muted px-3 py-2"
                           >
                             <Calendar className="h-4 w-4 shrink-0 text-muted-foreground" />
                             <div className="min-w-0 flex-1 text-sm">
@@ -1161,7 +1161,7 @@ export function TourDetailPanel({
                   <CreditCard className="h-5 w-5 text-primary" />
                   Booking Information
                 </h3>
-                <div className="rounded-xl border border-border/40 p-4">
+                <div className="rounded-xl border border-border p-4">
                   <dl className="space-y-3">
                     {bookingInfo.confirmationType && (
                       <div className="flex gap-4">
@@ -1226,7 +1226,7 @@ export function TourDetailPanel({
 
       {/* ── Sticky Action Bar (only for pending reviews) ── */}
       {(tour.status === 'PENDING_APPROVAL' || tour.draftStatus === 'PENDING_APPROVAL') && (
-        <div className="shrink-0 border-t border-border/40 bg-surface-base/95 backdrop-blur-sm">
+        <div className="shrink-0 border-t border-border bg-surface-base/95 ">
           <div className="flex items-center gap-3 p-4">
             <Button
               onClick={onApprove}

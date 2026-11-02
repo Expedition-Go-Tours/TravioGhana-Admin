@@ -1,5 +1,4 @@
 import { memo, useCallback, useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -15,7 +14,6 @@ import { ConfirmModal } from "@/components/shared/ConfirmModal";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
-import { staggerContainer, fadeIn } from "@/lib/animations";
 import { formatNumber, formatDate } from "@/lib/utils";
 import api from "@/lib/axios";
 import { toggleSupplierExpeditionRole } from "@/services/supplierService";
@@ -83,7 +81,7 @@ const TourRow = memo(function TourRow({ tour, isPending, onToggle, onOpen }: Tou
       : et?.syncStatus === "failed"
         ? { dot: "bg-status-rejected", label: "Sync failed" }
         : et?.syncStatus === "pending" || et?.syncStatus === "syncing"
-          ? { dot: "bg-amber-400", label: "Syncing" }
+          ? { dot: "bg-status-pending", label: "Syncing" }
           : et
             ? { dot: "bg-text-tertiary/50", label: "Not synced" }
             : { dot: "bg-text-tertiary/50", label: "Off EG" };
@@ -91,14 +89,14 @@ const TourRow = memo(function TourRow({ tour, isPending, onToggle, onOpen }: Tou
   return (
     <div
       onClick={() => onOpen(tour.id)}
-      className="group flex cursor-pointer items-center gap-4 px-5 py-4 transition-colors hover:bg-surface-muted/40"
+      className="group flex cursor-pointer items-center gap-4 px-5 py-4 transition-colors hover:bg-surface-muted"
     >
       <SafeImage
         src={tour.coverPhoto || undefined}
         alt={tour.title}
-        className="h-11 w-11 shrink-0 rounded-lg object-cover ring-1 ring-border/60"
+        className="h-11 w-11 shrink-0 rounded-xl object-cover ring-1 ring-border/60"
         fallback={
-          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-surface-muted">
+          <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-surface-muted">
             <Globe className="h-4 w-4 text-text-tertiary" />
           </div>
         }
@@ -110,7 +108,7 @@ const TourRow = memo(function TourRow({ tour, isPending, onToggle, onOpen }: Tou
             {tour.title}
           </p>
           {et?.isFeatured && (
-            <span className="inline-flex shrink-0 items-center rounded-full bg-amber-50 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-amber-700 ring-1 ring-inset ring-amber-200">
+            <span className="inline-flex shrink-0 items-center rounded-full bg-status-pending/10 px-1.5 py-0.5 text-[9px] font-semibold text-status-pending-text ring-1 ring-inset ring-status-pending/30">
               Featured
             </span>
           )}
@@ -126,8 +124,8 @@ const TourRow = memo(function TourRow({ tour, isPending, onToggle, onOpen }: Tou
             </span>
           )}
           {tour.averageRating > 0 && (
-            <span className="inline-flex items-center gap-0.5 text-amber-600">
-              <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+            <span className="inline-flex items-center gap-0.5 text-status-pending-text">
+              <Star className="h-3 w-3 fill-status-pending text-status-pending-text" />
               {Number(tour.averageRating).toFixed(1)}
             </span>
           )}
@@ -146,7 +144,7 @@ const TourRow = memo(function TourRow({ tour, isPending, onToggle, onOpen }: Tou
             className={`inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[10px] font-semibold ${
               et.bookingFlow === "DIRECT"
                 ? "bg-primary/10 text-primary"
-                : "bg-amber-100 text-amber-700"
+                : "bg-status-pending/10 text-status-pending-text"
             }`}
           >
             <ExternalLink className="h-2.5 w-2.5" />
@@ -158,7 +156,7 @@ const TourRow = memo(function TourRow({ tour, isPending, onToggle, onOpen }: Tou
           <span className="text-[10px] font-medium text-text-tertiary">{syncMeta.label}</span>
           {et?.syncError && (
             <div className="pointer-events-none absolute bottom-full right-0 mb-1.5 z-10 hidden group-hover/sync:block">
-              <div className="max-w-[220px] rounded-lg bg-slate-800 px-2.5 py-1.5 text-[11px] leading-snug text-white shadow-lg">
+              <div className="max-w-[220px] rounded-xl bg-text-primary px-2.5 py-1.5 text-[11px] leading-snug text-white shadow-lg">
                 {et.syncError}
               </div>
             </div>
@@ -184,7 +182,7 @@ const TourRow = memo(function TourRow({ tour, isPending, onToggle, onOpen }: Tou
           }`}
         >
           <span
-            className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
+            className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
               isPublished ? "translate-x-5" : "translate-x-1"
             }`}
           />
@@ -199,8 +197,8 @@ const TourRow = memo(function TourRow({ tour, isPending, onToggle, onOpen }: Tou
 
 function TourRowSkeleton() {
   return (
-    <div className="flex items-center gap-4 border-b border-border/70 px-5 py-4 animate-pulse">
-      <Skeleton className="h-11 w-11 rounded-lg" />
+    <div className="flex items-center gap-4 border-b border-border px-5 py-4 animate-pulse">
+      <Skeleton className="h-11 w-11 rounded-xl" />
       <div className="flex-1 space-y-2">
         <Skeleton className="h-4 w-1/2" />
         <Skeleton className="h-3 w-1/3" />
@@ -305,9 +303,9 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
   }, [navigate]);
 
   const kpiColor = {
-    emerald: "bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/30 dark:to-emerald-900/20",
-    blue: "bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20",
-    amber: "bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/30 dark:to-amber-900/20",
+    emerald: "bg-primary/10",
+    blue: "bg-status-approved/10",
+    amber: "bg-status-pending/10",
   };
 
   const kpis = [
@@ -320,13 +318,8 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
   const live = supplier.activeOnExpedition > 0 || stats.onEG > 0;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, x: 40 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: -40 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
-      className="space-y-6"
-    >
+    <div 
+      className="space-y-6">
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-xs text-text-tertiary">
         <button
@@ -342,16 +335,16 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
       </div>
 
       {/* Supplier profile header */}
-      <div className="rounded-2xl border border-border bg-surface-base p-5 shadow-soft sm:p-6">
+      <div className="rounded-xl border border-border bg-surface-base p-5  sm:p-6">
         <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-start gap-4">
             <div className="relative shrink-0">
               <SafeImage
                 src={supplierDetail?.photoURL || supplier.photoURL || undefined}
                 alt={supplier.name}
-                className="h-16 w-16 rounded-2xl object-cover ring-2 ring-border"
+                className="h-16 w-16 rounded-xl object-cover ring-2 ring-border"
                 fallback={
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-emerald-400 to-emerald-600 text-xl font-bold text-white">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary text-xl font-semibold text-white">
                     {supplier.name.charAt(0).toUpperCase()}
                   </div>
                 }
@@ -364,7 +357,7 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
             </div>
             <div className="min-w-0">
               <div className="flex items-center gap-2">
-                <h1 className="truncate text-lg font-bold text-text-primary sm:text-xl">{supplier.name}</h1>
+                <h1 className="truncate text-[26px] font-light leading-8 tracking-[-0.26px] text-text-primary sm:text-[28px]">{supplier.name}</h1>
               </div>
               <p className="mt-0.5 truncate text-sm text-text-tertiary">{supplierDetail?.email || supplier.email}</p>
               <div className="mt-2 flex flex-wrap items-center gap-1.5">
@@ -386,7 +379,7 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
                   className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium ${
                     isExpeditionPartner
                       ? "bg-primary/10 text-primary"
-                      : "bg-amber-100 text-amber-700"
+                      : "bg-status-pending/10 text-status-pending-text"
                   }`}
                 >
                   <ExternalLink className="h-3 w-3" />
@@ -395,7 +388,7 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
               </div>
 
               {/* Expedition partner toggle — controls DIRECT vs EXTERNAL booking flow */}
-              <div className="mt-3 flex items-center gap-3 rounded-xl border border-border/70 bg-surface-muted/40 px-3.5 py-2.5">
+              <div className="mt-3 flex items-center gap-3 rounded-xl border border-border bg-surface-muted px-3.5 py-2.5">
                 <button
                   role="switch"
                   aria-checked={isExpeditionPartner}
@@ -408,7 +401,7 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
                   }`}
                 >
                   <span
-                    className={`inline-block h-4 w-4 transform rounded-full bg-white shadow-sm transition-transform ${
+                    className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
                       isExpeditionPartner ? "translate-x-5" : "translate-x-1"
                     }`}
                   />
@@ -431,12 +424,12 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
               { label: "On EG", value: formatNumber(supplier.onExpedition), icon: Globe },
               { label: "Direct", value: formatNumber(supplier.directCount), icon: ExternalLink },
             ].map((s) => (
-              <div key={s.label} className="rounded-lg border border-border/70 bg-surface-muted/40 px-3.5 py-3">
+              <div key={s.label} className="rounded-xl border border-border bg-surface-muted px-3.5 py-3">
                 <div className="flex items-center gap-1.5">
                   <s.icon className="h-3.5 w-3.5 text-text-tertiary" />
                   <p className="text-xs font-medium text-text-secondary">{s.label}</p>
                 </div>
-                <p className="mt-1 text-xl font-bold text-text-primary tabular-nums">{s.value}</p>
+                <p className="mt-1 text-xl font-semibold text-text-primary tnum">{s.value}</p>
               </div>
             ))}
           </div>
@@ -444,34 +437,28 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
       </div>
 
       {/* KPI Cards */}
-      <motion.div
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-2 gap-4 lg:grid-cols-4"
-      >
+      <div 
+        className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         {kpis.map((k) => (
-          <motion.div
-            key={k.label}
-            variants={fadeIn}
-            className={`rounded-lg shadow-sm border-0 p-5 ${kpiColor[k.accent]}`}
-          >
+          <div
+            key={k.label} 
+            className={`rounded-xl border-0 p-5 ${kpiColor[k.accent]}`}>
             <div className="flex items-start justify-between">
               <div className="space-y-1.5">
                 <p className="text-sm font-medium text-muted-foreground">{k.label}</p>
-                <p className="text-3xl font-bold tracking-tight text-text-primary">{formatNumber(k.value)}</p>
+                <p className="text-3xl font-semibold tracking-tight text-text-primary">{formatNumber(k.value)}</p>
               </div>
               <div className="p-3 rounded-xl bg-primary/10 text-primary">
                 <k.icon className="h-5 w-5" />
               </div>
             </div>
-          </motion.div>
+          </div>
         ))}
-      </motion.div>
+      </div>
 
       {/* Distribution health */}
       {!isLoading && !isError && (
-        <div className="rounded-xl border border-border bg-surface-base p-5 shadow-soft">
+        <div className="rounded-xl border border-border bg-surface-base p-5 ">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <h3 className="text-sm font-semibold text-text-primary">Distribution health</h3>
             <span className="text-xs text-text-tertiary">{tours.length} tour{tours.length !== 1 ? "s" : ""} on this supplier</span>
@@ -479,16 +466,16 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
             {[
               { label: "Published", value: stats.onEG, dot: "bg-status-active" },
-              { label: "Synced", value: syncStats.synced, dot: "bg-emerald-400" },
-              { label: "Pending", value: syncStats.pending + syncStats.never, dot: "bg-amber-400" },
+              { label: "Synced", value: syncStats.synced, dot: "bg-primary" },
+              { label: "Pending", value: syncStats.pending + syncStats.never, dot: "bg-status-pending" },
               { label: "Failed", value: syncStats.failed, dot: "bg-status-rejected" },
             ].map((h) => (
-              <div key={h.label} className="rounded-lg border border-border/70 bg-surface-muted/40 px-3.5 py-3">
+              <div key={h.label} className="rounded-xl border border-border bg-surface-muted px-3.5 py-3">
                 <div className="flex items-center gap-1.5">
                   <span className={`h-2 w-2 rounded-full ${h.dot}`} />
                   <p className="text-xs font-medium text-text-secondary">{h.label}</p>
                 </div>
-                <p className="mt-1 text-xl font-bold text-text-primary tabular-nums">{h.value}</p>
+                <p className="mt-1 text-xl font-semibold text-text-primary tnum">{h.value}</p>
               </div>
             ))}
           </div>
@@ -534,8 +521,8 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
 
       {/* Loading */}
       {isLoading && (
-        <div className="overflow-hidden rounded-xl border border-border bg-surface-base shadow-soft">
-          <div className="border-b border-border/70 px-5 py-3">
+        <div className="overflow-hidden rounded-xl border border-border bg-surface-base ">
+          <div className="border-b border-border px-5 py-3">
             <Skeleton className="h-4 w-32" />
           </div>
           {Array.from({ length: 5 }).map((_, i) => <TourRowSkeleton key={i} />)}
@@ -558,8 +545,8 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
 
       {/* Tour list */}
       {!isLoading && !isError && (
-        <div className="overflow-hidden rounded-xl border border-border bg-surface-base shadow-soft">
-          <div className="flex items-center justify-between border-b border-border/70 px-5 py-3">
+        <div className="overflow-hidden rounded-xl border border-border bg-surface-base ">
+          <div className="flex items-center justify-between border-b border-border px-5 py-3">
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-text-primary">Tours</h3>
               <span className="rounded-full bg-surface-muted px-2 py-0.5 text-[11px] font-medium text-text-secondary">
@@ -633,6 +620,6 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
         }}
         onCancel={() => setConfirmTarget(null)}
       />
-    </motion.div>
+    </div>
   );
 }

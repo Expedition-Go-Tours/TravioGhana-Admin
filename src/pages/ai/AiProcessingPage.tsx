@@ -1,6 +1,5 @@
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 import {
   Brain,
   RefreshCw,
@@ -21,7 +20,6 @@ import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { StatCard } from "@/components/shared/StatCard";
 import { SectionError } from "@/components/shared/SectionError";
-import { fadeIn, fadeInUp } from "@/lib/animations";
 import { toast } from "sonner";
 import {
   fetchAiStatus,
@@ -55,7 +53,7 @@ function StatSkeleton() {
   return (
     <Card className="p-5">
       <div className="flex items-center gap-3">
-        <Skeleton className="h-10 w-10 rounded-lg" />
+        <Skeleton className="h-10 w-10 rounded-xl" />
         <div className="space-y-2">
           <Skeleton className="h-3 w-20" />
           <Skeleton className="h-6 w-12" />
@@ -69,13 +67,13 @@ function StatSkeleton() {
 
 function CronStatusSection({ status }: { status: AiStatusResponse["cron"] }) {
   return (
-    <motion.div variants={fadeIn}>
-      <Card className="border-border/60">
+    <div>
+      <Card className="border-border">
         <CardContent className="p-5">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div
-                className={`flex h-10 w-10 items-center justify-center rounded-lg ${
+                className={`flex h-10 w-10 items-center justify-center rounded-xl ${
                   status.running
                     ? "bg-status-active/15 text-status-active-text"
                     : "bg-status-rejected/15 text-status-rejected-text"
@@ -98,7 +96,7 @@ function CronStatusSection({ status }: { status: AiStatusResponse["cron"] }) {
           </div>
           <div className="mt-4 grid grid-cols-2 gap-4 sm:grid-cols-4">
             <div>
-              <p className="text-[11px] font-medium uppercase text-text-tertiary">
+              <p className="text-[11px] font-medium text-text-tertiary">
                 Interval
               </p>
               <p className="text-sm font-semibold text-text-primary">
@@ -106,7 +104,7 @@ function CronStatusSection({ status }: { status: AiStatusResponse["cron"] }) {
               </p>
             </div>
             <div>
-              <p className="text-[11px] font-medium uppercase text-text-tertiary">
+              <p className="text-[11px] font-medium text-text-tertiary">
                 Max / Cycle
               </p>
               <p className="text-sm font-semibold text-text-primary">
@@ -114,7 +112,7 @@ function CronStatusSection({ status }: { status: AiStatusResponse["cron"] }) {
               </p>
             </div>
             <div>
-              <p className="text-[11px] font-medium uppercase text-text-tertiary">
+              <p className="text-[11px] font-medium text-text-tertiary">
                 Delay Between
               </p>
               <p className="text-sm font-semibold text-text-primary">
@@ -122,7 +120,7 @@ function CronStatusSection({ status }: { status: AiStatusResponse["cron"] }) {
               </p>
             </div>
             <div>
-              <p className="text-[11px] font-medium uppercase text-text-tertiary">
+              <p className="text-[11px] font-medium text-text-tertiary">
                 Processing Now
               </p>
               <p className="text-sm font-semibold text-text-primary">
@@ -138,7 +136,7 @@ function CronStatusSection({ status }: { status: AiStatusResponse["cron"] }) {
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }
 
@@ -152,9 +150,9 @@ function DetailStatsRow({
   attractionStats: AiStatusResponse["attractions"];
 }) {
   return (
-    <motion.div variants={fadeInUp} className="grid grid-cols-1 gap-4 md:grid-cols-2">
+    <div  className="grid grid-cols-1 gap-4 md:grid-cols-2">
       {/* Image Analysis */}
-      <Card className="border-border/60">
+      <Card className="border-border">
         <CardContent className="p-5">
           <div className="mb-4 flex items-center gap-2">
             <ImageIcon className="h-4 w-4 text-text-tertiary" />
@@ -220,7 +218,7 @@ function DetailStatsRow({
       </Card>
 
       {/* Attractions */}
-      <Card className="border-border/60">
+      <Card className="border-border">
         <CardContent className="p-5">
           <div className="mb-4 flex items-center gap-2">
             <MapPin className="h-4 w-4 text-text-tertiary" />
@@ -267,7 +265,7 @@ function DetailStatsRow({
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }
 
@@ -283,8 +281,8 @@ function FailedToursTable({
   isRetrying: boolean;
 }) {
   return (
-    <motion.div variants={fadeInUp}>
-      <Card className="border-border/60">
+    <div>
+      <Card className="border-border">
         <CardContent className="p-5">
           <div className="mb-4 flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -318,7 +316,7 @@ function FailedToursTable({
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-border-muted text-[11px] font-medium uppercase text-text-tertiary">
+                  <tr className="border-b border-border-muted text-[11px] font-medium text-text-tertiary">
                     <th className="pb-2 pr-4">Title</th>
                     <th className="pb-2 pr-4">Category</th>
                     <th className="pb-2 pr-4">City</th>
@@ -363,7 +361,7 @@ function FailedToursTable({
           )}
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }
 
@@ -371,8 +369,8 @@ function FailedToursTable({
 
 function FailedImagesTable({ images }: { images: AiFailedImage[] }) {
   return (
-    <motion.div variants={fadeInUp}>
-      <Card className="border-border/60">
+    <div>
+      <Card className="border-border">
         <CardContent className="p-5">
           <div className="mb-4 flex items-center gap-2">
             <ImageIcon className="h-4 w-4 text-status-rejected-text" />
@@ -389,7 +387,7 @@ function FailedImagesTable({ images }: { images: AiFailedImage[] }) {
             <div className="overflow-x-auto">
               <table className="w-full text-left text-sm">
                 <thead>
-                  <tr className="border-b border-border-muted text-[11px] font-medium uppercase text-text-tertiary">
+                  <tr className="border-b border-border-muted text-[11px] font-medium text-text-tertiary">
                     <th className="pb-2 pr-4">Tour ID</th>
                     <th className="pb-2 pr-4">Image URL</th>
                     <th className="pb-2 pr-4">Retries</th>
@@ -428,7 +426,7 @@ function FailedImagesTable({ images }: { images: AiFailedImage[] }) {
           )}
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 }
 
@@ -494,7 +492,7 @@ export default function AiProcessingPage() {
           </div>
           <Skeleton className="h-9 w-24" />
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => (
             <StatSkeleton key={i} />
           ))}
@@ -514,7 +512,7 @@ export default function AiProcessingPage() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-lg font-semibold text-text-primary">
+          <h1 className="text-[26px] font-light leading-8 tracking-[-0.26px] text-text-primary">
             AI Processing
           </h1>
           <p className="mt-0.5 text-sm text-text-tertiary">
@@ -540,9 +538,9 @@ export default function AiProcessingPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-lg font-semibold text-text-primary">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+        <div className="min-w-0">
+          <h1 className="text-[26px] font-light leading-8 tracking-[-0.26px] text-text-primary">
             AI Processing Dashboard
           </h1>
           <p className="mt-0.5 text-sm text-text-tertiary">
@@ -555,17 +553,15 @@ export default function AiProcessingPage() {
             )}
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={handleRefresh}>
+        <Button variant="outline" size="sm" onClick={handleRefresh} className="self-start">
           <RefreshCw className="mr-1.5 h-3.5 w-3.5" />
           Refresh
         </Button>
       </div>
 
       {/* Tour Processing Stats */}
-      <motion.div
-        variants={fadeIn}
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4"
-      >
+      <div 
+        className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
           label="Total Active Tours"
           value={String(tours.total)}
@@ -600,13 +596,13 @@ export default function AiProcessingPage() {
           icon={<XCircle className="h-5 w-5" />}
           accent="red"
         />
-      </motion.div>
+      </div>
 
       {/* Cron Status */}
       {status?.cron && <CronStatusSection status={status.cron} />}
 
       {/* Image & Attraction Detail Stats */}
-      {status && (
+      {status?.imageAnalysis && status?.attractions && (
         <DetailStatsRow
           imageStats={status.imageAnalysis}
           attractionStats={status.attractions}
@@ -614,7 +610,7 @@ export default function AiProcessingPage() {
       )}
 
       {/* Failed Tours */}
-      {failed && (
+      {failed?.tours && (
         <FailedToursTable
           tours={failed.tours}
           onRetry={handleRetry}
@@ -623,7 +619,7 @@ export default function AiProcessingPage() {
       )}
 
       {/* Failed Images */}
-      {failed && <FailedImagesTable images={failed.failedImages} />}
+      {failed?.failedImages && <FailedImagesTable images={failed.failedImages} />}
     </div>
   );
 }

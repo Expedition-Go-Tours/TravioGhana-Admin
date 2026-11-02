@@ -1,47 +1,61 @@
-﻿import { useState } from "react";
+﻿import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Loader2, ShieldCheck, Users, Search, X, Check } from "lucide-react";
+import {
+  Plus,
+  Pencil,
+  Trash2,
+  Loader2,
+  ShieldCheck,
+  Users,
+  Search,
+  X,
+  Check,
+  KeyRound,
+} from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import api from "@/lib/axios";
 import { cn } from "@/lib/utils";
 import type { AdminRole, AdminPermission, PermissionGroup } from "@/lib/permissions";
 
-function TableSkeleton() {
+function formatRoleName(name: string) {
+  return name.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function ListSkeleton() {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-9 w-64" />
-        <Skeleton className="h-9 w-32" />
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Skeleton className="h-10 w-full rounded-md sm:w-72" />
+        <Skeleton className="h-10 w-full rounded-full sm:w-28" />
       </div>
-      <div className="rounded-xl border border-border/60 bg-surface-base shadow-sm overflow-hidden">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-b border-border/40">
-              {["Role", "Admins", "Permissions", "Actions"].map((h) => (
-                <th key={h} className="px-5 py-3.5 text-left">
-                  <Skeleton className="h-3 w-16" />
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <tr key={i} className="border-b border-border/30">
-                {Array.from({ length: 4 }).map((_, j) => (
-                  <td key={j} className="px-5 py-3">
-                    <Skeleton className={cn("h-4", j === 2 ? "w-32" : j === 0 ? "w-28" : "w-12")} />
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="overflow-hidden rounded-xl border border-border bg-surface-base">
+        <div className="border-b border-border px-5 py-3">
+          <Skeleton className="h-3 w-24" />
+        </div>
+        {Array.from({ length: 4 }).map((_, index) => (
+          <div key={index} className="flex items-center gap-3 border-b border-border px-5 py-4 last:border-b-0">
+            <Skeleton className="h-10 w-10 shrink-0 rounded-lg" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <Skeleton className="h-4 w-36" />
+              <Skeleton className="h-3 w-64 max-w-full" />
+              <Skeleton className="h-5 w-48 max-w-full" />
+            </div>
+            <Skeleton className="hidden h-8 w-24 rounded-full sm:block" />
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -56,6 +70,7 @@ export function RolesTab() {
   const [editDesc, setEditDesc] = useState("");
   const [editPerms, setEditPerms] = useState<Set<string>>(new Set());
   const [search, setSearch] = useState("");
+  const [permSearch, setPermSearch] = useState("");
 
   const { data: rolesData, isLoading: rolesLoading } = useQuery({
     queryKey: ["admin", "roles"],
@@ -75,7 +90,11 @@ export function RolesTab() {
       queryClient.invalidateQueries({ queryKey: ["admin", "roles"] });
       closeEditor();
     },
-    onError: (err: Error) => toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to create role"),
+    onError: (err: Error) =>
+      toast.error(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          "Could not create the role",
+      ),
   });
 
   const updateMutation = useMutation({
@@ -86,7 +105,11 @@ export function RolesTab() {
       queryClient.invalidateQueries({ queryKey: ["admin", "roles"] });
       closeEditor();
     },
-    onError: (err: Error) => toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to update role"),
+    onError: (err: Error) =>
+      toast.error(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          "Could not update the role",
+      ),
   });
 
   const deleteMutation = useMutation({
@@ -96,15 +119,20 @@ export function RolesTab() {
       queryClient.invalidateQueries({ queryKey: ["admin", "roles"] });
       setShowDelete(null);
     },
-    onError: (err: Error) => toast.error((err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to delete role"),
+    onError: (err: Error) =>
+      toast.error(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          "Could not delete the role",
+      ),
   });
 
   function openEditor(role: AdminRole | null) {
+    setPermSearch("");
     if (role) {
       setEditingRole(role);
-      setEditName(role.name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()));
+      setEditName(formatRoleName(role.name));
       setEditDesc(role.description || "");
-      setEditPerms(new Set(role.permissions.map((p) => p.permission.id)));
+      setEditPerms(new Set(role.permissions.map((permission) => permission.permission.id)));
     } else {
       setEditingRole(null);
       setEditName("");
@@ -117,6 +145,7 @@ export function RolesTab() {
   function closeEditor() {
     setShowEditor(false);
     setEditingRole(null);
+    setPermSearch("");
   }
 
   function togglePerm(key: string) {
@@ -128,174 +157,273 @@ export function RolesTab() {
     });
   }
 
+  function setCategory(categoryPerms: AdminPermission[], selected: boolean) {
+    setEditPerms((prev) => {
+      const next = new Set(prev);
+      for (const permission of categoryPerms) {
+        if (selected) next.add(permission.id);
+        else next.delete(permission.id);
+      }
+      return next;
+    });
+  }
+
   function saveRole() {
     const name = editName.trim().toLowerCase().replace(/\s+/g, "_");
-    if (!name) { toast.error("Role name is required"); return; }
-    const payload = { name, description: editDesc.trim(), permissionIds: Array.from(editPerms) };
-    if (editingRole) {
-      updateMutation.mutate({ id: editingRole.id, ...payload });
-    } else {
-      createMutation.mutate(payload);
+    if (!name) {
+      toast.error("Role name is required");
+      return;
     }
+    const payload = { name, description: editDesc.trim(), permissionIds: Array.from(editPerms) };
+    if (editingRole) updateMutation.mutate({ id: editingRole.id, ...payload });
+    else createMutation.mutate(payload);
   }
 
-  const groupedPerms: PermissionGroup = {};
-  if (permsData) {
-    for (const p of permsData as AdminPermission[]) {
-      if (!groupedPerms[p.category]) groupedPerms[p.category] = [];
-      groupedPerms[p.category].push(p);
+  const filteredPermGroups = useMemo(() => {
+    const groupedPerms: PermissionGroup = {};
+    for (const permission of (permsData as AdminPermission[] | undefined) ?? []) {
+      if (!groupedPerms[permission.category]) groupedPerms[permission.category] = [];
+      groupedPerms[permission.category].push(permission);
     }
-  }
+
+    const permissionQuery = permSearch.trim().toLowerCase();
+    if (!permissionQuery) return Object.entries(groupedPerms);
+    return Object.entries(groupedPerms)
+      .map(([category, perms]) => [
+        category,
+        perms.filter(
+          (permission) =>
+            permission.name.toLowerCase().includes(permissionQuery) ||
+            (permission.description || "").toLowerCase().includes(permissionQuery),
+        ),
+      ] as const)
+      .filter(([, perms]) => perms.length > 0);
+  }, [permsData, permSearch]);
+
+  const allPermissionIds = (permsData as AdminPermission[] | undefined)?.map((permission) => permission.id) ?? [];
+  const allSelected = allPermissionIds.length > 0 && allPermissionIds.every((id) => editPerms.has(id));
 
   const roles: AdminRole[] = rolesData || [];
-  const filteredRoles = roles.filter((r) =>
-    r.name.toLowerCase().includes(search.toLowerCase()),
-  );
+  const filteredRoles = roles.filter((role) => {
+    const query = search.trim().toLowerCase();
+    if (!query) return true;
+    return (
+      role.name.toLowerCase().includes(query) ||
+      (role.description || "").toLowerCase().includes(query)
+    );
+  });
 
-  if (rolesLoading) return <TableSkeleton />;
+  if (rolesLoading) return <ListSkeleton />;
 
   return (
-    <div className="space-y-5">
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
-        <div className="relative w-full sm:flex-1 sm:max-w-xs">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary pointer-events-none" />
+    <div className="space-y-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="relative w-full sm:max-w-[280px]">
+          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
           <Input
-            placeholder="Search roles..."
+            placeholder="Search roles"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(event) => setSearch(event.target.value)}
             className="pl-9"
+            aria-label="Search roles"
           />
           {search && (
             <button
               type="button"
               onClick={() => setSearch("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary"
+              className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-text-tertiary transition-colors hover:text-text-primary"
+              aria-label="Clear search"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
-        <Button onClick={() => openEditor(null)} className="gap-2 shadow-sm w-full sm:w-auto">
-          <Plus className="h-4 w-4" /> Create Role
+        <Button onClick={() => openEditor(null)} className="w-full gap-2 sm:w-auto">
+          <Plus className="h-4 w-4" /> New role
         </Button>
       </div>
 
-      <div className="rounded-xl border border-border/60 bg-surface-base shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="bg-surface-muted/40 border-b border-border/40">
-                <th className="px-5 py-3.5 text-left font-semibold text-text-secondary text-xs uppercase tracking-wider">Role</th>
-                <th className="px-5 py-3.5 text-left font-semibold text-text-secondary text-xs uppercase tracking-wider">Admins</th>
-                <th className="px-5 py-3.5 text-left font-semibold text-text-secondary text-xs uppercase tracking-wider">Permissions</th>
-                <th className="px-5 py-3.5 text-right font-semibold text-text-secondary text-xs uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredRoles.map((role, idx) => (
-                <tr key={role.id} className={cn(
-                  "border-b border-border/30 transition-colors hover:bg-surface-muted/50",
-                  idx === filteredRoles.length - 1 && "border-b-0",
-                )}>
-                  <td className="px-5 py-4">
-                    <div className="flex items-center gap-2.5">
-                      <div className="w-8 h-8 rounded-lg bg-text-primary/5 text-text-primary flex items-center justify-center shrink-0">
-                        <ShieldCheck className="h-4 w-4" />
-                      </div>
-                      <div>
-                        <span className="font-medium text-text-primary">
-                          {role.name.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}
-                        </span>
-                        {role.isSystem && (
-                          <Badge variant="secondary" className="ml-2 text-[9px] px-1.5 py-0">System</Badge>
-                        )}
-                        {role.description && (
-                          <p className="text-xs text-text-secondary mt-0.5">{role.description}</p>
-                        )}
-                      </div>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-text-secondary">
-                    <div className="flex items-center gap-1.5">
-                      <Users className="h-3.5 w-3.5 text-text-tertiary" />
-                      <span className="font-medium">{role._count?.users || 0}</span>
-                    </div>
-                  </td>
-                  <td className="px-5 py-4">
-                    <div className="flex flex-wrap gap-1">
-                      {role.permissions.slice(0, 4).map((rp) => (
-                        <Badge key={rp.permission.id} variant="outline" className="text-[10px] px-1.5 py-0 font-normal">
-                          {rp.permission.name}
-                        </Badge>
-                      ))}
-                      {role.permissions.length > 4 && (
-                        <span className="text-[10px] text-text-secondary font-medium px-1.5 py-0.5 bg-surface-muted rounded">
-                          +{role.permissions.length - 4} more
-                        </span>
-                      )}
-                    </div>
-                  </td>
-                  <td className="px-5 py-4 text-right">
-                    {!role.isSystem && (
-                      <div className="flex items-center justify-end gap-0.5">
-                        <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-8 sm:w-8 hover:bg-surface-muted hover:text-text-primary" onClick={() => openEditor(role)}>
-                          <Pencil className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="h-9 w-9 sm:h-8 sm:w-8 text-red-400 hover:text-red-600 hover:bg-red-50" onClick={() => setShowDelete(role)}>
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    )}
-                  </td>
-                </tr>
-              ))}
-              {filteredRoles.length === 0 && (
-                <tr>
-                  <td colSpan={4} className="px-5 py-12 text-center text-text-secondary">
-                    <ShieldCheck className="h-8 w-8 mx-auto mb-2 text-text-tertiary" />
-                    No roles found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+      <div className="overflow-hidden rounded-xl border border-border bg-surface-base">
+        <div className="flex items-center justify-between gap-3 border-b border-border px-5 py-3">
+          <p className="text-xs font-medium text-text-secondary">
+            {filteredRoles.length} {filteredRoles.length === 1 ? "role" : "roles"}
+          </p>
+          <p className="hidden text-[11px] text-text-tertiary sm:block">
+            System roles are managed by Travio
+          </p>
         </div>
+
+        <ul className="divide-y divide-border">
+          {filteredRoles.map((role) => (
+            <li key={role.id} className="flex flex-col gap-3 px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                <div className="min-w-0">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold text-text-primary">
+                      {formatRoleName(role.name)}
+                    </span>
+                    {role.isSystem && (
+                      <Badge variant="outline" className="text-[10px] font-medium">
+                        System
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="mt-0.5 text-[13px] leading-relaxed text-text-secondary">
+                    {role.description || "No description yet."}
+                  </p>
+                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                    {role.permissions.slice(0, 3).map((entry) => (
+                      <span
+                        key={entry.permission.id}
+                        className="inline-flex items-center rounded-full border border-border bg-surface-muted px-2 py-0.5 text-[10px] font-medium text-text-secondary"
+                      >
+                        {entry.permission.name}
+                      </span>
+                    ))}
+                    {role.permissions.length > 3 && (
+                      <span className="text-[10px] font-medium text-text-tertiary">
+                        +{role.permissions.length - 3} more
+                      </span>
+                    )}
+                    <span className="mx-1 hidden h-3 w-px bg-border sm:block" />
+                    <span className="inline-flex items-center gap-1 text-[11px] text-text-tertiary">
+                      <Users className="h-3 w-3" />
+                      {role._count?.users || 0} {(role._count?.users || 0) === 1 ? "admin" : "admins"}
+                    </span>
+                    <span className="mx-1 hidden h-3 w-px bg-border sm:block" />
+                    <span className="inline-flex items-center gap-1 text-[11px] text-text-tertiary">
+                      <KeyRound className="h-3 w-3" />
+                      {role.permissions.length} permissions
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex shrink-0 items-center justify-end gap-1 self-end sm:self-auto">
+                {role.isSystem ? (
+                  <span className="text-[11px] font-medium text-text-tertiary">Managed by Travio</span>
+                ) : (
+                  <>
+                    <Button variant="ghost" size="sm" onClick={() => openEditor(role)} className="gap-1.5">
+                      <Pencil className="h-3.5 w-3.5" /> Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => setShowDelete(role)}
+                      className="h-8 w-8 text-text-tertiary hover:bg-status-rejected/10 hover:text-status-rejected-text"
+                      aria-label={`Delete ${formatRoleName(role.name)}`}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+
+        {filteredRoles.length === 0 && (
+          <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
+            <ShieldCheck className="mb-3 h-8 w-8 text-text-tertiary" />
+            <p className="text-sm font-medium text-text-primary">No roles found</p>
+            <p className="mt-1 max-w-sm text-[13px] text-text-tertiary">
+              {search ? `Nothing matches “${search}”. Try a different search.` : "Create a role to group admin permissions."}
+            </p>
+            {search && (
+              <Button variant="outline" size="sm" onClick={() => setSearch("")} className="mt-4">
+                Clear search
+              </Button>
+            )}
+          </div>
+        )}
       </div>
 
-      <Dialog open={showEditor} onOpenChange={closeEditor}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto !bg-surface-base/95 backdrop-blur-xl">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <div className="w-7 h-7 rounded-lg bg-text-primary/5 text-text-primary flex items-center justify-center">
-                <ShieldCheck className="h-3.5 w-3.5" />
+      <Dialog open={showEditor} onOpenChange={(open) => !open && closeEditor()}>
+        <DialogContent className="flex max-h-[85dvh] w-full flex-col gap-0 overflow-hidden p-0 sm:max-w-3xl">
+          <DialogHeader className="border-b border-border px-5 py-5 text-left sm:px-6">
+            <div className="flex items-start gap-3">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                <ShieldCheck className="h-4 w-4" />
               </div>
-              {editingRole ? "Edit Role" : "Create Role"}
-            </DialogTitle>
-            <DialogDescription>
-              {editingRole ? "Update role name, description, and permissions" : "Define a new admin role with specific permissions"}
-            </DialogDescription>
+              <div className="min-w-0">
+                <DialogTitle>{editingRole ? "Edit role" : "Create role"}</DialogTitle>
+                <DialogDescription className="mt-1">
+                  {editingRole
+                    ? "Update the role name, description, or permissions."
+                    : "Name the role and choose the permissions it grants."}
+                </DialogDescription>
+              </div>
+            </div>
           </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+          <div className="min-h-0 flex-1 space-y-5 overflow-y-auto px-5 py-5 sm:px-6">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div className="space-y-1.5">
-                <Label htmlFor="role-name">Role Name</Label>
-                <Input id="role-name" value={editName} onChange={(e) => setEditName(e.target.value)} placeholder="e.g. Finance Admin" />
+                <Label htmlFor="role-name">Role name</Label>
+                <Input
+                  id="role-name"
+                  value={editName}
+                  onChange={(event) => setEditName(event.target.value)}
+                  placeholder="e.g. Finance admin"
+                />
               </div>
               <div className="space-y-1.5">
                 <Label htmlFor="role-desc">Description</Label>
-                <Input id="role-desc" value={editDesc} onChange={(e) => setEditDesc(e.target.value)} placeholder="What this role can do..." />
+                <Input
+                  id="role-desc"
+                  value={editDesc}
+                  onChange={(event) => setEditDesc(event.target.value)}
+                  placeholder="What this role can do"
+                />
               </div>
             </div>
-            <div>
-              <Label className="mb-3 block text-sm font-medium text-text-primary">Permissions</Label>
+
+            <div className="space-y-3">
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="text-sm font-medium text-text-primary">Permissions</p>
+                  <p className="mt-0.5 text-[13px] text-text-tertiary">
+                    {editPerms.size} of {allPermissionIds.length} selected
+                  </p>
+                </div>
+                <div className="flex items-center gap-1">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() =>
+                      setEditPerms(new Set(allSelected ? [] : allPermissionIds))
+                    }
+                    disabled={permsLoading || allPermissionIds.length === 0}
+                  >
+                    {allSelected ? "Clear all" : "Select all"}
+                  </Button>
+                </div>
+              </div>
+
+              <div className="relative">
+                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
+                <Input
+                  placeholder="Filter permissions"
+                  value={permSearch}
+                  onChange={(event) => setPermSearch(event.target.value)}
+                  className="pl-9"
+                  aria-label="Filter permissions"
+                />
+              </div>
+
               {permsLoading ? (
                 <div className="space-y-3">
-                  {Array.from({ length: 4 }).map((_, i) => (
-                    <div key={i} className="rounded-lg border border-border/60 p-3">
-                      <Skeleton className="h-4 w-20 mb-3" />
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                        {Array.from({ length: 4 }).map((_, j) => (
-                          <div key={j} className="flex items-center gap-2">
+                  {Array.from({ length: 3 }).map((_, index) => (
+                    <div key={index} className="rounded-lg border border-border p-3">
+                      <Skeleton className="mb-3 h-4 w-24" />
+                      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                        {Array.from({ length: 4 }).map((__, item) => (
+                          <div key={item} className="flex items-center gap-2">
                             <Skeleton className="h-4 w-4 rounded" />
                             <Skeleton className="h-3 w-28" />
                           </div>
@@ -304,101 +432,137 @@ export function RolesTab() {
                     </div>
                   ))}
                 </div>
+              ) : filteredPermGroups.length === 0 ? (
+                <div className="rounded-lg border border-border px-4 py-10 text-center">
+                  <p className="text-sm font-medium text-text-primary">No permissions match</p>
+                  <p className="mt-1 text-[13px] text-text-tertiary">Try a shorter search.</p>
+                </div>
               ) : (
-                Object.entries(groupedPerms).map(([category, perms]) => (
-                  <div key={category} className="mb-3 rounded-xl border border-border/60 bg-surface-base shadow-sm overflow-hidden">
-                    <div className="flex items-center justify-between px-4 py-2.5 bg-surface-muted/60 border-b border-border/40">
-                      <h4 className="text-xs font-semibold text-text-secondary">
-                        <span className="inline-flex items-center gap-1.5">
-                          {category}
-                          <span className="text-text-tertiary font-normal">({perms.length})</span>
-                        </span>
-                      </h4>
-                    </div>
-                    <div className="p-3">
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                        {perms.map((perm) => (
-                          <label
-                            key={perm.id}
-                            className={cn(
-                              "flex items-center gap-2.5 rounded-lg px-3 py-2.5 cursor-pointer transition-colors text-sm",
-                              editPerms.has(perm.id)
-                                ? "bg-text-primary/5 border border-text-primary/15"
-                                : "hover:bg-surface-muted border border-transparent",
-                            )}
+                <div className="space-y-3">
+                  {filteredPermGroups.map(([category, perms]) => {
+                    const allInCategory = perms.every((permission) => editPerms.has(permission.id));
+                    return (
+                      <div key={category} className="overflow-hidden rounded-lg border border-border">
+                        <div className="flex items-center justify-between gap-3 border-b border-border bg-surface-muted px-3 py-2">
+                          <p className="text-xs font-semibold text-text-primary">
+                            {category}
+                            <span className="ml-1.5 font-normal text-text-tertiary">({perms.length})</span>
+                          </p>
+                          <button
+                            type="button"
+                            onClick={() => setCategory(perms, !allInCategory)}
+                            className="text-[11px] font-medium text-primary transition-colors hover:text-primary/80"
                           >
-                            <div className={cn(
-                              "w-4 h-4 rounded flex items-center justify-center shrink-0 border-2 transition-all duration-150",
-                              editPerms.has(perm.id)
-                                ? "bg-text-primary border-text-primary"
-                                : "border-border bg-surface-base",
-                            )}>
-                              {editPerms.has(perm.id) && (
-                                <Check className="h-3 w-3 text-white stroke-[3]" />
-                              )}
-                            </div>
-                            <input
-                              type="checkbox"
-                              checked={editPerms.has(perm.id)}
-                              onChange={() => togglePerm(perm.id)}
-                              className="sr-only"
-                            />
-                            <div>
-                              <span className="text-text-primary text-xs">{perm.name}</span>
-                              {perm.description && (
-                                <p className="text-[10px] text-text-tertiary leading-tight">{perm.description}</p>
-                              )}
-                            </div>
-                          </label>
-                        ))}
+                            {allInCategory ? "Clear" : "Select all"}
+                          </button>
+                        </div>
+                        <div className="grid grid-cols-1 gap-1 p-2 sm:grid-cols-2">
+                          {perms.map((permission) => {
+                            const checked = editPerms.has(permission.id);
+                            return (
+                              <label
+                                key={permission.id}
+                                className={cn(
+                                  "flex cursor-pointer items-start gap-2.5 rounded-md border px-3 py-2.5 transition-colors",
+                                  checked
+                                    ? "border-primary/25 bg-primary/5"
+                                    : "border-transparent hover:bg-surface-muted",
+                                )}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={checked}
+                                  onChange={() => togglePerm(permission.id)}
+                                  className="peer sr-only"
+                                />
+                                <span
+                                  className={cn(
+                                    "mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded border-2 transition-colors",
+                                    "peer-focus-visible:ring-2 peer-focus-visible:ring-primary/40 peer-focus-visible:ring-offset-1",
+                                    checked
+                                      ? "border-primary bg-primary text-primary-foreground"
+                                      : "border-border bg-surface-base",
+                                  )}
+                                >
+                                  {checked && <Check className="h-3 w-3" strokeWidth={3} />}
+                                </span>
+                                <span className="min-w-0">
+                                  <span className="block text-[13px] font-medium text-text-primary">
+                                    {permission.name}
+                                  </span>
+                                  {permission.description && (
+                                    <span className="mt-0.5 block text-[11px] leading-snug text-text-tertiary">
+                                      {permission.description}
+                                    </span>
+                                  )}
+                                </span>
+                              </label>
+                            );
+                          })}
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                ))
+                    );
+                  })}
+                </div>
               )}
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={closeEditor} className="shadow-sm">Cancel</Button>
-            <Button onClick={saveRole} disabled={createMutation.isPending || updateMutation.isPending} className="gap-2 shadow-sm">
-              {(createMutation.isPending || updateMutation.isPending) && <Loader2 className="h-4 w-4 animate-spin" />}
-              {editingRole ? "Save Changes" : "Create Role"}
+
+          <DialogFooter className="border-t border-border px-5 py-4 sm:px-6">
+            <Button variant="outline" onClick={closeEditor}>
+              Cancel
+            </Button>
+            <Button
+              onClick={saveRole}
+              disabled={createMutation.isPending || updateMutation.isPending}
+              className="gap-2"
+            >
+              {(createMutation.isPending || updateMutation.isPending) && (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              )}
+              {editingRole ? "Save changes" : "Create role"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={!!showDelete} onOpenChange={() => setShowDelete(null)}>
-        <DialogContent className="max-w-md">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="text-left">
             <div className="flex items-start gap-4">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-surface-muted">
-                <Trash2 className="h-5 w-5 text-red-500" />
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-status-rejected/10">
+                <Trash2 className="h-5 w-5 text-status-rejected-text" />
               </div>
-              <div>
-                <DialogTitle>Delete Role</DialogTitle>
+              <div className="min-w-0">
+                <DialogTitle>Delete this role?</DialogTitle>
                 <DialogDescription className="mt-1.5">
-                  Are you sure you want to delete "{showDelete?.name?.replace(/_/g, " ")}"? This action cannot be undone.
-                  {showDelete?._count?.users ? (
-                    <p className="mt-2 flex items-center gap-1.5 text-red-600 font-medium bg-red-50 px-3 py-2 rounded-lg text-sm">
-                      <Users className="h-4 w-4" />
-                      {showDelete._count.users} admin(s) are assigned to this role. Reassign them first.
-                    </p>
-                  ) : null}
+                  “{showDelete ? formatRoleName(showDelete.name) : ""}” will be removed permanently. This cannot be undone.
                 </DialogDescription>
               </div>
             </div>
           </DialogHeader>
+
+          {(showDelete?._count?.users ?? 0) > 0 && (
+            <div className="flex items-start gap-2.5 rounded-lg border border-status-rejected/25 bg-status-rejected/10 px-3.5 py-2.5 text-[13px] leading-relaxed text-status-rejected-text">
+              <Users className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>
+                {showDelete?._count?.users} {(showDelete?._count?.users ?? 0) === 1 ? "admin is" : "admins are"} assigned to this role. Reassign them before deleting.
+              </span>
+            </div>
+          )}
+
           <DialogFooter>
-            <Button variant="outline" onClick={() => setShowDelete(null)} className="shadow-sm">Cancel</Button>
+            <Button variant="outline" onClick={() => setShowDelete(null)}>
+              Cancel
+            </Button>
             <Button
               variant="destructive"
               onClick={() => showDelete && deleteMutation.mutate(showDelete.id)}
               disabled={deleteMutation.isPending || (showDelete?._count?.users ?? 0) > 0}
-              className="gap-2 shadow-sm"
+              className="gap-2"
             >
               {deleteMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              Delete
+              Delete role
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -406,4 +570,3 @@ export function RolesTab() {
     </div>
   );
 }
-

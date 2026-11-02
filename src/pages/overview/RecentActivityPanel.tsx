@@ -36,18 +36,18 @@ const activityIcons: Record<string, React.ReactNode> = {
 };
 
 const activityColors: Record<string, string> = {
-  booking: "bg-blue-500",
+  booking: "bg-status-approved",
   user: "bg-status-active",
-  review: "bg-amber-500",
-  alert: "bg-red-500",
-  update: "bg-violet-500",
-  message: "bg-cyan-500",
-  payout: "bg-green-500",
-  supplier: "bg-orange-500",
-  offer: "bg-pink-500",
-  team: "bg-indigo-500",
+  review: "bg-status-pending",
+  alert: "bg-status-rejected",
+  update: "bg-status-processing",
+  message: "bg-status-approved",
+  payout: "bg-primary/100",
+  supplier: "bg-status-pending",
+  offer: "bg-status-rejected",
+  team: "bg-primary",
   role: "bg-text-secondary",
-  webhook: "bg-teal-500",
+  webhook: "bg-primary",
 };
 
 export function RecentActivityPanel({ activities = [], loading }: RecentActivityPanelProps) {
@@ -83,36 +83,38 @@ export function RecentActivityPanel({ activities = [], loading }: RecentActivity
   );
 
   return (
-    <Card className="h-full border border-border/60 shadow-soft bg-surface-base rounded-2xl">
-      <CardHeader className="pb-3 pt-5 px-5">
+    <Card className="flex h-full max-h-[400px] flex-col border border-border bg-surface-base">
+      <CardHeader className="pb-2 pt-4 px-5">
         <div className="flex items-center justify-between">
-          <CardTitle className="text-[15px] font-semibold text-text-primary flex items-center gap-2">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+          <CardTitle className="flex items-center gap-2 text-[15px] font-semibold text-text-primary">
+            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
               <Bell className="h-4 w-4" />
             </span>
             Recent Activity
+            <span className="tnum ml-auto rounded-full bg-surface-muted px-2 py-0.5 text-[11px] font-semibold text-text-tertiary">
+              {filteredActivities.length}
+            </span>
           </CardTitle>
         </div>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-4">
-          <TabsList className="w-full bg-surface-muted rounded-lg p-1">
-            <TabsTrigger value="today" className="flex-1 text-xs font-medium rounded-md data-[state=active]:bg-surface-base data-[state=active]:text-text-primary data-[state=active]:shadow-sm">Today</TabsTrigger>
-            <TabsTrigger value="yesterday" className="flex-1 text-xs font-medium rounded-md data-[state=active]:bg-surface-base data-[state=active]:text-text-primary data-[state=active]:shadow-sm">Yesterday</TabsTrigger>
-            <TabsTrigger value="week" className="flex-1 text-xs font-medium rounded-md data-[state=active]:bg-surface-base data-[state=active]:text-text-primary data-[state=active]:shadow-sm">This week</TabsTrigger>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-3">
+          <TabsList className="h-9 w-full rounded-lg border-b-0 bg-surface-muted p-1">
+            <TabsTrigger value="today" className="min-w-0 flex-1 shrink rounded-md px-2 text-[11px] font-medium data-[state=active]:bg-surface-base data-[state=active]:font-semibold data-[state=active]:text-text-primary">Today</TabsTrigger>
+            <TabsTrigger value="yesterday" className="min-w-0 flex-1 shrink rounded-md px-2 text-[11px] font-medium data-[state=active]:bg-surface-base data-[state=active]:font-semibold data-[state=active]:text-text-primary">Yesterday</TabsTrigger>
+            <TabsTrigger value="week" className="min-w-0 flex-1 shrink rounded-md px-2 text-[11px] font-medium data-[state=active]:bg-surface-base data-[state=active]:font-semibold data-[state=active]:text-text-primary">This week</TabsTrigger>
           </TabsList>
         </Tabs>
-        <div className="relative mt-3">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-text-tertiary" />
+        <div className="relative mt-2">
+          <Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-tertiary" />
           <Input
             placeholder="Search activities"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 h-9 text-xs bg-surface-muted border-border rounded-lg"
+            className="h-8 rounded-lg border-border bg-surface-muted pl-9 text-xs"
           />
         </div>
-        <p className="text-xs text-text-secondary mt-3">{filteredActivities.length} new activities {activeTab === "today" ? "today" : activeTab === "yesterday" ? "yesterday" : "this week"}</p>
       </CardHeader>
-      <CardContent className="p-0 px-5 pb-5">
-        <div className="max-h-80 overflow-y-auto scrollbar-thin divide-y divide-border/60">
+      <CardContent className="min-h-0 flex-1 overflow-hidden p-0 px-5 pb-4">
+        <div className="h-full overflow-y-auto scrollbar-thin divide-y divide-border">
           {loading ? (
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -130,7 +132,7 @@ export function RecentActivityPanel({ activities = [], loading }: RecentActivity
             <div className="py-10 text-center text-sm text-text-secondary">No activities found</div>
           ) : (
             filteredActivities.map((activity, index) => (
-              <div key={activity.id || index} className="flex items-start gap-3 py-3.5 hover:bg-surface-muted rounded-lg transition-colors cursor-pointer">
+              <div key={activity.id || index} className="flex items-start gap-3 py-3">
                 <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white", activityColors[activity.type])}>
                   {activityIcons[activity.type]}
                 </div>

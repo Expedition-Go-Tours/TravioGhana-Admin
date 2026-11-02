@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { motion } from "framer-motion";
 import {
   ArrowLeft, ChevronRight, ChevronLeft, Star, Eye, Calendar, DollarSign,
   Clock, Users, Shield, Globe, Check, X, Camera, MapPin, Bed, UtensilsCrossed,
@@ -321,33 +320,28 @@ function normalizeTour(raw: Record<string, unknown>): TourDetail {
 
 function SectionCard({ title, children, className }: { title?: string; children: React.ReactNode; className?: string }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-30px" }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      className={cn("bg-surface-base rounded-xl border border-border/60 shadow-sm shadow-black/5 overflow-hidden hover:shadow-md hover:shadow-black/5 hover:border-border transition-all duration-200", className)}
-    >
+    <div 
+      className={cn("overflow-hidden rounded-xl border border-border bg-surface-base", className)}>
       {title && (
-        <div className="px-5 py-4 border-b border-border/60">
+        <div className="px-5 py-4 border-b border-border">
           <div className="flex items-center gap-3">
-            <div className="w-0.5 h-4 bg-linear-to-b from-emerald-500 to-emerald-300 rounded-full shrink-0" />
+            <div className="w-0.5 h-4 bg-linear-to-b from-primary to-primary rounded-full shrink-0" />
             <h2 className="text-sm font-semibold text-text-primary tracking-tight flex-1">{title}</h2>
           </div>
         </div>
       )}
       <div className={cn("px-5 py-4", !title && "p-5")}>{children}</div>
-    </motion.div>
+    </div>
   );
 }
 
 function DetailRow({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value?: string | null }) {
   if (value == null || value === "") return null;
   return (
-    <div className="grid grid-cols-[90px_1fr] gap-x-3 gap-y-0.5 py-2 first:pt-0 last:pb-0 border-b border-border/60 last:border-0">
+    <div className="grid grid-cols-[90px_1fr] gap-x-3 gap-y-0.5 py-2 first:pt-0 last:pb-0 border-b border-border last:border-0">
       <div className="flex items-center gap-1.5">
         <Icon size={11} className="text-text-tertiary shrink-0" />
-        <span className="text-[11px] text-text-tertiary uppercase tracking-wider">{label}</span>
+        <span className="text-[11px] text-text-tertiary ">{label}</span>
       </div>
       <span className="text-sm font-medium text-text-primary break-words leading-snug min-w-0">{value}</span>
     </div>
@@ -356,16 +350,16 @@ function DetailRow({ icon: Icon, label, value }: { icon: React.ElementType; labe
 
 function StatCard({ label, value, icon, accent }: { label: string; value: string; icon: React.ReactNode; accent?: "emerald" | "blue" | "amber" }) {
   const map = {
-    emerald: "bg-emerald-50 text-emerald-600",
-    blue: "bg-blue-50 text-blue-600",
-    amber: "bg-amber-50 text-amber-600",
+    emerald: "bg-primary/10 text-primary",
+    blue: "bg-status-approved/10 text-status-approved-text",
+    amber: "bg-status-pending/10 text-status-pending-text",
   };
   const a = map[accent || "emerald"];
   return (
-    <div className="flex items-center gap-3 bg-surface-base rounded-xl border border-border/60 px-4 py-3.5 shadow-sm shadow-black/5 hover:shadow-md hover:border-border transition-all duration-200">
+    <div className="flex items-center gap-3 rounded-xl border border-border bg-surface-base px-4 py-3.5">
       <div className={cn("w-10 h-10 rounded-xl flex items-center justify-center ring-1 ring-border/50", a)}>{icon}</div>
       <div className="min-w-0">
-        <p className="text-base font-bold text-text-primary leading-none tabular-nums truncate">{value}</p>
+        <p className="text-base font-semibold text-text-primary leading-none tnum truncate">{value}</p>
         <p className="text-xs text-text-tertiary font-medium leading-tight mt-1">{label}</p>
       </div>
     </div>
@@ -452,7 +446,7 @@ export default function TourDetailPage() {
       <div className="space-y-6">
         <Skeleton className="h-5 w-48" />
         <Skeleton className="h-[420px] w-full rounded-xl" />
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
           {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 rounded-xl" />)}
         </div>
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -486,13 +480,13 @@ export default function TourDetailPage() {
   const isMultiDay = dayKeys.length > 1 || locations.some((l) => (l.day ?? 1) > 1);
 
   return (
-    <div className="min-h-screen bg-surface-muted/80">
+    <div className="min-h-screen bg-surface-muted">
       {/* Sticky header */}
-      <div className="bg-surface-base shadow-sm shadow-black/5 border-b border-border">
+      <div className="bg-surface-base border-b border-border">
         <div className="max-w-5xl mx-auto px-4 md:px-6">
           <div className="flex items-center justify-between h-14">
             <div className="flex items-center gap-2 min-w-0">
-              <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-medium text-text-tertiary hover:text-emerald-700 hover:bg-emerald-50 rounded-lg transition-all shrink-0">
+              <button onClick={() => navigate(-1)} className="flex items-center gap-1.5 h-8 px-2.5 text-xs font-medium text-text-tertiary hover:text-primary hover:bg-primary/10 rounded-xl transition-colors shrink-0">
                 <ArrowLeft size={14} />
                 <span className="hidden sm:inline">Tours</span>
               </button>
@@ -507,7 +501,7 @@ export default function TourDetailPage() {
                     size="sm"
                     onClick={() => reviewMutation.mutate({ action: "approve" })}
                     disabled={reviewMutation.isPending}
-                    className="h-8 bg-emerald-600 hover:bg-emerald-700 text-white"
+                    className="h-8 bg-primary hover:bg-primary text-white"
                   >
                     {isPendingEdits ? "Approve edits" : "Approve"}
                   </Button>
@@ -516,7 +510,7 @@ export default function TourDetailPage() {
                     variant="outline"
                     onClick={() => setFlagOpen(true)}
                     disabled={reviewMutation.isPending}
-                    className="h-8 text-amber-700 border-amber-200 hover:bg-amber-50"
+                    className="h-8 text-status-pending-text border-status-pending/30 hover:bg-status-pending/10"
                   >
                     <Flag size={13} className="mr-1" /> Flag
                   </Button>
@@ -530,13 +524,9 @@ export default function TourDetailPage() {
       <div className="max-w-5xl mx-auto px-4 md:px-6 py-6">
         {/* Hero gallery */}
         {displayPhotos.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: "easeOut" }}
-            className="relative mb-8"
-          >
-            <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-1 rounded-xl overflow-hidden shadow-sm shadow-black/5">
+          <div 
+            className="relative mb-8">
+            <div className="grid grid-cols-1 md:grid-cols-4 md:grid-rows-2 gap-1 rounded-xl overflow-hidden ">
               {displayPhotos.slice(0, 5).map((photo, i) => {
                 const hasMore = displayPhotos.length > 5 && i === 4;
                 return (
@@ -545,22 +535,22 @@ export default function TourDetailPage() {
                     onClick={() => setLightboxIndex(i)}
                     className={cn("relative overflow-hidden bg-surface-muted group cursor-pointer", i === 0 ? "md:col-span-2 md:row-span-2 min-h-[260px] md:min-h-[440px]" : "min-h-[130px] md:min-h-[219px]")}
                   >
-                    <OptimizedImage src={photo} width={i === 0 ? 2400 : 600} alt={`Photo ${i + 1}`} className="absolute inset-0 w-full h-full object-cover transition-all duration-700 group-hover:scale-105" />
+                    <OptimizedImage src={photo} width={i === 0 ? 2400 : 600} alt={`Photo ${i + 1}`} className="absolute inset-0 w-full h-full object-cover" />
                     {i === 0 && (
-                      <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white bg-white/10 backdrop-blur-sm border border-white/20 shadow-sm opacity-0 group-hover:opacity-100 transition-all duration-300">
+                      <div className="absolute bottom-3 right-3 flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-medium text-white bg-black/50 border border-white/20 ">
                         <Camera size={12} /> <span>View all {displayPhotos.length} photos</span>
                       </div>
                     )}
                     {hasMore && (
                       <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                        <span className="text-xs font-semibold text-white/90 bg-white/10 backdrop-blur-sm border border-white/20 px-3 py-1.5 rounded-lg">+{displayPhotos.length - 5} more</span>
+                        <span className="text-xs font-semibold text-white/90 bg-white/10  border border-white/20 px-3 py-1.5 rounded-xl">+{displayPhotos.length - 5} more</span>
                       </div>
                     )}
                   </button>
                 );
               })}
             </div>
-          </motion.div>
+          </div>
         )}
 
         {/* Performance stats */}
@@ -592,8 +582,8 @@ export default function TourDetailPage() {
                 <ul className="space-y-2.5">
                   {tour.highlights.map((h, i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-text-secondary">
-                      <div className="w-4 h-4 rounded-full bg-emerald-50 flex items-center justify-center shrink-0 mt-0.5">
-                        <Check size={10} className="text-emerald-500" />
+                      <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+                        <Check size={10} className="text-primary" />
                       </div>
                       <span className="min-w-0 break-words">{h}</span>
                     </li>
@@ -613,7 +603,7 @@ export default function TourDetailPage() {
                       <div key={dayNum}>
                         {isMultiDay && (
                           <div className="flex flex-wrap items-center gap-2 mb-3">
-                            <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full">Day {dayNum}</span>
+                            <span className="text-xs font-semibold text-primary bg-primary/10 px-2.5 py-1 rounded-full">Day {dayNum}</span>
                             {logistics?.accommodation && (
                               <span className="flex items-center gap-1 text-xs text-text-tertiary"><Bed size={12} className="text-text-tertiary" /> {ACCOMMODATION_LABELS[logistics.accommodation] || logistics.accommodation}</span>
                             )}
@@ -644,7 +634,7 @@ export default function TourDetailPage() {
                           ))}
                           {isMultiDay && (
                             <div className="flex items-center gap-1.5 text-[11px] text-text-tertiary pl-9">
-                              <MoonStar size={12} className="text-amber-500" />
+                              <MoonStar size={12} className="text-status-pending-text" />
                               Overnight in {stopTitle(stops[stops.length - 1])}
                             </div>
                           )}
@@ -666,7 +656,7 @@ export default function TourDetailPage() {
                       <ul className="space-y-2.5">
                         {tour.included.map((item, i) => (
                           <li key={i} className="flex items-start gap-2.5 text-sm text-text-secondary">
-                            <div className="w-4 h-4 rounded-full bg-emerald-50 flex items-center justify-center shrink-0 mt-0.5"><Check size={10} className="text-emerald-500" /></div>
+                            <div className="w-4 h-4 rounded-full bg-primary/10 flex items-center justify-center shrink-0 mt-0.5"><Check size={10} className="text-primary" /></div>
                             <span>{item}</span>
                           </li>
                         ))}
@@ -679,7 +669,7 @@ export default function TourDetailPage() {
                       <ul className="space-y-2.5">
                         {tour.excluded.map((item, i) => (
                           <li key={i} className="flex items-start gap-2.5 text-sm text-text-secondary">
-                            <div className="w-4 h-4 rounded-full bg-red-50 flex items-center justify-center shrink-0 mt-0.5"><X size={10} className="text-red-400" /></div>
+                            <div className="w-4 h-4 rounded-full bg-status-rejected/10 flex items-center justify-center shrink-0 mt-0.5"><X size={10} className="text-status-rejected-text" /></div>
                             <span>{item}</span>
                           </li>
                         ))}
@@ -688,7 +678,7 @@ export default function TourDetailPage() {
                   )}
                 </div>
                 {(tour.foodProvided || (tour.meals && tour.meals.length > 0) || tour.drinksIncluded || (tour.dietaryOptions && tour.dietaryOptions.length > 0)) && (
-                  <div className="mt-4 pt-4 border-t border-border/60 space-y-2">
+                  <div className="mt-4 pt-4 border-t border-border space-y-2">
                     {tour.foodProvided && <p className="text-sm text-text-secondary"><span className="font-medium">Meals:</span> {tour.meals?.map((m) => `${m.type} (${m.format})`).join(", ") || "Provided"}</p>}
                     {tour.drinksIncluded && <p className="text-sm text-text-secondary"><span className="font-medium">Drinks:</span> Included</p>}
                     {tour.dietaryOptions && tour.dietaryOptions.length > 0 && <p className="text-sm text-text-secondary"><span className="font-medium">Dietary options:</span> {tour.dietaryOptions.join(", ")}</p>}
@@ -701,8 +691,8 @@ export default function TourDetailPage() {
               <SectionCard title="What to Bring">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {tour.whatToBring.map((item, i) => (
-                    <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-lg bg-surface-muted text-sm text-text-secondary">
-                      <Check size={12} className="text-emerald-500 shrink-0" />
+                    <div key={i} className="flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-surface-muted text-sm text-text-secondary">
+                      <Check size={12} className="text-primary shrink-0" />
                       <span>{item}</span>
                     </div>
                   ))}
@@ -735,10 +725,10 @@ export default function TourDetailPage() {
                               <span>{[p.name, p.address].filter(Boolean).join(", ") || "—"}</span>
                               {p.time && <span className="ml-2 text-[11px] text-text-tertiary">pickup {p.time}</span>}
                               {hasZone && (
-                                <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-medium text-emerald-700">zone</span>
+                                <span className="ml-2 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-medium text-primary">zone</span>
                               )}
                               {exclusionCount > 0 && (
-                                <span className="ml-1.5 rounded-full bg-rose-50 px-2 py-0.5 text-[10px] font-medium text-rose-600">
+                                <span className="ml-1.5 rounded-full bg-status-rejected/10 px-2 py-0.5 text-[10px] font-medium text-status-rejected-text">
                                   {exclusionCount} no-pickup
                                 </span>
                               )}
@@ -775,7 +765,7 @@ export default function TourDetailPage() {
                     if (tour.supplier?.id) navigate(`/admin/suppliers/${tour.supplier.id}`);
                   }}
                   disabled={!tour.supplier.id}
-                  className="group flex w-full items-center gap-3 text-left rounded-lg transition-all disabled:cursor-default"
+                  className="group flex w-full items-center gap-3 text-left rounded-xl transition-colors disabled:cursor-default"
                 >
                   {tour.supplier.photoURL ? (
                     <OptimizedImage src={tour.supplier.photoURL} alt="" width={40} className="h-10 w-10 shrink-0 rounded-full object-cover" />
@@ -783,11 +773,11 @@ export default function TourDetailPage() {
                     <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-surface-muted text-sm font-semibold text-text-secondary">{tour.supplier.name?.charAt(0)?.toUpperCase() || "?"}</div>
                   )}
                   <div className="min-w-0">
-                    <p className={cn("text-sm font-medium text-text-primary", tour.supplier.id && "hover:text-emerald-700")}>{tour.supplier.name || "Unknown"}</p>
+                    <p className={cn("text-sm font-medium text-text-primary", tour.supplier.id && "hover:text-primary")}>{tour.supplier.name || "Unknown"}</p>
                     {tour.supplier.email && <p className="text-xs text-text-tertiary truncate">{tour.supplier.email}</p>}
                   </div>
                   {tour.supplier.id && (
-                    <ChevronRight size={14} className="ml-auto shrink-0 text-border group-hover:text-emerald-600 transition-colors" />
+                    <ChevronRight size={14} className="ml-auto shrink-0 text-border group-hover:text-primary transition-colors" />
                   )}
                 </button>
               </SectionCard>
@@ -801,8 +791,8 @@ export default function TourDetailPage() {
                   <>
                     <div className="flex flex-wrap items-center gap-1.5 pb-1">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-surface-muted text-text-secondary">{tour.pricingModel === "perGroup" ? "Per group" : "Per person"}</span>
-                      {tour.pricingApproach === "sameForEveryone" && <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-emerald-50 text-emerald-600">Same for everyone</span>}
-                      {tour.pricingApproach === "dependsOnAge" && <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-600">Depends on age</span>}
+                      {tour.pricingApproach === "sameForEveryone" && <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-primary/10 text-primary">Same for everyone</span>}
+                      {tour.pricingApproach === "dependsOnAge" && <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium bg-status-pending/10 text-status-pending-text">Depends on age</span>}
                     </div>
                     <div className="divide-y divide-border/40">
                       {normalizedPrices.map((price, i) => (
@@ -812,15 +802,15 @@ export default function TourDetailPage() {
                               <span className="text-sm text-text-primary font-medium">{price.label}</span>
                               {(price.minAge != null || price.maxAge != null) && <span className="text-xs text-text-tertiary">({price.minAge}–{price.maxAge})</span>}
                             </div>
-                            <span className="text-sm font-bold text-text-primary tabular-nums shrink-0 ml-3">{formatCurrency(price.price, tour.currency)}</span>
+                            <span className="text-sm font-semibold text-text-primary tnum shrink-0 ml-3">{formatCurrency(price.price, tour.currency)}</span>
                           </div>
                           {price.tiers && price.tiers.length > 0 && (
-                            <div className="ml-3 mb-2 pb-2 border-b border-border/40 last:border-b-0">
+                            <div className="ml-3 mb-2 pb-2 border-b border-border last:border-b-0">
                               <div className="space-y-1">
                                 {price.tiers.map((tier, ti) => (
-                                  <div key={ti} className="flex items-center justify-between text-xs pl-3 py-1 rounded bg-surface-muted/50 px-2">
+                                  <div key={ti} className="flex items-center justify-between text-xs pl-3 py-1 rounded bg-surface-muted px-2">
                                     <span className="text-text-tertiary">{tier.from ?? "1"}–{tier.to ?? "∞"} people</span>
-                                    <span className="font-semibold text-text-primary tabular-nums">{formatCurrency(tier.pricePerPerson ?? 0, tour.currency)} each</span>
+                                    <span className="font-semibold text-text-primary tnum">{formatCurrency(tier.pricePerPerson ?? 0, tour.currency)} each</span>
                                   </div>
                                 ))}
                               </div>
@@ -830,7 +820,7 @@ export default function TourDetailPage() {
                       ))}
                     </div>
                     {tour.validPeriod && (
-                      <div className="pt-3 mt-2 border-t border-border/60">
+                      <div className="pt-3 mt-2 border-t border-border">
                         <div className="flex items-center justify-between text-xs">
                           <span className="text-text-tertiary">Valid period</span>
                           <span className="font-medium text-text-tertiary">{tour.validPeriod.start ? formatDate(tour.validPeriod.start) : ""}{tour.validPeriod.end ? ` – ${formatDate(tour.validPeriod.end)}` : ""}</span>
@@ -858,7 +848,7 @@ export default function TourDetailPage() {
                       <p className="text-xs text-text-tertiary mb-2">Operating Days</p>
                       <div className="flex flex-wrap gap-1.5">
                         {tour.operatingDays.map((day) => (
-                          <span key={day} className="text-xs px-2.5 py-1 rounded-md bg-surface-muted text-text-tertiary font-medium border border-border/60 capitalize">{day.slice(0, 3)}</span>
+                          <span key={day} className="text-xs px-2.5 py-1 rounded-md bg-surface-muted text-text-tertiary font-medium border border-border capitalize">{day.slice(0, 3)}</span>
                         ))}
                       </div>
                     </div>
@@ -870,7 +860,7 @@ export default function TourDetailPage() {
                         {tour.timeSlots.map((slot, i) => {
                           const start = typeof slot === "string" ? slot : slot.startTime;
                           const end = typeof slot === "string" ? undefined : slot.endTime;
-                          return <span key={i} className="text-xs px-2.5 py-1 rounded-md bg-surface-muted text-text-tertiary font-medium border border-border/60">{formatTime(start)}{end ? ` – ${formatTime(end)}` : ""}</span>;
+                          return <span key={i} className="text-xs px-2.5 py-1 rounded-md bg-surface-muted text-text-tertiary font-medium border border-border">{formatTime(start)}{end ? ` – ${formatTime(end)}` : ""}</span>;
                         })}
                       </div>
                     </div>
@@ -903,7 +893,7 @@ export default function TourDetailPage() {
                   {tour.options.map((opt, i) => {
                     const vLabel = validityLabel(opt);
                     return (
-                      <div key={opt.id || i} className="rounded-lg border border-border/60 p-4 space-y-2 bg-surface-muted/40">
+                      <div key={opt.id || i} className="rounded-xl border border-border p-4 space-y-2 bg-surface-muted">
                         <div className="flex items-center justify-between gap-2">
                           <p className="text-sm font-semibold text-text-primary">{opt.title || `Option ${i + 1}`}</p>
                           {opt.refCode && opt.refCode !== "default" && <span className="text-[11px] text-text-tertiary shrink-0">Ref: {opt.refCode}</span>}
@@ -911,11 +901,11 @@ export default function TourDetailPage() {
                         {vLabel && <p className="text-xs text-text-tertiary flex items-center gap-1.5"><Ticket size={12} className="text-text-tertiary shrink-0" /> {vLabel}</p>}
                         {opt.description && <p className="text-xs text-text-tertiary leading-relaxed">{opt.description}</p>}
                         <div className="flex flex-wrap gap-1.5">
-                          {opt.isPrivate && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-violet-50 text-violet-600 border border-violet-200/50"><Lock size={10} /> Private</span>}
-                          {opt.skipTheLine && opt.skipTheLine !== "none" && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-amber-50 text-amber-600 border border-amber-200/50"><Flag size={10} /> Skip the line</span>}
-                          {opt.audioGuide && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-200/50"><Headphones size={10} /> Audio guide</span>}
-                          {opt.infoBooklet && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-teal-50 text-teal-600 border border-teal-200/50"><BookOpen size={10} /> Info booklet</span>}
-                          {opt.maxGroupSize && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-orange-50 text-orange-600 border border-orange-200/50"><Users size={10} /> Max {opt.maxGroupSize} ppl</span>}
+                          {opt.isPrivate && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-status-processing/10 text-status-processing-text border border-status-processing/30"><Lock size={10} /> Private</span>}
+                          {opt.skipTheLine && opt.skipTheLine !== "none" && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-status-pending/10 text-status-pending-text border border-status-pending/30"><Flag size={10} /> Skip the line</span>}
+                          {opt.audioGuide && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-primary/10 text-primary border border-primary/30"><Headphones size={10} /> Audio guide</span>}
+                          {opt.infoBooklet && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-primary/10 text-primary border border-primary/30"><BookOpen size={10} /> Info booklet</span>}
+                          {opt.maxGroupSize && <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-status-pending/10 text-status-pending-text border border-status-pending/30"><Users size={10} /> Max {opt.maxGroupSize} ppl</span>}
                         </div>
                       </div>
                     );
@@ -935,13 +925,13 @@ export default function TourDetailPage() {
                   )}
                   {tour.instantBooking !== undefined && (
                     <div className="flex items-center gap-2.5 text-text-secondary">
-                      {tour.instantBooking ? <Check size={14} className="text-emerald-500 shrink-0" /> : <Clock size={14} className="text-text-tertiary shrink-0" />}
+                      {tour.instantBooking ? <Check size={14} className="text-primary shrink-0" /> : <Clock size={14} className="text-text-tertiary shrink-0" />}
                       <span>{tour.instantBooking ? "Instant booking" : "Request booking"}</span>
                     </div>
                   )}
                   {tour.instantConfirmation !== undefined && (
                     <div className="flex items-center gap-2.5 text-text-secondary">
-                      {tour.instantConfirmation ? <Check size={14} className="text-emerald-500 shrink-0" /> : <Clock size={14} className="text-text-tertiary shrink-0" />}
+                      {tour.instantConfirmation ? <Check size={14} className="text-primary shrink-0" /> : <Clock size={14} className="text-text-tertiary shrink-0" />}
                       <span>{tour.instantConfirmation ? "Instant confirmation" : "Manual confirmation"}</span>
                     </div>
                   )}
@@ -993,7 +983,7 @@ export default function TourDetailPage() {
                 reviewMutation.mutate({ action: "flag", reason: flagReason.trim() });
               }}
               disabled={reviewMutation.isPending}
-              className="bg-amber-600 hover:bg-amber-700 text-white"
+              className="bg-status-pending hover:bg-status-pending text-white"
             >
               <Flag size={14} className="mr-1" /> Flag
             </Button>

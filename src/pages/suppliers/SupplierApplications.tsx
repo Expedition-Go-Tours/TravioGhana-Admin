@@ -2,7 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import {
-  Search, X, Users, UserCheck, Clock, UserX, Star, Building2, MapPin, ArrowRight,
+  Search, X, Users, UserCheck, Clock, UserX, Building2, MapPin, ArrowRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,7 +34,6 @@ interface Supplier {
   supplierType?: string;
   totalBookings?: number;
   totalEarnings?: string | number;
-  averageRating?: string | number;
   createdAt?: string;
 }
 
@@ -86,15 +85,14 @@ function SupplierCard({
   const name = s.user?.name || "—";
   const initial = name.charAt(0).toUpperCase();
   const isPending = s.status === "PENDING" || s.status === "UNDER_REVIEW";
-  const hasRating = s.averageRating != null && Number(s.averageRating) > 0;
 
   return (
     <div
-      className="flex flex-col gap-3 rounded-xl border border-border bg-surface-base p-4 transition-colors hover:bg-surface-muted/30 cursor-pointer"
+      className="flex flex-col gap-3 rounded-xl border border-border bg-surface-base p-4 transition-colors hover:bg-surface-muted cursor-pointer"
       onClick={onView}
     >
       <div className="flex items-start gap-3">
-        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-sm font-bold text-white">
+        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-semibold text-white">
           <span>{initial}</span>
           {s.user?.photoURL && (
             <OptimizedImage
@@ -130,19 +128,11 @@ function SupplierCard({
         <span className="inline-flex items-center rounded-md bg-surface-muted px-2 py-1 font-medium text-text-secondary">
           {supplierTypeLabel(s.supplierType)}
         </span>
-        <span className="tabular-nums text-text-secondary">{formatNumber(s.totalBookings)} bookings</span>
-        <span className="font-semibold tabular-nums text-text-primary">{formatCurrency(s.totalEarnings)}</span>
-        {hasRating ? (
-          <span className="inline-flex items-center gap-1 tabular-nums text-text-primary">
-            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-            {Number(s.averageRating).toFixed(1)}
-          </span>
-        ) : (
-          <span className="text-text-tertiary">No ratings</span>
-        )}
+        <span className="tnum text-text-secondary">{formatNumber(s.totalBookings)} bookings</span>
+        <span className="font-semibold tnum text-text-primary">{formatCurrency(s.totalEarnings)}</span>
       </div>
 
-      <div className="flex items-center justify-between border-t border-border/50 pt-3">
+      <div className="flex items-center justify-between border-t border-border pt-3">
         <span className="text-xs text-text-tertiary">Joined {formatDate(s.createdAt)}</span>
         <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
           <Button size="sm" variant="outline" onClick={onView}>
@@ -223,7 +213,6 @@ export default function SuppliersPage() {
       if (sortKey === "name") return (s.user?.name || businessName(s)).toLowerCase();
       if (sortKey === "bookings") return Number(s.totalBookings) || 0;
       if (sortKey === "earnings") return Number(s.totalEarnings) || 0;
-      if (sortKey === "rating") return Number(s.averageRating) || -1;
       return 0;
     };
     arr.sort((a, b) => {
@@ -270,7 +259,7 @@ export default function SuppliersPage() {
         const initial = name.charAt(0).toUpperCase();
         return (
           <div className="flex items-center gap-3">
-            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-emerald-400 to-emerald-600 text-xs font-bold text-white">
+            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-semibold text-white">
               <span>{initial}</span>
               {r.user?.photoURL && (
                 <OptimizedImage
@@ -318,29 +307,14 @@ export default function SuppliersPage() {
       header: "Bookings",
       sortable: true,
       align: "right",
-      render: (r) => <span className="font-semibold text-text-primary tabular-nums">{formatNumber(r.totalBookings)}</span>,
+      render: (r) => <span className="font-semibold text-text-primary tnum">{formatNumber(r.totalBookings)}</span>,
     },
     {
       key: "earnings",
       header: "Earnings",
       sortable: true,
       align: "right",
-      render: (r) => <span className="font-semibold text-text-primary tabular-nums">{formatCurrency(r.totalEarnings)}</span>,
-    },
-    {
-      key: "rating",
-      header: "Rating",
-      sortable: true,
-      align: "right",
-      render: (r) =>
-        r.averageRating != null && Number(r.averageRating) > 0 ? (
-          <span className="inline-flex items-center gap-1 tabular-nums text-text-primary">
-            <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-            {Number(r.averageRating).toFixed(1)}
-          </span>
-        ) : (
-          <span className="text-xs text-text-tertiary">No ratings</span>
-        ),
+      render: (r) => <span className="font-semibold text-text-primary tnum">{formatCurrency(r.totalEarnings)}</span>,
     },
     { key: "status", header: "Status", render: (r) => <StatusBadge status={r.status || "UNKNOWN"} /> },
     { key: "createdAt", header: "Joined", render: (r) => <span className="text-xs text-text-tertiary">{formatDate(r.createdAt)}</span> },
@@ -459,7 +433,7 @@ export default function SuppliersPage() {
 
           {/* Type filter pills */}
           <div className="flex items-center gap-1.5 overflow-x-auto border-b border-border px-4 py-2.5 sm:px-5 sm:gap-2 scrollbar-thin">
-            <span className="shrink-0 text-xs font-medium uppercase tracking-wider text-text-tertiary">Type</span>
+            <span className="shrink-0 text-xs font-medium text-text-tertiary">Type</span>
             {TYPE_FILTERS.map((f) => (
               <button
                 key={f.value}
@@ -490,7 +464,7 @@ export default function SuppliersPage() {
                 )}
               >
                 {tab.label}
-                <span className={cn("ml-1 tabular-nums", activeTab === tab.key ? "text-primary" : "text-text-tertiary")}>
+                <span className={cn("ml-1 tnum", activeTab === tab.key ? "text-primary" : "text-text-tertiary")}>
                   {formatNumber(counts[tab.key] || 0)}
                 </span>
               </button>
@@ -528,16 +502,16 @@ export default function SuppliersPage() {
                 {[1, 2, 3].map((i) => (
                   <div key={i} className="animate-pulse rounded-xl border border-border p-4 space-y-3">
                     <div className="flex items-center gap-3">
-                      <div className="h-10 w-10 rounded-full bg-gray-100" />
+                      <div className="h-10 w-10 rounded-full bg-surface-muted" />
                       <div className="flex-1 space-y-2">
-                        <div className="h-3 w-24 bg-gray-100 rounded" />
-                        <div className="h-2.5 w-32 bg-gray-100 rounded" />
+                        <div className="h-3 w-24 bg-surface-muted rounded" />
+                        <div className="h-2.5 w-32 bg-surface-muted rounded" />
                       </div>
                     </div>
-                    <div className="h-3 w-40 bg-gray-100 rounded" />
+                    <div className="h-3 w-40 bg-surface-muted rounded" />
                     <div className="flex gap-3">
-                      <div className="h-5 w-16 bg-gray-100 rounded" />
-                      <div className="h-5 w-20 bg-gray-100 rounded" />
+                      <div className="h-5 w-16 bg-surface-muted rounded" />
+                      <div className="h-5 w-20 bg-surface-muted rounded" />
                     </div>
                   </div>
                 ))}
@@ -570,7 +544,7 @@ export default function SuppliersPage() {
 
             {/* Mobile pagination */}
             {totalPages > 1 && (
-              <div className="flex items-center justify-between border-t border-border/60 px-4 py-3">
+              <div className="flex items-center justify-between border-t border-border px-4 py-3">
                 <p className="text-xs text-text-tertiary">
                   Page {currentPage} of {totalPages}
                 </p>
@@ -578,14 +552,14 @@ export default function SuppliersPage() {
                   <button
                     disabled={currentPage <= 1}
                     onClick={() => setPage(currentPage - 1)}
-                    className="px-3 py-1.5 rounded-md text-xs font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:pointer-events-none"
+                    className="px-3 py-1.5 rounded-md text-xs font-medium text-text-secondary bg-white border border-border hover:bg-surface-muted disabled:opacity-40 disabled:pointer-events-none"
                   >
                     Prev
                   </button>
                   <button
                     disabled={currentPage >= totalPages}
                     onClick={() => setPage(currentPage + 1)}
-                    className="px-3 py-1.5 rounded-md text-xs font-medium text-gray-600 bg-white border border-gray-200 hover:bg-gray-50 disabled:opacity-40 disabled:pointer-events-none"
+                    className="px-3 py-1.5 rounded-md text-xs font-medium text-text-secondary bg-white border border-border hover:bg-surface-muted disabled:opacity-40 disabled:pointer-events-none"
                   >
                     Next
                   </button>

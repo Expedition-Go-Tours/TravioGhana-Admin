@@ -37,7 +37,7 @@ export default function BlogAnalytics() {
         <button onClick={() => navigate(-1)} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-base text-text-secondary transition-colors hover:bg-surface-muted hover:text-text-primary">
           <ArrowLeft className="h-4 w-4 text-text-primary" />
         </button>
-        <h1 className="text-lg font-semibold text-text-primary">Blog Analytics</h1>
+        <h1 className="text-[26px] font-light leading-8 tracking-[-0.26px] text-text-primary">Blog Analytics</h1>
       </div>
 
       {isLoading ? (
@@ -52,15 +52,15 @@ export default function BlogAnalytics() {
         <>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {kpis.map((kpi) => (
-              <Card key={kpi.label} className="border-l-2 border-l-primary/50">
+              <Card key={kpi.label}>
                 <CardContent className="p-4">
                   <div className="flex items-center gap-3">
-                    <div className={`rounded-lg p-2 ${kpi.bg}`}>
+                    <div className={`rounded-xl p-2 ${kpi.bg}`}>
                       <kpi.icon className={`h-5 w-5 ${kpi.color}`} />
                     </div>
                     <div>
                       <p className="text-xs text-text-secondary">{kpi.label}</p>
-                      <p className="text-xl font-bold text-text-primary">{kpi.value.toLocaleString()}</p>
+                      <p className="text-xl font-semibold text-text-primary">{kpi.value.toLocaleString()}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -69,9 +69,9 @@ export default function BlogAnalytics() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card className="border-l-2 border-l-green-500/60">
+            <Card>
               <CardHeader className="border-b border-border pb-3">
-                <CardTitle className="text-sm font-semibold text-text-primary">Top Viewed Articles</CardTitle>
+                <CardTitle className="text-sm font-medium text-text-primary">Top Viewed Articles</CardTitle>
               </CardHeader>
               <CardContent className="p-0">
                 {topViewed.length === 0 ? (
@@ -100,9 +100,9 @@ export default function BlogAnalytics() {
               </CardContent>
             </Card>
 
-            <Card className="border-l-2 border-l-green-500/60">
+            <Card>
               <CardHeader className="border-b border-border pb-3">
-                <CardTitle className="text-sm font-semibold text-text-primary">Articles by Category</CardTitle>
+                <CardTitle className="text-sm font-medium text-text-primary">Articles by Category</CardTitle>
               </CardHeader>
               <CardContent>
                 {categoryDistribution.length === 0 ? (

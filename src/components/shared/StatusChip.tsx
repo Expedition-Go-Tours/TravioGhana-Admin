@@ -21,7 +21,7 @@ const STATUS_STYLES = {
   refunded: { dot: "bg-status-pending", bg: "bg-status-pending/10 text-status-pending-text", label: "Refunded" },
   partially_refunded: { dot: "bg-status-pending", bg: "bg-status-pending/10 text-status-pending-text", label: "Partial Refund" },
   succeeded: { dot: "bg-status-active", bg: "bg-status-active/10 text-status-active-text", label: "Succeeded" },
-};
+} as const;
 
 type StatusKey = keyof typeof STATUS_STYLES;
 
@@ -37,12 +37,12 @@ export function StatusChip({ status, className }: StatusChipProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-lg min-w-[68px] justify-center",
+        "tnum inline-flex min-w-[76px] items-center justify-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-medium",
         style.bg,
         className,
       )}
     >
-      <span className={cn("w-1.5 h-1.5 rounded-full shrink-0", style.dot)} />
+      <span className={cn("h-1.5 w-1.5 shrink-0 rounded-full", style.dot)} />
       {style.label}
     </span>
   );

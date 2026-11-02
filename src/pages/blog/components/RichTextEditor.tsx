@@ -136,8 +136,8 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, expand 
   };
 
   const containerClass = expand
-    ? "flex flex-col h-full rounded-sm border border-border"
-    : "flex flex-col rounded-xl border border-border bg-card shadow-soft";
+    ? "flex flex-col h-full rounded-xl border border-border"
+    : "flex flex-col rounded-xl border border-border bg-card ";
   const contentAreaClass = expand
     ? "flex-1 overflow-y-auto p-6"
     : "p-4 sm:p-6";

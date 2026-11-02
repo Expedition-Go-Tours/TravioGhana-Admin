@@ -75,9 +75,9 @@ export default function AuthCallback() {
   }, [navigate]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-green-50 via-white to-green-50/60 dark:from-green-950/20 dark:via-surface-base dark:to-green-950/10">
+    <div className="flex min-h-screen items-center justify-center bg-surface-muted">
       <div className="flex flex-col items-center gap-4">
-        <Loader2 className="h-8 w-8 animate-spin text-green-600 dark:text-green-400" />
+        <Loader2 className="h-8 w-8 animate-spin text-primary dark:text-primary" />
         <p className="text-sm text-text-secondary">{status}</p>
       </div>
     </div>

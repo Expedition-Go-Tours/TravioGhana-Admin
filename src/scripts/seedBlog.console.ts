@@ -32,8 +32,7 @@
       {
         type: "paragraph",
         content: [
-          { type: "text", text: "Kenya's Maasai Mara is one of Africa's most iconic safari destinations, and for good reason. The vast savannah stretches endlessly beneath a sky that seems to touch the earth at every horizon. " },
-          { type: "text", text: "This is not just a travel destination — it's a life-changing experience.", marks: [{ type: "bold" }] },
+          { type: "text", text: "Kenya's Maasai Mara is one of Africa's best-known safari destinations. The savannah stretches to the horizon in every direction." },
         ],
       },
       {
@@ -41,9 +40,9 @@
         content: [
           { type: "text", text: "From the " },
           { type: "text", text: "Great Migration", marks: [{ type: "bold" }] },
-          { type: "text", text: " to the Big Five, every moment here feels curated by nature itself. Planning a trip? Check out our " },
-          { type: "text", text: "comprehensive safari guide", marks: [{ type: "link", attrs: { href: "https://example.com/safari-guide" } }] },
-          { type: "text", text: " for everything you need to know." },
+          { type: "text", text: " to the Big Five, wildlife drives the visit. Planning a trip? Read our " },
+          { type: "text", text: "safari planning guide", marks: [{ type: "link", attrs: { href: "https://example.com/safari-guide" } }] },
+          { type: "text", text: " before you book." },
         ],
       },
       {
@@ -56,7 +55,7 @@
         content: [
           { type: "text", text: "The dry season (July to October) offers the best wildlife viewing. This is when herds of wildebeest, zebra, and gazelle cross the Mara River in what Sir David Attenborough called " },
           { type: "text", text: '"the greatest show on Earth."', marks: [{ type: "italic" }] },
-          { type: "text", text: " The wet season (November to May) transforms the landscape into a lush green paradise." },
+          { type: "text", text: " The wet season (November to May) brings rain and turns the plains green." },
         ],
       },
       {
@@ -80,7 +79,7 @@
         content: [
           { type: "text", text: "Most travelers fly into " },
           { type: "text", text: "Jomo Kenyatta International Airport (NBO)", marks: [{ type: "bold" }] },
-          { type: "text", text: " in Nairobi, then take a short domestic flight to one of the Mara's many airstrips. Several operators offer daily flights, making the journey surprisingly accessible. For the adventurous, a 5-hour drive from Nairobi through the Great Rift Valley is an experience in itself." },
+          { type: "text", text: " in Nairobi, then take a short domestic flight to one of the Mara's many airstrips. Several operators offer daily flights. For the adventurous, a five-hour drive from Nairobi crosses the Great Rift Valley." },
         ],
       },
       {
@@ -109,7 +108,7 @@
       {
         type: "paragraph",
         content: [
-          { type: "text", text: "Most importantly, bring an open mind and a sense of wonder. The Mara has a way of exceeding every expectation." },
+          { type: "text", text: "Game drives start early, so bring layers for cold mornings." },
         ],
       },
       {
@@ -118,9 +117,7 @@
       {
         type: "paragraph",
         content: [
-          { type: "text", text: "Whether you're a first-time visitor or a seasoned safari-goer, " },
-          { type: "text", text: "the Maasai Mara promises an adventure you'll never forget.", marks: [{ type: "bold" }, { type: "italic" }] },
-          { type: "text", text: " Book your trip today and experience the wild heart of Africa." },
+          { type: "text", text: "Book your trip around the dry season for the best wildlife viewing.", marks: [{ type: "bold" }] },
         ],
       },
     ],
@@ -130,13 +127,13 @@
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
-      title: "Exploring the Wild Beauty of Maasai Mara",
+      title: "A Practical Guide to the Maasai Mara",
       slug: "exploring-wild-beauty-maasai-mara-" + Date.now(),
-      excerpt: "Discover why Kenya's most famous reserve should be at the top of your travel bucket list — from the Great Migration to breathtaking landscapes that define the African safari experience.",
+      excerpt: "When to visit the Maasai Mara, how to get there, and what to pack for a safari built around the Great Migration.",
       body,
       featuredImage: "https://images.unsplash.com/photo-1516426122078-c23e76319801?w=1200&q=80",
-      metaTitle: "Exploring the Wild Beauty of Maasai Mara | Travio Ghana",
-      metaDescription: "From the Great Migration to the Big Five — discover why Maasai Mara is Africa's most iconic safari destination. Complete travel guide with tips, best times to visit, and more.",
+      metaTitle: "A Practical Guide to the Maasai Mara | Travio Ghana",
+      metaDescription: "Plan a Maasai Mara safari: the best months for wildlife viewing, flights and road access from Nairobi, and what to pack.",
       status: "PUBLISHED",
       readTime: 8,
       locale: "en",

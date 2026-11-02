@@ -40,7 +40,7 @@ export default function CategoryManagerPage() {
   const renderCategory = (cat: ArticleCategory, depth = 0) => (
     <div key={cat.id}>
       <div
-        className="flex items-center justify-between px-4 py-3 hover:bg-surface-muted/50 rounded-lg group"
+        className="flex items-center justify-between px-4 py-3 hover:bg-surface-muted rounded-xl group"
         style={{ paddingLeft: `${16 + depth * 24}px` }}
       >
         <div className="flex items-center gap-2">
@@ -52,7 +52,7 @@ export default function CategoryManagerPage() {
           <span className="text-sm font-medium text-text-primary">{cat.name}</span>
           <span className="text-xs text-text-tertiary ml-2">({cat.articleCount || 0})</span>
         </div>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+        <div className="flex items-center gap-1 ">
           <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => { setEditingCategory(cat); setDialogOpen(true); }}>
             <Edit className="h-4 w-4" />
           </Button>
@@ -69,7 +69,7 @@ export default function CategoryManagerPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-text-primary">Categories</h1>
+          <h1 className="text-[26px] font-light leading-8 tracking-[-0.26px] text-text-primary">Categories</h1>
           <p className="mt-1 text-sm text-text-secondary">Organize your articles into categories</p>
         </div>
         <Button onClick={() => { setEditingCategory(null); setDialogOpen(true); }} className="bg-primary hover:bg-primary/90">
@@ -80,7 +80,7 @@ export default function CategoryManagerPage() {
       {isLoading ? (
         <div className="space-y-2">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-14 rounded-lg bg-surface-muted animate-pulse" />
+            <div key={i} className="h-14 rounded-xl bg-surface-muted animate-pulse" />
           ))}
         </div>
       ) : rootCategories.length === 0 ? (

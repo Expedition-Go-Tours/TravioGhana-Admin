@@ -1,5 +1,4 @@
-import { createBrowserRouter, RouterProvider, Navigate, useNavigate, useSearchParams, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { createBrowserRouter, RouterProvider, Navigate, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 import { queryClient } from "@/lib/query-client";
@@ -15,7 +14,6 @@ import LoginPage from "@/pages/Login";
 import AuthCallback from "@/pages/auth/AuthCallback";
 import OverviewPage from "@/pages/Overview";
 import RevenueTrendPage from "@/pages/revenue/RevenueTrend";
-import SearchAnalyticsPage from "@/pages/revenue/SearchAnalytics";
 import UserGrowthPage from "@/pages/users/UserGrowth";
 import CustomerLifetimeValuePage from "@/pages/users/CustomerLifetimeValue";
 import ConversionFunnelPage from "@/pages/users/ConversionFunnel";
@@ -25,15 +23,7 @@ import TourModerationPage from "@/pages/tours/TourModeration";
 import SupplierApplicationsPage from "@/pages/suppliers/SupplierApplications";
 import SupplierDetailPage from "@/pages/suppliers/SupplierDetail";
 import SupplierQcDashboardPage from "@/pages/suppliers/SupplierQcDashboard";
-import { ArrowLeft } from "lucide-react";
-import { PayoutsPaymentsTab } from "@/pages/finance/components/PayoutsPaymentsTab";
-import { InvoicesTab } from "@/pages/finance/components/InvoicesTab";
-import { PayoutsListTab } from "@/pages/finance/components/PayoutsListTab";
-import { PayoutsMethodsTab } from "@/pages/finance/components/PayoutsMethodsTab";
-import { PayoutSchedulesTab } from "@/pages/finance/components/PayoutSchedulesTab";
-import { PayoutRequestsTab } from "@/pages/finance/components/PayoutRequestsTab";
-import { DisputesQueueTab } from "@/pages/finance/components/DisputesQueueTab";
-import { CustomerRefundClaimsTab } from "@/pages/finance/components/CustomerRefundClaimsTab";
+import PayoutsPage from "@/pages/finance/PayoutsPage";
 import ReviewModerationPage from "@/pages/reviews/ReviewModeration";
 import BookingsPage from "@/pages/bookings/BookingsPage";
 import CancellationsPage from "@/pages/cancellations/CancellationsPage";
@@ -82,69 +72,6 @@ function CancellationsRedirect() {
   return <Navigate to={`/admin/cancellations${location.search}`} replace />;
 }
 
-type PayoutTab = "payments" | "invoices" | "requests" | "schedules" | "payouts" | "disputes" | "claims" | "methods";
-
-function PayoutsTabPage() {
-  const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
-  const tab: PayoutTab = (["payments", "invoices", "requests", "schedules", "payouts", "disputes", "claims", "methods"] as const).find((t) => searchParams.get("tab") === t) ?? "payments";
-  const [statusOverride, setStatusOverride] = useState<string | undefined>(undefined);
-
-  const switchTab = (t: PayoutTab) => {
-    const next = new URLSearchParams(searchParams);
-    if (t === "payments") next.delete("tab");
-    else next.set("tab", t);
-    setSearchParams(next, { replace: true });
-    setStatusOverride(undefined);
-  };
-
-  return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <button onClick={() => navigate(-1)} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-base text-text-secondary transition-colors hover:bg-surface-muted hover:text-text-primary">
-          <ArrowLeft className="h-4 w-4 text-text-primary" />
-        </button>
-        <div>
-          <h1 className="text-lg font-semibold text-text-primary">Payouts</h1>
-          <p className="mt-0.5 text-sm text-text-tertiary">Manage supplier payouts across approval, release, and settlement</p>
-        </div>
-      </div>
-      <div className="flex gap-2 border-b border-border-muted">
-        {([
-          { key: "payments", label: "Payments" },
-          { key: "invoices", label: "Invoices" },
-          { key: "requests", label: "Payout Requests" },
-          { key: "schedules", label: "Payout Schedules" },
-          { key: "payouts", label: "All Payouts" },
-          { key: "disputes", label: "Refund Requests" },
-          { key: "claims", label: "Customer Refund Claims" },
-          { key: "methods", label: "Supplier Methods" },
-        ] as const).map(({ key, label }) => (
-          <button
-            key={key}
-            className={`px-4 py-2 text-sm font-medium transition-colors focus:outline-none ${
-              tab === key
-                ? "border-b-2 border-primary text-primary"
-                : "text-text-secondary hover:text-primary"
-            }`}
-            onClick={() => switchTab(key)}
-          >
-            {label}
-          </button>
-        ))}
-      </div>
-      {tab === "payments" && <PayoutsPaymentsTab onSwitchToList={(status) => { setStatusOverride(status); setSearchParams((prev) => { const next = new URLSearchParams(prev); next.set("tab", "payouts"); return next; }, { replace: true }); }} onSwitchToRequests={() => setSearchParams((prev) => { const next = new URLSearchParams(prev); next.set("tab", "requests"); return next; }, { replace: true })} />}
-      {tab === "invoices" && <InvoicesTab />}
-      {tab === "requests" && <PayoutRequestsTab />}
-      {tab === "schedules" && <PayoutSchedulesTab />}
-      {tab === "payouts" && <PayoutsListTab initialStatus={statusOverride} onStatusChange={setStatusOverride} />}
-      {tab === "disputes" && <DisputesQueueTab />}
-      {tab === "claims" && <CustomerRefundClaimsTab />}
-      {tab === "methods" && <PayoutsMethodsTab />}
-    </div>
-  );
-}
-
 function AdminLayout() {
   return (
     <ProtectedRoute>
@@ -164,7 +91,6 @@ const router = createBrowserRouter([
       { index: true, element: <HomeRedirect /> },
       { path: "overview", element: <OverviewPage /> },
       { path: "revenue-trend", element: <PermissionRoute permission="analytics.view"><RevenueTrendPage /></PermissionRoute> },
-      { path: "search-analytics", element: <PermissionRoute permission="analytics.view"><SearchAnalyticsPage /></PermissionRoute> },
       { path: "user-growth", element: <PermissionRoute permission="users.view"><UserGrowthPage /></PermissionRoute> },
       { path: "clv", element: <PermissionRoute permission="users.view"><CustomerLifetimeValuePage /></PermissionRoute> },
       { path: "funnel", element: <PermissionRoute permission="users.view"><ConversionFunnelPage /></PermissionRoute> },
@@ -175,7 +101,7 @@ const router = createBrowserRouter([
       { path: "suppliers/:id", element: <PermissionRoute permission="suppliers.view"><SupplierDetailPage /></PermissionRoute> },
       { path: "suppliers/active", element: <Navigate to="/admin/suppliers" replace /> },
       { path: "quality-control", element: <PermissionRoute permission="suppliers.view"><SupplierQcDashboardPage /></PermissionRoute> },
-      { path: "payouts", element: <PermissionRoute permission="payouts.view"><PayoutsTabPage /></PermissionRoute> },
+      { path: "payouts", element: <PermissionRoute permission="payouts.view"><PayoutsPage /></PermissionRoute> },
       { path: "payout-methods", element: <PermissionRoute permission="payout-methods.view"><Navigate to="/admin/payouts?tab=methods" replace /></PermissionRoute> },
       { path: "bookings", element: <PermissionRoute permission="bookings.view"><BookingsPage /></PermissionRoute> },
       { path: "cancellations", element: <PermissionRoute permission={["bookings.view", "dashboard.*"]}><CancellationsPage /></PermissionRoute> },

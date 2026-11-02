@@ -70,7 +70,7 @@ export function CategoryDialog({ open, onOpenChange, category, categories, onSav
         </DialogHeader>
         <div className="space-y-4 py-4">
           {error && (
-            <div className="rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</div>
+            <div className="rounded-md bg-status-rejected/10 p-3 text-sm text-status-rejected-text">{error}</div>
           )}
           <div className="space-y-2">
             <Label htmlFor="cat-name">Name</Label>

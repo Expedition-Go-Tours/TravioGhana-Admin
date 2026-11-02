@@ -37,7 +37,7 @@ export function TourStatCard({ label, value, icon: Icon, variant = 'default', cl
       <Icon className={cn('h-4 w-4 shrink-0', iconStyles[variant])} />
       <div className="min-w-0">
         <div className="text-xs text-muted-foreground">{label}</div>
-        <div className="text-base font-bold tabular-nums">{value}</div>
+        <div className="text-base font-semibold tnum">{value}</div>
       </div>
     </div>
   );

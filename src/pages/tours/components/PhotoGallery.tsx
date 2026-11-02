@@ -16,7 +16,7 @@ export function PhotoGallery({ photos, maxVisible = 6 }: PhotoGalleryProps) {
 
   if (!photos || photos.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border/60 bg-surface-muted/30 py-10 text-center">
+      <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-border bg-surface-muted py-10 text-center">
         <ImagePlus className="mb-2 h-8 w-8 text-muted-foreground/40" />
         <p className="text-sm text-muted-foreground">No photos uploaded</p>
       </div>
@@ -46,17 +46,17 @@ export function PhotoGallery({ photos, maxVisible = 6 }: PhotoGalleryProps) {
           <button
             key={photo}
             onClick={() => openLightbox(i)}
-            className="group relative aspect-[16/10] overflow-hidden rounded-lg border border-border/40 transition-all duration-200 hover:shadow-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-secondary/30"
+            className="group relative aspect-[16/10] overflow-hidden rounded-xl border border-border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-text-secondary/30"
           >
             <OptimizedImage
               src={photo}
               alt={`Tour photo ${i + 1}`}
-              className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              className="h-full w-full object-cover"
               width={600}
             />
             {i === maxVisible - 1 && overflow > 0 && (
-              <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-[2px]">
-                <span className="text-lg font-bold text-white">+{overflow}</span>
+              <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                <span className="text-lg font-semibold text-white">+{overflow}</span>
               </div>
             )}
           </button>
@@ -64,12 +64,12 @@ export function PhotoGallery({ photos, maxVisible = 6 }: PhotoGalleryProps) {
       </div>
 
       <Dialog open={lightboxOpen} onOpenChange={setLightboxOpen}>
-        <DialogContent className="max-w-4xl border-0 bg-black/95 p-0 backdrop-blur-sm [&>button]:text-white/70 [&>button]:hover:text-white">
+        <DialogContent className="max-w-4xl border-0 bg-black/95 p-0  [&>button]:text-white/70 [&>button]:hover:text-white">
           <div className="relative flex items-center justify-center">
             <OptimizedImage
               src={photos[activeIndex]}
               alt={`Tour photo ${activeIndex + 1}`}
-              className="max-h-[80vh] rounded-lg object-contain"
+              className="max-h-[80vh] rounded-xl object-contain"
               width={1600}
               fit="fill"
             />
@@ -95,7 +95,7 @@ export function PhotoGallery({ photos, maxVisible = 6 }: PhotoGalleryProps) {
               </>
             )}
 
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm">
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/60 px-3 py-1 text-xs font-medium text-white ">
               {activeIndex + 1} / {photos.length}
             </div>
           </div>
@@ -107,7 +107,7 @@ export function PhotoGallery({ photos, maxVisible = 6 }: PhotoGalleryProps) {
                   key={photo}
                   onClick={() => setActiveIndex(i)}
                   className={cn(
-                    'h-1.5 w-1.5 rounded-full transition-all duration-200',
+                    'h-1.5 w-1.5 rounded-full transition-colors duration-200',
                     i === activeIndex
                       ? 'w-4 bg-white'
                       : 'bg-white/30 hover:bg-white/50'

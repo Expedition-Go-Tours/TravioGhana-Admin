@@ -1,20 +1,19 @@
-import { useEffect } from "react";
-import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import { useMemo } from "react";
 
 interface AnimatedNumberProps {
   value: number;
   format?: (n: number) => string;
 }
 
+/**
+ * Numbers render statically. The shell has no motion; the name is retained so
+ * existing call sites keep working.
+ */
 export function AnimatedNumber({ value, format }: AnimatedNumberProps) {
-  const motionValue = useMotionValue(0);
-  const spring = useSpring(motionValue, { stiffness: 60, damping: 20 });
+  const display = useMemo(
+    () => (format ? format(value) : String(Math.round(value))),
+    [format, value],
+  );
 
-  useEffect(() => {
-    motionValue.set(value);
-  }, [motionValue, value]);
-
-  const display = useTransform(spring, (v) => (format ? format(v) : String(Math.round(v))));
-
-  return <motion.span>{display}</motion.span>;
+  return <span className="tnum">{display}</span>;
 }

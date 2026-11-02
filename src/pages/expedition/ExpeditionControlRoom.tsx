@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { AnimatePresence } from "framer-motion";
 import ExpeditionSupplierList from "./ExpeditionSupplierList";
 import ExpeditionSupplierTours from "./ExpeditionSupplierTours";
 
@@ -21,7 +20,7 @@ export default function ExpeditionControlRoom() {
 
   return (
     <div className="min-h-0">
-      <AnimatePresence mode="wait">
+      <>
         {view.type === "list" && (
           <ExpeditionSupplierList
             key="supplier-list"
@@ -35,7 +34,7 @@ export default function ExpeditionControlRoom() {
             onBack={() => setView({ type: "list" })}
           />
         )}
-      </AnimatePresence>
+      </>
     </div>
   );
 }

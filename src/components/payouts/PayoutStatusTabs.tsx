@@ -33,7 +33,7 @@ export function PayoutStatusTabs({ tabs, active, onChange, className }: PayoutSt
             {tab.count != null && tab.count > 0 && (
               <span
                 className={cn(
-                  "inline-flex min-w-[18px] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-bold",
+                  "inline-flex min-w-[18px] items-center justify-center rounded-full px-1.5 py-0.5 text-[10px] font-semibold",
                   isActive ? "bg-primary/10 text-primary" : "bg-surface-muted text-text-tertiary"
                 )}
               >

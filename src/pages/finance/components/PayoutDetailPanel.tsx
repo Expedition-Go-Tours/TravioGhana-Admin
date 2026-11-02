@@ -1,6 +1,5 @@
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
 import {
   X,
   User,
@@ -51,7 +50,7 @@ function SectionDivider({ label }: { label: string }) {
   return (
     <div className="flex items-center gap-2 mb-3">
       <div className="h-px flex-1 bg-border" />
-      <span className="text-[11px] font-medium text-text-tertiary uppercase tracking-wider">{label}</span>
+      <span className="text-[11px] font-medium text-text-tertiary ">{label}</span>
       <div className="h-px flex-1 bg-border" />
     </div>
   );
@@ -84,21 +83,11 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
 
   return createPortal(
     <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
+      <div 
         className="fixed inset-0 z-40 bg-black/10"
-        onClick={onClose}
-      />
-      <motion.div
-        initial={{ x: "100%" }}
-        animate={{ x: 0 }}
-        exit={{ x: "100%" }}
-        transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        className="fixed right-0 top-0 z-50 h-full w-full sm:w-[480px] bg-surface-base border-l border-border shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col"
-      >
+        onClick={onClose} />
+      <div 
+        className="fixed right-0 top-0 z-50 h-full w-full sm:w-[480px] bg-surface-base border-l border-border shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2 min-w-0">
@@ -115,15 +104,15 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
 
         <div className="flex-1 overflow-y-auto">
           {/* Status Banner */}
-          <div className="flex items-center gap-2 border-b bg-surface-muted/40 px-5 py-3 text-xs font-semibold">
+          <div className="flex items-center gap-2 border-b bg-surface-muted px-5 py-3 text-xs font-semibold">
             <span className="inline-block h-1.5 w-1.5 rounded-full bg-status-pending" />
             {status.replace(/_/g, " ")}
           </div>
 
           {/* Amount Hero */}
           <div className="px-5 py-5 border-b border-border">
-            <p className="text-[11px] text-text-tertiary uppercase tracking-wider font-medium mb-1">Payout Amount</p>
-            <p className="text-3xl font-bold text-text-primary tabular-nums">{formatCurrency(amount)}</p>
+            <p className="text-[11px] text-text-tertiary font-medium mb-1">Payout Amount</p>
+            <p className="text-3xl font-semibold text-text-primary tnum">{formatCurrency(amount)}</p>
             <div className="flex items-center gap-3 mt-1.5">
               <StatusBadge status={status} />
               {payout.reference && (
@@ -224,7 +213,7 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
                 </DetailRow>
                 <div className="border-t border-border pt-2 mt-2 flex items-center justify-between">
                   <span className="text-xs font-semibold text-text-primary">Net Payout</span>
-                  <span className="text-sm font-bold text-status-active-text tabular-nums">{formatCurrency(netPayout)}</span>
+                  <span className="text-sm font-semibold text-status-active-text tnum">{formatCurrency(netPayout)}</span>
                 </div>
               </div>
             </div>
@@ -297,19 +286,13 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
                           )} />
                         )}
                         <div className="flex flex-col items-center shrink-0 pt-0.5">
-                          <motion.div
-                            initial={{ scale: 0 }}
-                            animate={{ scale: 1 }}
-                            className={cn("h-[22px] w-[22px] rounded-full border-2 flex items-center justify-center", dotClass)}
-                          >
+                          <div 
+                            className={cn("h-[22px] w-[22px] rounded-full border-2 flex items-center justify-center", dotClass)}>
                             {step.date && (
-                              <motion.div
-                                initial={{ scale: 0 }}
-                                animate={{ scale: 1 }}
-                                className="h-2 w-2 rounded-full bg-current"
-                              />
+                              <div 
+                                className="h-2 w-2 rounded-full bg-current" />
                             )}
-                          </motion.div>
+                          </div>
                         </div>
                         <div className={cn("pb-5", isLast && "pb-0")}>
                           <p className={cn(
@@ -404,7 +387,7 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
             Close
           </Button>
         </div>
-      </motion.div>
+      </div>
     </>,
     document.body
   );
@@ -412,8 +395,8 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
 
 function Field({ label, value }: { label: string; value?: string | null }) {
   return (
-    <div className="rounded-sm bg-surface-muted/50 px-3 py-2">
-      <p className="text-[10px] text-text-tertiary uppercase tracking-wider">{label}</p>
+    <div className="rounded-lg bg-surface-muted px-3 py-2">
+      <p className="text-[10px] text-text-tertiary ">{label}</p>
       <p className="mt-0.5 text-xs font-medium text-text-primary">{value || "—"}</p>
     </div>
   );

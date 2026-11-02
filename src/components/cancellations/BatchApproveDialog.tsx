@@ -75,7 +75,7 @@ export function BatchApproveDialog({
                 <div
                   key={r.id}
                   className={cn(
-                    "flex items-start gap-2.5 rounded-lg border p-3",
+                    "flex items-start gap-2.5 rounded-xl border p-3",
                     r.ok ? "border-status-active/30 bg-status-active/5" : "border-status-rejected/30 bg-status-rejected/5",
                   )}
                 >
@@ -100,7 +100,7 @@ export function BatchApproveDialog({
           </div>
         ) : (
           <div className="space-y-3">
-            <div className="max-h-[30vh] space-y-1.5 overflow-y-auto rounded-lg border border-border bg-surface-muted/40 p-3">
+            <div className="max-h-[30vh] space-y-1.5 overflow-y-auto rounded-xl border border-border bg-surface-muted p-3">
               {requests.map((r) => (
                 <div key={r.id} className="flex items-center justify-between gap-3 text-xs">
                   <span className="truncate font-mono text-text-primary">
@@ -112,7 +112,7 @@ export function BatchApproveDialog({
                 </div>
               ))}
             </div>
-            <div className="flex items-center justify-between rounded-lg bg-status-pending/10 px-3 py-2 text-xs">
+            <div className="flex items-center justify-between rounded-xl bg-status-pending/10 px-3 py-2 text-xs">
               <span className="font-medium text-text-secondary">Total full refund</span>
               <span className="font-semibold text-text-primary">{formatCurrency(totalRefund, currency)}</span>
             </div>

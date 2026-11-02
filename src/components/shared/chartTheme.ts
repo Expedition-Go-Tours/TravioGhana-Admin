@@ -1,10 +1,11 @@
 const v = (name: string) => `hsl(var(--${name}))`;
 
+/** Indigo leads; supporting hues only separate series. */
 export const chartColors = {
-  green: v("status-active"),
-  blue: v("status-approved"),
-  amber: v("status-pending"),
-  red: v("status-rejected"),
+  green: v("chart-1"),
+  blue: v("chart-2"),
+  amber: v("chart-3"),
+  red: v("chart-4"),
   violet: v("chart-5"),
 } as const;
 

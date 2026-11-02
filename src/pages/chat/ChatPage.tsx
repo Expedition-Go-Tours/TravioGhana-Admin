@@ -338,18 +338,18 @@ export default function ChatPage() {
   return (
     <div className="flex h-full overflow-hidden">
       <div className={cn(
-        "flex flex-col border-r border-border/50 bg-surface-base transition-all duration-300 overflow-hidden shrink-0",
+        "flex flex-col border-r border-border bg-surface-base transition-colors duration-150 overflow-hidden shrink-0",
         selectedConv ? "w-0 lg:w-[380px]" : "w-full lg:w-[380px]"
       )}>
-        <div className="flex items-center justify-between border-b border-border/50 px-5 py-4">
-          <h1 className="text-base font-bold text-text-primary">
+        <div className="flex items-center justify-between border-b border-border px-5 py-4">
+          <h1 className="text-base font-semibold text-text-primary">
             {type === "suppliers" ? "Supplier Messages" : "Customer Support"}
           </h1>
           <Button
             size="sm"
             variant="ghost"
             onClick={() => setNewDialogOpen(true)}
-            className="gap-1.5 rounded-full text-green-600 hover:text-green-700 hover:bg-green-50 px-3"
+            className="gap-1.5 rounded-full text-primary hover:text-primary hover:bg-primary/10 px-3"
           >
             <Plus className="h-4 w-4" />
             New

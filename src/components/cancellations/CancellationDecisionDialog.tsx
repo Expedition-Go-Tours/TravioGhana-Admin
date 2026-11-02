@@ -63,7 +63,7 @@ export function CancellationDecisionDialog({
     >
       <div className="space-y-3 text-left">
         {isReject ? (
-          <div className="flex items-start gap-2 rounded-lg border border-status-rejected/30 bg-status-rejected/10 px-3 py-2">
+          <div className="flex items-start gap-2 rounded-xl border border-status-rejected/30 bg-status-rejected/10 px-3 py-2">
             <XCircle className="mt-0.5 h-4 w-4 shrink-0 text-status-rejected-text" />
             <p className="text-xs text-text-secondary">
               Rejecting <strong className="text-text-primary">changes nothing on the booking</strong> — the
@@ -72,7 +72,7 @@ export function CancellationDecisionDialog({
             </p>
           </div>
         ) : (
-          <div className="flex items-start gap-2 rounded-lg border border-status-pending/40 bg-status-pending/10 px-3 py-2">
+          <div className="flex items-start gap-2 rounded-xl border border-status-pending/40 bg-status-pending/10 px-3 py-2">
             <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-status-pending-text" />
             <div className="space-y-1 text-xs text-text-secondary">
               <p>

@@ -13,7 +13,7 @@ export interface Column<T> {
   className?: string;
   align?: "left" | "right" | "center";
   /**
-   * Money/number column. Applies `tabular-nums` so digits align vertically
+   * Money/number column. Applies `tnum` so digits align vertically
    * down the column, and right-aligns unless an explicit `align` is given.
    * Primer: "Right-align numeric values and use the tabular-num font variant
    * when possible."
@@ -189,7 +189,7 @@ export function DataTable<T>({
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-surface-base py-12 text-text-secondary" aria-live="polite">
+      <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-surface-base py-12 text-text-secondary" aria-live="polite">
         <AlertCircle className="mb-2 h-8 w-8 text-status-rejected-text" />
         <p className="text-sm">{error}</p>
         {onRetry && (
@@ -227,7 +227,7 @@ export function DataTable<T>({
           "align-middle",
           alignClass[col.align ?? (col.numeric ? "right" : "left")],
           col.hideBelow && hideBelowClass[col.hideBelow],
-          col.numeric && "tabular-nums",
+          col.numeric && "tnum",
         )}
       >
         {col.numeric ? (
@@ -246,9 +246,9 @@ export function DataTable<T>({
     );
 
     return (
-      <div className="overflow-hidden rounded-lg border border-border bg-surface-base shadow-soft">
+      <div className="overflow-hidden rounded-xl border border-border bg-surface-base">
         {toolbar && (
-          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-4 py-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2.5">
             {toolbar}
           </div>
         )}
@@ -264,7 +264,7 @@ export function DataTable<T>({
           <table className="w-full text-sm" aria-busy="true">
             {caption && <caption id={captionId} className="sr-only">{caption}</caption>}
             <thead>
-              <tr className={cn("border-b border-border/60 bg-surface-muted/95", headPad)}>
+              <tr className={cn("border-b border-border bg-surface-base", headPad)}>
                 {hasSelection && <th scope="col" className={cn("w-10 text-left", headPad)}><Skeleton className="h-4 w-4" /></th>}
                 {columns.map((col) => (
                   <th
@@ -283,7 +283,7 @@ export function DataTable<T>({
             </thead>
             <tbody>
               {Array.from({ length: skeletonRows }).map((_, i) => (
-                <tr key={i} className={cn("border-b border-border/50", rowMinH)}>
+                <tr key={i} className={cn("border-b border-border", rowMinH)}>
                   {hasSelection && <td className={cn(rowPad, "align-middle")}><Skeleton className="h-4 w-4" /></td>}
                   {columns.map((col, ci) => cellFor(col, ci))}
                 </tr>
@@ -292,8 +292,8 @@ export function DataTable<T>({
             {totals && (
               // Reserves the totals row's presence and height without painting
               // numbers we do not have yet.
-              <tfoot className="border-t-2 border-border bg-surface-muted/95">
-                <tr className={cn("border-b border-border/50", rowMinH)}>
+              <tfoot className="border-t border-border bg-surface-muted">
+                <tr className={cn("border-b border-border", rowMinH)}>
                   {columns.map((col, ci) => cellFor(col, ci))}
                 </tr>
               </tfoot>
@@ -301,7 +301,7 @@ export function DataTable<T>({
           </table>
         </div>
         {pagination && pagination.totalPages > 1 && (
-          <div className={cn("flex items-center justify-between border-t border-border/60 px-4", sizeMap[size].chromeH)}>
+          <div className={cn("flex items-center justify-between border-t border-border px-4", sizeMap[size].chromeH)}>
             <Skeleton className="h-3.5 w-56" />
           </div>
         )}
@@ -313,7 +313,7 @@ export function DataTable<T>({
     // Carbon: the empty state replaces the table *including* its headers, or a
     // screen reader announces an empty table.
     return (
-      <div className="flex flex-col items-center justify-center rounded-lg border border-border bg-surface-base py-12 text-text-secondary">
+      <div className="flex flex-col items-center justify-center rounded-xl border border-border bg-surface-base py-12 text-text-secondary">
         <Inbox className="mb-2 h-8 w-8 text-text-tertiary" />
         <p className="text-sm">{emptyMessage}</p>
       </div>
@@ -321,9 +321,9 @@ export function DataTable<T>({
   }
 
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-surface-base shadow-soft">
+    <div className="overflow-hidden rounded-xl border border-border bg-surface-base">
       {toolbar && (
-        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-4 py-2.5">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border px-4 py-2.5">
           {toolbar}
         </div>
       )}
@@ -339,7 +339,7 @@ export function DataTable<T>({
         <table className="w-full text-sm" aria-busy={false} aria-describedby={caption ? captionId : undefined}>
           {caption && <caption id={captionId} className="sr-only">{caption}</caption>}
           <thead>
-            <tr className={cn("sticky top-0 z-10 border-b border-border/60 bg-surface-muted/95 backdrop-blur-md", headPad)}>
+            <tr className={cn("sticky top-0 z-10 border-b border-border bg-surface-base", headPad)}>
               {hasSelection && (
                 <th scope="col" className={cn("w-10 text-left", headPad)}>
                   <input
@@ -366,10 +366,10 @@ export function DataTable<T>({
                     scope="col"
                     aria-sort={ariaSort}
                     className={cn(
-                      "whitespace-nowrap text-xs font-semibold leading-tight text-text-secondary",
+                      "whitespace-nowrap text-xs font-medium leading-tight text-text-tertiary",
                       alignClass[col.align ?? (col.numeric ? "right" : "left")],
                       col.hideBelow && hideBelowClass[col.hideBelow],
-                      col.numeric && "tabular-nums",
+                      col.numeric && "tnum",
                       headPad,
                     )}
                   >
@@ -421,14 +421,14 @@ export function DataTable<T>({
                   // screen readers on the eight tables that are not one.
                   aria-expanded={renderExpanded ? isExpanded : undefined}
                   className={cn(
-                    "border-b border-border/50 transition-colors duration-100",
+                    "border-b border-border",
                     rowMinH,
                     // Hover only, never zebra: on a dense numeric table zebra adds
                     // a second vertical rhythm that fights the column rules, and
                     // combined with selection you get three competing row
                     // backgrounds. Selected wins, then hover, then nothing.
-                    isSelected ? "bg-accent/50" : "hover:bg-surface-muted/40",
-                    isExpanded && !isSelected && "bg-surface-muted/60",
+                    isSelected ? "bg-primary/[0.04]" : "hover:bg-surface-muted",
+                    isExpanded && !isSelected && "bg-surface-muted",
                     isPending && "opacity-60",
                     highlightedKey === key && "ring-1 ring-inset ring-primary/30",
                     onRowClick && "cursor-pointer",
@@ -472,7 +472,7 @@ export function DataTable<T>({
                   {columns.map((col) => {
                     const cellPad = cn(rowPad, "align-middle");
                     const align = alignClass[col.align ?? (col.numeric ? "right" : "left")];
-                    const common = cn(cellPad, align, col.hideBelow && hideBelowClass[col.hideBelow], col.numeric && "tabular-nums");
+                    const common = cn(cellPad, align, col.hideBelow && hideBelowClass[col.hideBelow], col.numeric && "tnum");
                     if (col.rowHeader) {
                       return (
                         <th
@@ -495,8 +495,8 @@ export function DataTable<T>({
               if (!isExpanded || !renderExpanded) return [rowEl];
               return [
                 rowEl,
-                <tr key={`exp-${key}`} className="border-b border-border/50">
-                  <td colSpan={colCount} className="bg-surface-muted/30 p-0">
+                <tr key={`exp-${key}`} className="border-b border-border">
+                  <td colSpan={colCount} className="bg-surface-muted p-0">
                     {renderExpanded(row)}
                   </td>
                 </tr>,
@@ -508,14 +508,14 @@ export function DataTable<T>({
               model ambiguous for assistive tech -- the totals line stops
               reading as a summary of the rows above it. */}
           {totals && (
-            <tfoot className="sticky bottom-0 z-10 border-t-2 border-border bg-surface-muted/95 backdrop-blur-md">
+            <tfoot className="sticky bottom-0 z-10 border-t border-border bg-surface-muted">
               {totals}
             </tfoot>
           )}
         </table>
       </div>
       {pagination && pagination.totalPages > 1 && (
-        <div className={cn("flex items-center justify-between border-t border-border/60 px-4", sizeMap[size].chromeH)}>
+        <div className={cn("flex items-center justify-between border-t border-border px-4", sizeMap[size].chromeH)}>
           <Pagination
             page={pagination.page}
             totalPages={pagination.totalPages}
@@ -529,4 +529,3 @@ export function DataTable<T>({
     </div>
   );
 }
-

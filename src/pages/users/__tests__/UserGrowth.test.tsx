@@ -69,7 +69,7 @@ describe("UserGrowthPage", () => {
 
     await waitFor(() => expect(screen.getByText("Total New Users")).toBeInTheDocument());
     // Period totals: 22 total / 17 customers / 5 suppliers; avg 11 over 2 months.
-    expect(await screen.findByText("22")).toBeInTheDocument();
+    expect((await screen.findAllByText("22")).length).toBeGreaterThan(0);
     expect(screen.getByText("17")).toBeInTheDocument();
     expect(screen.getByText("5")).toBeInTheDocument();
     expect(screen.getByText("11")).toBeInTheDocument();
@@ -86,7 +86,7 @@ describe("UserGrowthPage", () => {
     expect(screen.getByText("Registration Trend")).toBeInTheDocument();
     expect(screen.getByText("Customers")).toBeInTheDocument();
     expect(screen.getByText("Suppliers")).toBeInTheDocument();
-    expect(screen.getByText("Total: 22 · last 12 months")).toBeInTheDocument();
+    expect(screen.getByText(/Total:/)).toHaveTextContent("Total: 22 · last 12 months");
 
     // Comparison overlay + export controls.
     expect(screen.getByRole("button", { name: "Previous period" })).toBeInTheDocument();

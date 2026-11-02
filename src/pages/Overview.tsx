@@ -26,7 +26,6 @@ import {
   Pie,
   Cell,
 } from "recharts";
-import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -44,7 +43,6 @@ import styles from "./Overview.module.css";
 import api from "@/lib/axios";
 import { getAdminSocket } from "@/lib/adminSocket";
 import { formatCurrency, formatNumber, formatDate } from "@/lib/utils";
-import { staggerContainer, fadeInUp } from "@/lib/animations";
 import { cn } from "@/lib/utils";
 import OptimizedImage from "@/components/shared/OptimizedImage";
 
@@ -62,6 +60,12 @@ interface OverviewData {
   eventFeed?: Array<{ message?: string; userName?: string; createdAt?: string; resource?: string }>;
 }
 
+const statusLabel = (status?: string | null) => {
+  if (!status) return "Unknown";
+  const label = status.toLowerCase().replace(/_/g, " ");
+  return label.charAt(0).toUpperCase() + label.slice(1);
+};
+
 const bookingColors: Record<string, string> = {
   CONFIRMED: "hsl(var(--status-active))",
   PENDING: "hsl(var(--status-pending))",
@@ -74,17 +78,8 @@ const bookingColors: Record<string, string> = {
 export default function OverviewPage() {
   const navigate = useNavigate();
   const { can } = usePermission();
-  const [timeFilter, setTimeFilter] = useState("today");
+  const [timeFilter, setTimeFilter] = useState("this_month");
 
-  const periodLabel = (base: string) => {
-    const labels: Record<string, string> = {
-      today: `${base} Today`,
-      last_week: `${base} (7d)`,
-      last_month: `${base} (30d)`,
-      last_quarter: `${base} (90d)`,
-    };
-    return labels[timeFilter] || `${base} (7d)`;
-  };
   const [showActiveUsers, setShowActiveUsers] = useState(false);
   const [showTodayBookings, setShowTodayBookings] = useState(false);
   const [showNewSignups, setShowNewSignups] = useState(false);
@@ -142,7 +137,7 @@ export default function OverviewPage() {
     placeholderData: keepPreviousData,
   });
 
-  const { data: payoutSummary } = useQuery({
+  const { data: payoutSummary, isLoading: payoutLoading, isError: payoutError, refetch: payoutRefetch } = useQuery({
     queryKey: ["admin", "payout-summary"],
     enabled: can('payouts.view'),
     queryFn: async () => {
@@ -202,7 +197,7 @@ export default function OverviewPage() {
 
 
   // Recent Bookings
-  const { data: recentBookings, isLoading: recentBookingsLoading } = useQuery({
+  const { data: recentBookings, isLoading: recentBookingsLoading, isError: recentBookingsError, refetch: recentBookingsRefetch } = useQuery({
     queryKey: ["admin", "bookings", "recent"],
     queryFn: async () => {
       const res = await api.get("/admin/bookings?limit=5&sortOrder=desc");
@@ -220,7 +215,7 @@ export default function OverviewPage() {
   });
 
   // Notification Stats
-  const { data: notifStats, isLoading: notifStatsLoading } = useQuery({
+  const { data: notifStats, isLoading: notifStatsLoading, isError: notifStatsError, refetch: notifStatsRefetch } = useQuery({
     queryKey: NOTIFICATION_OVERVIEW_ROOT,
     queryFn: () => getNotificationStats(),
     enabled: can("notifications.view"),
@@ -269,29 +264,21 @@ export default function OverviewPage() {
     const cur = Number(current) || 0;
     if (cur === 0) return undefined;
     const prev = Number(previous) || 0;
-    if (prev === 0) return { value: 0, isPositive: true };
+    if (prev === 0) return undefined;
     const change = ((cur - prev) / prev) * 100;
-    const rounded = Math.min(Math.abs(Math.round(change)), 100);
-    return { value: rounded, isPositive: change >= 0 };
+    return { value: Math.abs(Math.round(change)), isPositive: change >= 0 };
   };
 
-  // Sparkline data from real API (last 7 data points from weekly booking data)
+  // Only real multi-point history is rendered as a sparkline. A single point
+  // produced a meaningless dot next to the KPI value.
   const weeklyBookingData = overview?.weeklyBookingData || [];
-  const bookingsSparkline = weeklyBookingData.length > 0
-    ? weeklyBookingData.slice(-7).map((d) => d.count)
-    : [Number(overview?.bookings?.today) || 0];
-  const revenueSparkline = [Number(overview?.revenue?.today?.revenue) || 0];
-  const usersSparkline = [Number(overview?.activeUsers) || 0];
-
+  const bookingsSparkline = weeklyBookingData.slice(-7).map((d) => d.count);
   const weeklyTotal = weeklyBookingData.reduce((sum, d) => sum + d.count, 0);
 
-  const weeklyTrend = (() => {
-    if (weeklyBookingData.length < 2) return undefined;
-    const mid = Math.floor(weeklyBookingData.length / 2);
-    const firstHalf = weeklyBookingData.slice(0, mid).reduce((s, d) => s + d.count, 0);
-    const secondHalf = weeklyBookingData.slice(mid).reduce((s, d) => s + d.count, 0);
-    return calcTrend(secondHalf, firstHalf);
-  })();
+  // Current vs previous period, both of which the API computes for the
+  // selected range. Splitting the series in half was not a previous-period
+  // comparison and changed meaning with the filter.
+  const weeklyTrend = calcTrend(overview?.bookings?.today, overview?.bookings?.yesterday);
 
   // Transform event feed for RecentActivityPanel
   const activities = (overview?.eventFeed || []).slice(0, 10).map((event, idx) => {
@@ -331,67 +318,88 @@ export default function OverviewPage() {
   });
 
   const userName = localStorage.getItem("userName") || "Admin";
+  const periodShort =
+    timeFilter === "last_month" ? "Last month"
+    : timeFilter === "last_quarter" ? "Last quarter"
+    : timeFilter === "today" ? "Today"
+    : "This month";
+
+  const comparisonLabel =
+    timeFilter === "today" ? "vs yesterday"
+    : timeFilter === "this_month" ? "vs last month"
+    : timeFilter === "last_month" ? "vs previous month"
+    : "vs previous quarter";
 
   return (
-    <motion.div
-      variants={staggerContainer}
-      initial="hidden"
-      animate="visible"
-      className={cn("-mx-4 md:-mx-6 lg:-mx-8 space-y-4 md:space-y-5", styles.container)}
-    >
+    <div 
+      className="space-y-4 md:space-y-5">
       {overview?.forbidden ? (
         <WelcomeDashboard />
       ) : (
         <>
           {/* Welcome Header */}
-          <motion.div variants={fadeInUp} className="flex items-start justify-between">
+          <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h1 className="text-xl md:text-2xl font-bold tracking-tight text-text-primary">
+              <h1 className="text-[26px] font-semibold leading-8 tracking-[-0.02em] text-text-primary">
                 Hello, {userName}
               </h1>
-              <p className="text-sm text-text-secondary mt-1">
+              <p className="mt-1 text-sm text-text-tertiary">
                 Here are the latest insights from your customer interactions.
               </p>
             </div>
             <Select value={timeFilter} onValueChange={setTimeFilter}>
-              <SelectTrigger className="w-[140px] h-9 text-xs">
+              <SelectTrigger className="h-9 w-[140px] text-xs" aria-label="Time period">
                 <SelectValue placeholder="Select period" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="today">Today</SelectItem>
-                <SelectItem value="last_week">Last week</SelectItem>
+                <SelectItem value="this_month">This month</SelectItem>
                 <SelectItem value="last_month">Last month</SelectItem>
                 <SelectItem value="last_quarter">Last quarter</SelectItem>
               </SelectContent>
             </Select>
-          </motion.div>
+          </div>
+
+          {overviewError && (
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-status-rejected/30 bg-status-rejected/5 px-4 py-3">
+              <p className="text-sm text-status-rejected-text">
+                Dashboard metrics could not be loaded. The figures below are unavailable.
+              </p>
+              <Button variant="outline" size="sm" onClick={() => overviewRefetch()}>
+                Retry
+              </Button>
+            </div>
+          )}
 
           {/* KPI Cards with Sparklines */}
-          <motion.div variants={fadeInUp} className={styles.kpiGrid}>
+          <div  className={styles.kpiGrid}>
             {can('dashboard.bookings') && (
               <KPICardWithSparkline
-                label={periodLabel("Bookings")}
+                label="Bookings"
                 value={overviewLoading ? 0 : Number(overview?.bookings?.today) || 0}
                 trend={calcTrend(overview?.bookings?.today, overview?.bookings?.yesterday)}
                 sparklineData={bookingsSparkline}
                 sparklineColor="hsl(var(--status-active))"
                 loading={overviewLoading}
+                error={overviewError}
                 onClick={() => setShowTodayBookings(true)}
+                trendLabel={comparisonLabel}
                 accent="emerald"
                 icon={<ShoppingCart className="h-4 w-4" />}
               />
             )}
             {can('dashboard.revenue') && (
               <KPICardWithSparkline
-                label={periodLabel("Revenue")}
+                label="Revenue"
                 value={overviewLoading ? 0 : Number(overview?.revenue?.today?.revenue) || 0}
                 trend={calcTrend(
                   overview?.revenue?.today?.revenue ? Number(overview.revenue.today.revenue) : undefined,
                   overview?.revenue?.yesterday?.revenue ? Number(overview.revenue.yesterday.revenue) : undefined
                 )}
-                sparklineData={revenueSparkline}
-                sparklineColor="hsl(var(--status-approved))"
                 loading={overviewLoading}
+                error={overviewError}
+                onClick={() => navigate("/admin/revenue-trend")}
+                trendLabel={comparisonLabel}
                 format="currency"
                 accent="blue"
                 icon={<Banknote className="h-4 w-4" />}
@@ -399,22 +407,22 @@ export default function OverviewPage() {
             )}
             {can('users.view') && (
               <KPICardWithSparkline
-                label={periodLabel("Active Users")}
+                label="Active Users"
                 value={overviewLoading ? 0 : Number(overview?.activeUsers) || 0}
                 trend={calcTrend(overview?.activeUsers, overview?.activeUsersPrevious)}
-                sparklineData={usersSparkline}
-                sparklineColor="hsl(var(--chart-5))"
                 loading={overviewLoading}
+                error={overviewError}
                 onClick={() => setShowActiveUsers(true)}
+                trendLabel={comparisonLabel}
                 accent="violet"
                 icon={<UserCheck className="h-4 w-4" />}
               />
             )}
-          </motion.div>
+          </div>
 
           {/* Booking Volume + Recent Activity */}
-          <motion.div variants={fadeInUp} className={styles.contentGrid3}>
-            <div className="lg:col-span-2">
+          <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+            <div className="xl:col-span-2">
               <BookingVolumeChart
                 data={weeklyBookingData}
                 total={weeklyTotal}
@@ -423,16 +431,16 @@ export default function OverviewPage() {
                 period={timeFilter}
               />
             </div>
-            <div className="lg:col-span-1">
+            <div className="xl:col-span-1">
               <RecentActivityPanel
                 activities={activities}
                 loading={overviewLoading}
               />
             </div>
-          </motion.div>
+          </div>
 
           {/* Top Suppliers + Notifications + Recent Bookings */}
-          <motion.div variants={fadeInUp} className={styles.contentGrid3}>
+          <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
             <div className="lg:col-span-1">
               <TopSuppliers 
                 suppliers={overview?.topSuppliers} 
@@ -440,91 +448,190 @@ export default function OverviewPage() {
               />
             </div>
             <div className="lg:col-span-1">
-              <NotificationsCard 
-                data={notifStats} 
-                loading={notifStatsLoading} 
+              <NotificationsCard
+                data={notifStats}
+                loading={notifStatsLoading}
+                error={notifStatsError}
+                onRetry={() => notifStatsRefetch()}
               />
             </div>
-            <div className="lg:col-span-1">
-              <RecentBookingsTable bookings={recentBookings} loading={recentBookingsLoading} />
+            <div className="md:col-span-2 xl:col-span-1">
+              <RecentBookingsTable
+                bookings={recentBookings}
+                loading={recentBookingsLoading}
+                error={recentBookingsError}
+                onRetry={() => recentBookingsRefetch()}
+              />
             </div>
-          </motion.div>
+          </div>
 
           {/* Top Tours */}
           {can('tours.view') && (
-            <motion.div variants={fadeInUp}>
-              <Card>
-                <CardHeader className="border-b border-primary/10 pb-3.5">
-                  <CardTitle className="flex items-center gap-2.5 text-[13px] font-semibold tracking-tight text-text-primary">
-                    <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
-                      <Map className="h-4 w-4" />
-                    </span>
-                    Top Tours
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="p-0 overflow-x-auto">
-                  {overviewLoading ? (
-                    <div className="p-4 space-y-2">
-                      {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-10 w-full rounded-lg" />)}
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 border-b border-border px-6 py-4">
+                <CardTitle className="flex items-center gap-2.5 text-sm font-semibold tracking-[-0.01em] text-text-primary">
+                  <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                    <Map className="h-4 w-4" />
+                  </span>
+                  Top Tours
+                  <span className="text-[11px] font-semibold text-text-tertiary">{periodShort}</span>
+                </CardTitle>
+                <button
+                  type="button"
+                  onClick={() => navigate("/admin/tours")}
+                  className="text-xs font-medium text-primary hover:underline"
+                >
+                  View all
+                </button>
+              </CardHeader>
+              <CardContent className="p-0">
+                {overviewLoading ? (
+                  <div className="space-y-2 p-4">
+                    {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-lg" />)}
+                  </div>
+                ) : overviewError ? (
+                  <SectionError message="Failed to load tours" onRetry={() => overviewRefetch()} />
+                ) : !overview?.topTours?.length ? (
+                  <SectionEmpty message="No top tours data for this period" />
+                ) : (
+                  <>
+                    {/* Desktop table */}
+                    <div className="hidden overflow-x-auto md:block">
+                      <table className="w-full min-w-[640px] border-collapse text-sm">
+                        <thead>
+                          <tr className="border-b border-border">
+                            <th scope="col" className="w-12 px-6 py-2.5 text-left text-[11px] font-semibold text-text-tertiary">#</th>
+                            <th scope="col" className="px-3 py-2.5 text-left text-[11px] font-semibold text-text-tertiary">Tour</th>
+                            <th scope="col" className="w-28 px-3 py-2.5 text-right text-[11px] font-semibold text-text-tertiary">Bookings</th>
+                            <th scope="col" className="w-36 px-3 py-2.5 text-right text-[11px] font-semibold text-text-tertiary">Revenue</th>
+                            <th scope="col" className="w-36 px-6 py-2.5 text-right text-[11px] font-semibold text-text-tertiary">Rating</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {overview.topTours.map((tour, idx) => {
+                            const rating = Number(tour.averageRating) || 0;
+                            const reviews = Number(tour.reviewCount) || 0;
+                            const go = () => navigate(tour.id ? `/admin/tours/${tour.id}` : "/admin/tours");
+                            return (
+                              <tr
+                                key={tour.id || idx}
+                                role="link"
+                                tabIndex={0}
+                                onClick={go}
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" || e.key === " ") {
+                                    e.preventDefault();
+                                    go();
+                                  }
+                                }}
+                                className="cursor-pointer border-b border-border transition-colors last:border-b-0 hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/30"
+                              >
+                                <td className="px-6 py-3">
+                                  <span className={cn(
+                                    "tnum inline-flex h-6 w-6 items-center justify-center rounded-full text-[11px] font-medium",
+                                    idx < 3 ? "bg-primary/10 text-primary" : "text-text-tertiary",
+                                  )}>
+                                    {idx + 1}
+                                  </span>
+                                </td>
+                                <td className="px-3 py-3">
+                                  <div className="flex min-w-0 items-center gap-3">
+                                    {tour.coverPhoto ? (
+                                      <OptimizedImage src={tour.coverPhoto} alt="" width={40} className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                                    ) : (
+                                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-muted">
+                                        <MapPin className="h-4 w-4 text-text-tertiary" />
+                                      </div>
+                                    )}
+                                    <p className="truncate font-medium text-text-primary">{tour.title}</p>
+                                  </div>
+                                </td>
+                                <td className="tnum px-3 py-3 text-right text-text-secondary">{formatNumber(tour.bookingCount)}</td>
+                                <td className="tnum px-3 py-3 text-right font-semibold text-text-primary">{formatCurrency(tour.revenue, tour.currency)}</td>
+                                <td className="px-6 py-3 text-right">
+                                  {rating > 0 ? (
+                                    <span className="inline-flex items-center justify-end gap-1 text-text-secondary">
+                                      <StarIcon className="h-3.5 w-3.5 fill-status-pending text-status-pending-text" />
+                                      <span className="tnum font-semibold text-text-primary">{rating.toFixed(1)}</span>
+                                      <span className="tnum text-[11px] text-text-tertiary">({formatNumber(reviews)})</span>
+                                    </span>
+                                  ) : (
+                                    <span className="text-xs text-text-tertiary">No reviews</span>
+                                  )}
+                                </td>
+                              </tr>
+                            );
+                          })}
+                        </tbody>
+                      </table>
                     </div>
-                  ) : overviewError ? (
-                    <SectionError message="Failed to load tours" onRetry={() => overviewRefetch()} />
-                  ) : !overview?.topTours?.length ? (
-                    <SectionEmpty message="No top tours data" />
-                  ) : (
-                    <div className="divide-y divide-primary/10">
-                      {overview.topTours.map((tour, idx) => (
-                        <div
-                          key={tour.id || idx}
-                          className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 transition-colors"
-                          onClick={() => navigate("/admin/tours")}
-                          tabIndex={0}
-                          onKeyDown={(e) => { if (e.key === "Enter") navigate("/admin/tours"); }}
-                        >
-                          <span className={cn(
-                            "w-5 h-5 flex items-center justify-center rounded-full text-[10px] font-bold shrink-0",
-                            idx === 0 ? "bg-emerald-600 text-white" : idx === 1 ? "bg-blue-500 text-white" : idx === 2 ? "bg-violet-500 text-white" : "text-text-tertiary"
-                          )}>
-                            {idx + 1}
-                          </span>
-                          {tour.coverPhoto ? (
-                            <OptimizedImage src={tour.coverPhoto} alt="" width={32} className="h-8 w-8 rounded-md object-cover shrink-0" />
-                          ) : (
-                            <div className="h-8 w-8 rounded-md bg-surface-muted flex items-center justify-center shrink-0">
-                              <MapPin className="h-4 w-4 text-text-tertiary" />
-                            </div>
-                          )}
-                          <span className="font-medium text-text-primary truncate flex-1 min-w-0">{tour.title}</span>
-                          <div className="flex items-center gap-4 text-xs tabular-nums shrink-0">
-                            <span className="text-text-secondary text-right w-16">{formatNumber(tour.bookingCount)} <span className="text-text-tertiary">bk</span></span>
-                            <span className="text-text-primary font-semibold text-right w-20">{formatCurrency(tour.revenue, tour.currency)}</span>
-                            {tour.averageRating != null && (
-                              <span className={cn("text-right w-10", styles.hideMobile)}>
-                                <span className="text-status-pending-text font-semibold">{Number(tour.averageRating).toFixed(1)}</span>
-                              </span>
+
+                    {/* Mobile list */}
+                    <div className="divide-y divide-border md:hidden">
+                      {overview.topTours.map((tour, idx) => {
+                        const rating = Number(tour.averageRating) || 0;
+                        return (
+                          <button
+                            key={tour.id || idx}
+                            type="button"
+                            onClick={() => navigate(tour.id ? `/admin/tours/${tour.id}` : "/admin/tours")}
+                            className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/30"
+                          >
+                            <span className={cn(
+                              "tnum flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[11px] font-medium",
+                              idx < 3 ? "bg-primary/10 text-primary" : "text-text-tertiary",
+                            )}>
+                              {idx + 1}
+                            </span>
+                            {tour.coverPhoto ? (
+                              <OptimizedImage src={tour.coverPhoto} alt="" width={40} className="h-10 w-10 shrink-0 rounded-lg object-cover" />
+                            ) : (
+                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-surface-muted">
+                                <MapPin className="h-4 w-4 text-text-tertiary" />
+                              </div>
                             )}
-                            <span className={cn("text-text-tertiary text-right w-14", styles.hideMobile)}>{formatNumber(tour.reviewCount)} <span className="text-text-tertiary">rv</span></span>
-                          </div>
-                        </div>
-                      ))}
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-3">
+                                <p className="line-clamp-2 text-sm font-medium leading-snug text-text-primary">{tour.title}</p>
+                                <span className="tnum shrink-0 text-sm font-semibold text-text-primary">
+                                  {formatCurrency(tour.revenue, tour.currency)}
+                                </span>
+                              </div>
+                              <div className="mt-1 flex items-center gap-2 whitespace-nowrap text-xs text-text-tertiary">
+                                <span className="tnum">{formatNumber(tour.bookingCount)} bookings</span>
+                                <span aria-hidden="true">·</span>
+                                {rating > 0 ? (
+                                  <span className="tnum inline-flex items-center gap-0.5">
+                                    <StarIcon className="h-3 w-3 fill-status-pending text-status-pending-text" />
+                                    {rating.toFixed(1)}
+                                  </span>
+                                ) : (
+                                  <span>No reviews</span>
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        );
+                      })}
                     </div>
-                  )}
-                </CardContent>
-              </Card>
-            </motion.div>
+                  </>
+                )}
+              </CardContent>
+            </Card>
           )}
 
           {/* Bottom Grid: Booking Status + Payout Summary */}
           {(can('dashboard.bookings') || can('dashboard.*') || can('payouts.view')) && (
-            <motion.div variants={fadeInUp} className={styles.contentGrid2}>
+            <div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
               {can('dashboard.bookings') && (
                 <Card>
-                  <CardHeader className="border-b border-primary/10 pb-3.5">
-                    <CardTitle className="flex items-center gap-2.5 text-[13px] font-semibold tracking-tight text-text-primary">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300">
+                  <CardHeader className="border-b border-border pb-3.5">
+                    <CardTitle className="flex items-center gap-2.5 text-sm font-semibold tracking-[-0.01em] text-text-primary">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-status-approved/10 text-status-approved-text">
                         <Activity className="h-4 w-4" />
                       </span>
                       Booking Status
+                      <span className="ml-auto text-[11px] font-semibold text-text-tertiary">All time</span>
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4">
@@ -536,30 +643,40 @@ export default function OverviewPage() {
                       <SectionEmpty message="No booking data" />
                     ) : (
                       <div className="flex flex-col items-center">
-                        <div className={styles.chartPie}><ResponsiveContainer width="100%" height="100%">
-                          <RePieChart>
-                            <Pie
-                              data={(overview.bookingStatusDistribution || []).map((d) => ({ name: d.status || "Unknown", value: d.count || 0 }))}
-                              cx="50%"
-                              cy="50%"
-                              innerRadius={55}
-                              outerRadius={85}
-                              dataKey="value"
-                              paddingAngle={3}
-                              stroke="none"
-                            >
-                              {(overview.bookingStatusDistribution || []).map((entry, i) => (
-                                <Cell key={entry.status || `unknown-${i}`} fill={bookingColors[entry.status || ""] || "hsl(var(--status-suspended))"} />
-                              ))}
-                            </Pie>
-                            <Tooltip />
-                          </RePieChart>
-                        </ResponsiveContainer></div>
+                        <div className="relative w-full">
+                          <div className={styles.chartPie}>
+                            <ResponsiveContainer width="100%" height="100%">
+                              <RePieChart>
+                                <Pie
+                                  data={(overview.bookingStatusDistribution || []).map((d) => ({ name: d.status || "Unknown", value: d.count || 0 }))}
+                                  cx="50%"
+                                  cy="50%"
+                                  innerRadius={55}
+                                  outerRadius={85}
+                                  dataKey="value"
+                                  paddingAngle={3}
+                                  stroke="none"
+                                >
+                                  {(overview.bookingStatusDistribution || []).map((entry, i) => (
+                                    <Cell key={entry.status || `unknown-${i}`} fill={bookingColors[entry.status || ""] || "hsl(var(--status-suspended))"} />
+                                  ))}
+                                </Pie>
+                                <Tooltip formatter={(value, name) => [formatNumber(Number(value)), statusLabel(String(name))]} />
+                              </RePieChart>
+                            </ResponsiveContainer>
+                          </div>
+                          <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                            <span className="tnum text-2xl font-semibold leading-none tracking-[-0.02em] text-text-primary">
+                              {formatNumber((overview.bookingStatusDistribution || []).reduce((sum, d) => sum + (d.count || 0), 0))}
+                            </span>
+                            <span className="mt-1 text-[11px] text-text-tertiary">bookings</span>
+                          </div>
+                        </div>
                         <div className="mt-3 flex flex-wrap justify-center gap-x-5 gap-y-1.5">
                           {(overview.bookingStatusDistribution || []).map((d, i) => (
                             <span key={d.status || `legend-${i}`} className="inline-flex items-center gap-1.5 text-xs text-text-secondary">
                               <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: bookingColors[d.status || ""] || "hsl(var(--status-suspended))" }} />
-                              {d.status || "Unknown"}
+                              {statusLabel(d.status)} <span className="tnum text-text-tertiary">{formatNumber(d.count || 0)}</span>
                             </span>
                           ))}
                         </div>
@@ -571,55 +688,57 @@ export default function OverviewPage() {
 
               {can('payouts.view') && (
                 <Card>
-                  <CardHeader className="border-b border-primary/10 pb-3.5">
-                    <CardTitle className="flex items-center gap-2.5 text-[13px] font-semibold tracking-tight text-text-primary">
-                      <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+                  <CardHeader className="border-b border-border pb-3.5">
+                    <CardTitle className="flex items-center gap-2.5 text-sm font-semibold tracking-[-0.01em] text-text-primary">
+                      <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary/10 dark:bg-primary/10 text-primary dark:text-primary">
                         <Banknote className="h-4 w-4" />
                       </span>
                       Payout Summary
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="pt-4 space-y-3">
-                    {!payoutSummary ? (
+                    {payoutError ? (
+                      <SectionError message="Failed to load payout summary" onRetry={() => payoutRefetch()} />
+                    ) : payoutLoading || !payoutSummary ? (
                       <Skeleton className="h-28 w-full rounded-xl" />
                     ) : (
                       <>
-                        <div className="flex items-center justify-between py-2.5 border-b border-border/60">
+                        <div className="flex items-center justify-between py-2.5 border-b border-border">
                           <div className="flex items-center gap-2">
-                            <span className="h-2 w-2 rounded-full bg-red-400" />
+                            <span className="h-2 w-2 rounded-full bg-status-rejected" />
                             <span className="text-sm text-text-secondary">Outstanding</span>
                           </div>
-                          <span className="text-sm font-semibold text-red-600 dark:text-red-400">{formatNumber(payoutSummary.outstanding?.count)}</span>
+                          <span className="tnum text-sm font-semibold text-status-rejected-text">{formatNumber(payoutSummary.outstanding?.count)}</span>
                         </div>
-                        <div className="flex items-center justify-between py-2.5 border-b border-border/60">
+                        <div className="flex items-center justify-between py-2.5 border-b border-border">
                           <div className="flex items-center gap-2">
-                            <span className="h-2 w-2 rounded-full bg-amber-400" />
+                            <span className="h-2 w-2 rounded-full bg-status-pending" />
                             <span className="text-sm text-text-secondary">Pending</span>
                           </div>
-                          <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">{formatNumber(payoutSummary.pending?.count)}</span>
+                          <span className="tnum text-sm font-semibold text-status-pending-text">{formatNumber(payoutSummary.pending?.count)}</span>
                         </div>
-                        <div className="flex items-center justify-between py-2.5 border-b border-border/60">
+                        <div className="flex items-center justify-between py-2.5 border-b border-border">
                           <div className="flex items-center gap-2">
-                            <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                            <span className="h-2 w-2 rounded-full bg-primary" />
                             <span className="text-sm text-text-secondary">Paid This Month</span>
                           </div>
-                          <span className="text-sm font-semibold text-emerald-600 dark:text-emerald-400">{formatNumber(payoutSummary.paidThisMonth?.count)}</span>
+                          <span className="tnum text-sm font-semibold text-primary">{formatNumber(payoutSummary.paidThisMonth?.count)}</span>
                         </div>
                         <div className="text-xs text-text-tertiary space-y-1.5 pt-1">
-                          <div className="flex justify-between"><span>Outstanding total</span><span className="font-medium text-red-600 dark:text-red-400">{formatCurrency(payoutSummary.outstanding?.totalAmount)}</span></div>
-                          <div className="flex justify-between"><span>Pending total</span><span className="font-medium text-amber-600 dark:text-amber-400">{formatCurrency(payoutSummary.pending?.totalAmount)}</span></div>
-                          <div className="flex justify-between"><span>Paid total</span><span className="font-medium text-emerald-600 dark:text-emerald-400">{formatCurrency(payoutSummary.paidThisMonth?.totalAmount)}</span></div>
+                          <div className="flex justify-between"><span>Outstanding total</span><span className="tnum font-semibold text-status-rejected-text">{formatCurrency(payoutSummary.outstanding?.totalAmount)}</span></div>
+                          <div className="flex justify-between"><span>Pending total</span><span className="tnum font-semibold text-status-pending-text">{formatCurrency(payoutSummary.pending?.totalAmount)}</span></div>
+                          <div className="flex justify-between"><span>Paid total</span><span className="tnum font-semibold text-primary">{formatCurrency(payoutSummary.paidThisMonth?.totalAmount)}</span></div>
                         </div>
-                        <Button variant="outline" size="sm" className="w-full h-10 rounded-xl group" onClick={() => navigate("/admin/payouts")}>
+                        <Button variant="outline" size="sm" className="w-full font-medium" onClick={() => navigate("/admin/payouts")}>
                           View All Payouts
-                          <ArrowRight className="ml-1.5 h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
+                          <ArrowRight className="ml-1.5 h-3.5 w-3.5" />
                         </Button>
                       </>
                     )}
                   </CardContent>
                 </Card>
               )}
-            </motion.div>
+            </div>
           )}
 
           {/* Dialogs */}
@@ -636,9 +755,9 @@ export default function OverviewPage() {
                   {activeUsersData.map((user) => (
                     <div key={user.id} className="flex items-start gap-3 px-4 py-3">
                       {user.photoURL ? (
-                        <OptimizedImage src={user.photoURL} alt="" width={32} className="h-8 w-8 shrink-0 rounded-[10px] object-cover mt-0.5" />
+                        <OptimizedImage src={user.photoURL} alt="" width={32} className="h-8 w-8 shrink-0 rounded-xl object-cover mt-0.5" />
                       ) : (
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-surface-muted text-xs font-medium text-text-secondary mt-0.5">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-surface-muted text-xs font-medium text-text-secondary mt-0.5">
                           {user.name?.charAt(0)?.toUpperCase() || "?"}
                         </div>
                       )}
@@ -702,9 +821,9 @@ export default function OverviewPage() {
                   {newSignupsData.map((user) => (
                     <div key={user.id} className="flex items-start gap-3 px-4 py-3">
                       {user.photoURL ? (
-                        <OptimizedImage src={user.photoURL} alt="" width={32} className="h-8 w-8 shrink-0 rounded-[10px] object-cover mt-0.5" />
+                        <OptimizedImage src={user.photoURL} alt="" width={32} className="h-8 w-8 shrink-0 rounded-xl object-cover mt-0.5" />
                       ) : (
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-[10px] bg-surface-muted text-xs font-medium text-text-secondary mt-0.5">
+                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-surface-muted text-xs font-medium text-text-secondary mt-0.5">
                           {user.name?.charAt(0)?.toUpperCase() || "?"}
                         </div>
                       )}
@@ -723,27 +842,22 @@ export default function OverviewPage() {
           )}
         </>
       )}
-    </motion.div>
+    </div>
   );
 }
 
 /* Modal Shell */
 function ModalShell({ title, children, onClose, wide }: { title: string; children: React.ReactNode; onClose: () => void; wide?: boolean }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40 backdrop-blur-sm p-0 sm:p-4" onClick={onClose}>
-      <motion.div
-        initial={{ opacity: 0, y: 40, scale: 0.97 }}
-        animate={{ opacity: 1, y: 0, scale: 1 }}
-        exit={{ opacity: 0, y: 40, scale: 0.97 }}
-        transition={{ duration: 0.4, ease: [0.32, 0.72, 0, 1] }}
+    <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/40  p-0 sm:p-4" onClick={onClose}>
+      <div 
         className={cn(
-          "relative w-full sm:rounded-xl bg-surface-base border border-border shadow-soft-lg overflow-hidden",
+          "relative w-full sm:rounded-xl bg-surface-base border border-border shadow-lg overflow-hidden",
           "max-h-[85dvh] flex flex-col",
           wide ? "max-w-2xl" : "max-w-lg",
           "rounded-t-xl sm:rounded-xl"
         )}
-        onClick={(e) => e.stopPropagation()}
-      >
+        onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between border-b border-border px-4 py-3 shrink-0">
           <h2 className="text-sm font-semibold text-text-primary">{title}</h2>
           <button
@@ -757,7 +871,7 @@ function ModalShell({ title, children, onClose, wide }: { title: string; childre
         <div className="overflow-y-auto scrollbar-thin flex-1">
           {children}
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }
@@ -781,22 +895,22 @@ function WelcomeDashboard() {
   const available = sections.filter((s) => can(s.permission));
 
   return (
-    <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="space-y-6">
-      <motion.div variants={fadeInUp} className="border-l-2 border-l-primary pl-3">
-        <h1 className="text-lg md:text-xl font-semibold text-text-primary">
+    <div  className="space-y-6">
+      <div>
+        <h1 className="text-[26px] font-semibold leading-8 tracking-[-0.02em] text-text-primary">
           Welcome{adminRole?.name ? `, ${adminRole.name.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase())}` : ''}
         </h1>
-        <p className="text-sm text-text-secondary mt-1">Select a section below to get started</p>
-      </motion.div>
+        <p className="mt-1 text-sm text-text-tertiary">Select a section below to get started</p>
+      </div>
       {available.length > 0 ? (
-        <motion.div variants={fadeInUp} className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div  className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {available.map((section) => (
             <button
               key={section.route}
               onClick={() => navigate(section.route)}
-              className="group flex flex-col items-start gap-3 rounded-lg border border-border bg-surface-base p-5 text-left transition-all duration-300 ease-[cubic-bezier(0.32,0.72,0,1)] hover:border-primary/30 hover:shadow-tinted hover:-translate-y-0.5"
+              className="group flex flex-col items-start gap-3 rounded-xl border border-border bg-surface-base p-5 text-left transition-colors hover:border-primary/30"
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-md bg-accent text-accent-foreground group-hover:scale-105 transition-transform duration-300">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-accent-foreground">
                 {section.icon}
               </div>
               <div>
@@ -805,7 +919,7 @@ function WelcomeDashboard() {
               </div>
             </button>
           ))}
-        </motion.div>
+        </div>
       ) : (
         <Card>
           <CardContent className="p-8 text-center">
@@ -814,32 +928,26 @@ function WelcomeDashboard() {
           </CardContent>
         </Card>
       )}
-    </motion.div>
+    </div>
   );
 }
 
 /* KPI Card with Sparkline - Subtle tinted cards with per-metric identity */
 const KPI_ACCENTS = {
   emerald: {
-    bg: "bg-gradient-to-br from-emerald-50/70 to-surface-base dark:from-emerald-950/20 dark:to-surface-base",
-    border: "border-emerald-200/60 dark:border-emerald-800/20",
-    hoverBorder: "hover:border-emerald-300 dark:hover:border-emerald-700/30",
-    iconBg: "bg-emerald-100 dark:bg-emerald-900/30",
-    iconText: "text-emerald-700 dark:text-emerald-300",
+    hoverBorder: "hover:border-primary/30",
+    iconBg: "bg-primary/10",
+    iconText: "text-primary",
   },
   blue: {
-    bg: "bg-gradient-to-br from-blue-50/70 to-surface-base dark:from-blue-950/20 dark:to-surface-base",
-    border: "border-blue-200/60 dark:border-blue-800/20",
-    hoverBorder: "hover:border-blue-300 dark:hover:border-blue-700/30",
-    iconBg: "bg-blue-100 dark:bg-blue-900/30",
-    iconText: "text-blue-700 dark:text-blue-300",
+    hoverBorder: "hover:border-status-approved/30",
+    iconBg: "bg-status-approved/10",
+    iconText: "text-status-approved-text",
   },
   violet: {
-    bg: "bg-gradient-to-br from-violet-50/70 to-surface-base dark:from-violet-950/20 dark:to-surface-base",
-    border: "border-violet-200/60 dark:border-violet-800/20",
-    hoverBorder: "hover:border-violet-300 dark:hover:border-violet-700/30",
-    iconBg: "bg-violet-100 dark:bg-violet-900/30",
-    iconText: "text-violet-700 dark:text-violet-300",
+    hoverBorder: "hover:border-status-processing/30",
+    iconBg: "bg-status-processing/10",
+    iconText: "text-status-processing-text",
   },
 } as const;
 
@@ -852,6 +960,8 @@ function KPICardWithSparkline({
   sparklineData,
   sparklineColor,
   loading,
+  error,
+  trendLabel = "vs last period",
   format,
   onClick,
   accent = "emerald",
@@ -861,67 +971,70 @@ function KPICardWithSparkline({
   label: string;
   value: number;
   trend?: { value: number; isPositive: boolean };
-  sparklineData: number[];
-  sparklineColor: string;
+  sparklineData?: number[];
+  sparklineColor?: string;
   loading: boolean;
+  error?: boolean;
+  trendLabel?: string;
   format?: "currency" | "number";
   onClick?: () => void;
   accent?: KpiAccent;
   icon?: React.ReactNode;
   currency?: string;
 }) {
-  const displayValue = format === "currency" ? formatCurrency(value, currency) : formatNumber(value);
+  const displayValue = error
+    ? "—"
+    : format === "currency"
+      ? formatCurrency(value, currency)
+      : formatNumber(value);
+  const hasSparkline = !error && !loading && !!sparklineData && sparklineData.length >= 2;
   const a = KPI_ACCENTS[accent];
 
   return (
     <div
       className={cn(
-        "relative rounded-xl border shadow-sm transition-all duration-200 overflow-hidden",
-        a.bg, a.border,
+        "relative overflow-hidden rounded-xl border border-border bg-surface-base",
         styles.kpiCard,
-        onClick ? cn("cursor-pointer hover:shadow-md hover:-translate-y-0.5", a.hoverBorder) : "",
+        onClick ? cn("cursor-pointer", a.hoverBorder) : "",
       )}
       onClick={onClick}
       role={onClick ? "button" : undefined}
       tabIndex={onClick ? 0 : undefined}
       onKeyDown={onClick ? (e) => { if (e.key === "Enter") onClick(); } : undefined}
     >
-      <div className="flex items-start justify-between">
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            {icon && <span className={cn("flex h-7 w-7 items-center justify-center rounded-lg", a.iconBg, a.iconText)}>{icon}</span>}
-            <p className="text-[13px] font-medium text-text-secondary">{label}</p>
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex min-w-0 items-center gap-2">
+          {icon && <span className={cn("flex h-7 w-7 shrink-0 items-center justify-center rounded-lg", a.iconBg, a.iconText)}>{icon}</span>}
+          <p className="text-[13px] font-medium leading-snug text-text-tertiary">{label}</p>
+        </div>
+        {hasSparkline && (
+          <div className="h-8 w-20 shrink-0" aria-hidden="true">
+            <SparklineChart data={sparklineData!} color={sparklineColor} height={32} />
           </div>
-          {loading ? (
-            <Skeleton className="h-8 w-28 mt-2" />
-          ) : (
-            <p className="mt-2 text-3xl font-bold text-text-primary tabular-nums">{displayValue}</p>
-          )}
-          {!loading && trend && (
-            <p className={cn("mt-2 text-xs font-medium flex items-center gap-1", trend.isPositive ? "text-status-active-text" : "text-status-rejected-text")}>
-              {trend.isPositive ? (
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
-                </svg>
-              ) : (
-                <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-                </svg>
-              )}
-              {trend.value}% vs last period
-            </p>
-          )}
-        </div>
-        <div className="w-24 h-12">
-          {loading ? (
-            <Skeleton className="h-full w-full" />
-          ) : (
-            <SparklineChart data={sparklineData} color={sparklineColor} height={48} />
-          )}
-        </div>
+        )}
       </div>
+      {loading ? (
+        <Skeleton className="mt-2 h-8 w-28" />
+      ) : (
+        <p className="tnum mt-2 text-[24px] font-semibold leading-tight tracking-[-0.02em] text-text-primary sm:text-[26px]">
+          {displayValue}
+        </p>
+      )}
+      {!loading && !error && trend && (
+        <p className={cn("mt-2 flex items-center gap-1 text-xs font-semibold", trend.isPositive ? "text-status-active-text" : "text-status-rejected-text")}>
+          {trend.isPositive ? (
+            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
+            </svg>
+          ) : (
+            <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          )}
+          {trend.value}% {trendLabel}
+        </p>
+      )}
     </div>
   );
 }
-
 

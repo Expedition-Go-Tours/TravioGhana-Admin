@@ -19,7 +19,7 @@ function formatDiffPath(path: string) {
 export function DiffViewer({ diff, changesSummary }: DiffViewerProps) {
   if (diff.length === 0) {
     return (
-      <div className="rounded-xl border border-border/40 bg-surface-muted/30 p-6 text-center">
+      <div className="rounded-xl border border-border bg-surface-muted p-6 text-center">
         <p className="text-sm text-muted-foreground">No pending changes</p>
       </div>
     );
@@ -45,21 +45,21 @@ export function DiffViewer({ diff, changesSummary }: DiffViewerProps) {
         {diff.map((entry) => (
           <div
             key={entry.path}
-            className="flex items-start gap-3 rounded-lg border border-border bg-surface-muted/40 px-3 py-2.5"
+            className="flex items-start gap-3 rounded-xl border border-border bg-surface-muted px-3 py-2.5"
           >
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-medium text-text-secondary uppercase tracking-wider break-all">
+              <p className="text-[11px] font-medium text-text-secondary break-all">
                 {formatDiffPath(entry.path)}
               </p>
               <div className="flex items-center gap-2 text-xs mt-1 flex-wrap">
                 {entry.before !== undefined && (
-                  <span className="rounded bg-red-50 border border-red-100 text-red-600 px-1.5 py-0.5 line-through max-w-xs truncate">
+                  <span className="rounded bg-status-rejected/10 border border-status-rejected/30 text-status-rejected-text px-1.5 py-0.5 line-through max-w-xs truncate">
                     {entry.before}
                   </span>
                 )}
                 <GitCompareArrows className="h-3 w-3 text-text-tertiary shrink-0" />
                 {entry.after !== undefined && (
-                  <span className="rounded bg-emerald-50 border border-emerald-100 text-emerald-700 px-1.5 py-0.5 max-w-xs truncate">
+                  <span className="rounded bg-primary/10 border border-primary/30 text-primary px-1.5 py-0.5 max-w-xs truncate">
                     {entry.after}
                   </span>
                 )}

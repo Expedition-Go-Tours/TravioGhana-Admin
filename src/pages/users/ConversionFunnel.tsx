@@ -1,5 +1,4 @@
 ﻿import { useMemo, useState } from "react";
-import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
@@ -21,7 +20,6 @@ import { StatCard } from "@/components/shared/StatCard";
 import { ChartTooltip } from "@/components/shared/ChartTooltip";
 import { chartColors, chartAxis } from "@/components/shared/chartTheme";
 import api from "@/lib/axios";
-import { staggerContainer } from "@/lib/animations";
 import { formatNumber, formatCurrency } from "@/lib/utils";
 
 const periods = [
@@ -144,12 +142,8 @@ export default function ConversionFunnelPage() {
         )}
       </PageInsight>
 
-      <motion.div
-        variants={staggerContainer}
-        initial="hidden"
-        animate="visible"
-        className="grid grid-cols-2 gap-4 lg:grid-cols-4"
-      >
+      <div 
+        className="grid grid-cols-2 gap-4 lg:grid-cols-4">
         <StatCard
           label="Overall Conversion"
           value={rates?.overall != null ? `${rates.overall.toFixed(1)}%` : "—"}
@@ -184,7 +178,7 @@ export default function ConversionFunnelPage() {
             ? `${formatNumber(abandoned.checkouts)} holds expired before payment`
             : "No expired holds in this window"}
         />
-      </motion.div>
+      </div>
 
       <Card>
         <CardHeader className="border-b border-border pb-3">
@@ -211,7 +205,7 @@ export default function ConversionFunnelPage() {
                 const prevUsers = idx > 0 ? (funnel[idx - 1]?.users || 0) : 0;
                 const stepRate = idx > 0 && prevUsers > 0 ? (step.users / prevUsers) * 100 : null;
                 return (
-                  <div key={step.step} className="rounded-lg border border-border/60 p-4 transition-colors hover:border-border/100">
+                  <div key={step.step} className="rounded-xl border border-border p-4 transition-colors hover:border-border">
                     <div className="flex items-center gap-4">
                       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full" style={{ backgroundColor: `${meta?.color}18` }}>
                         <Icon className="h-5 w-5" style={{ color: meta?.color }} />
@@ -223,8 +217,8 @@ export default function ConversionFunnelPage() {
                             <p className="text-xs text-text-tertiary">{meta?.description}</p>
                           </div>
                           <div className="flex items-baseline gap-3">
-                            <p className="text-lg font-bold text-text-primary tabular-nums">{formatNumber(step.users)}</p>
-                            <p className="text-xs text-text-tertiary tabular-nums">{pctOfTop.toFixed(1)}% of top</p>
+                            <p className="text-lg font-semibold text-text-primary tnum">{formatNumber(step.users)}</p>
+                            <p className="text-xs text-text-tertiary tnum">{pctOfTop.toFixed(1)}% of top</p>
                           </div>
                         </div>
                         <div className="mt-2.5 h-2.5 w-full rounded-full bg-surface-muted overflow-hidden">
@@ -248,7 +242,7 @@ export default function ConversionFunnelPage() {
                     </div>
                     {/* Median checkout time lives between Checkout and Booking */}
                     {idx === 1 && medianMinutes > 0 && (
-                      <div className="mt-2 flex items-center gap-1.5 border-t border-border/40 pt-2 text-xs text-text-tertiary">
+                      <div className="mt-2 flex items-center gap-1.5 border-t border-border pt-2 text-xs text-text-tertiary">
                         <Timer className="h-3.5 w-3.5" />
                         Median hold → paid booking: <span className="font-semibold text-text-secondary">{formatMinutes(medianMinutes)}</span> (pay-now checkouts)
                       </div>
@@ -321,7 +315,7 @@ export default function ConversionFunnelPage() {
               <SectionEmpty message="No expired holds in this period — every checkout either converted or is still open." />
             ) : (
               <div className="space-y-4">
-                <div className="rounded-lg bg-status-pending/10 p-3">
+                <div className="rounded-xl bg-status-pending/10 p-3">
                   <p className="text-sm font-semibold text-text-primary">
                     {formatCurrency(abandoned.value)}
                   </p>
@@ -331,10 +325,10 @@ export default function ConversionFunnelPage() {
                   </p>
                 </div>
                 {abandoned.byTour.length > 0 ? (
-                  <div className="overflow-hidden rounded-lg border border-border/60">
+                  <div className="overflow-hidden rounded-xl border border-border">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="border-b border-border/60 bg-surface-muted/60 text-left text-xs text-text-tertiary">
+                        <tr className="border-b border-border bg-surface-muted text-left text-xs text-text-tertiary">
                           <th className="px-3 py-2 font-medium">Tour</th>
                           <th className="px-3 py-2 text-right font-medium">Holds</th>
                           <th className="px-3 py-2 text-right font-medium">Value</th>
@@ -342,10 +336,10 @@ export default function ConversionFunnelPage() {
                       </thead>
                       <tbody>
                         {abandoned.byTour.map((row) => (
-                          <tr key={row.tourId} className="border-b border-border/40 last:border-0">
+                          <tr key={row.tourId} className="border-b border-border last:border-0">
                             <td className="px-3 py-2.5 text-text-primary truncate max-w-[200px]" title={row.tourTitle}>{row.tourTitle}</td>
-                            <td className="px-3 py-2.5 text-right tabular-nums text-text-secondary">{formatNumber(row.checkouts)}</td>
-                            <td className="px-3 py-2.5 text-right tabular-nums font-medium text-text-primary">{formatCurrency(row.value)}</td>
+                            <td className="px-3 py-2.5 text-right tnum text-text-secondary">{formatNumber(row.checkouts)}</td>
+                            <td className="px-3 py-2.5 text-right tnum font-medium text-text-primary">{formatCurrency(row.value)}</td>
                           </tr>
                         ))}
                       </tbody>

@@ -141,7 +141,7 @@ describe("BookingsPage deep links", () => {
     });
 
     expect(await screen.findByRole("heading", { name: "TG-1001" })).toBeInTheDocument();
-    expect(screen.getByText("Booking Detail")).toBeInTheDocument();
+    expect(screen.getByText("Booking detail")).toBeInTheDocument();
   });
 
   it("opens a new booking's sidebar for every notification click while the page stays mounted", async () => {

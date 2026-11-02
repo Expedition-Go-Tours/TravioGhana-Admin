@@ -2,7 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { Download, Search, X, Eye, MapPin, Hash, Building2, Wallet, Smartphone, Calendar, DollarSign, Receipt, Percent, Clock, Send, ArrowUpRight, Info } from "lucide-react";
+import { Download, Search, X, Eye, MapPin, Hash, Building2, Wallet, Smartphone, Calendar, DollarSign, Receipt, Percent, ArrowRight, Info } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -25,7 +25,7 @@ import { usePermission } from "@/hooks/usePermission";
 import { useSocketInvalidate } from "@/hooks/useSocketEvent";
 import { PayoutDetailPanel } from "./PayoutDetailPanel";
 import api from "@/lib/axios";
-import { cn, formatCurrency, formatNumber, truncateId } from "@/lib/utils";
+import { formatCurrency, formatNumber, truncateId } from "@/lib/utils";
 import type { Payout } from "@/types/payout";
 import OptimizedImage from "@/components/shared/OptimizedImage";
 
@@ -266,13 +266,13 @@ export function PayoutsListTab({ initialStatus, onStatusChange }: PayoutsListTab
       key: "amount",
       header: "Amount",
       className: "text-right",
-      render: (r) => <span className="text-sm font-semibold text-text-primary tabular-nums">{formatCurrency(r.amount)}</span>,
+      render: (r) => <span className="text-sm font-semibold text-text-primary tnum">{formatCurrency(r.amount)}</span>,
     },
     {
       key: "commission",
       header: "Commission",
       className: "text-right",
-      render: (r) => <span className="text-sm text-text-secondary tabular-nums">{formatCurrency(r.commissionAmount ?? r.commission)}</span>,
+      render: (r) => <span className="text-sm text-text-secondary tnum">{formatCurrency(r.commissionAmount ?? r.commission)}</span>,
     },
     {
       key: "status",
@@ -364,7 +364,7 @@ export function PayoutsListTab({ initialStatus, onStatusChange }: PayoutsListTab
   return (
     <div className="space-y-6">
       {summary && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:gap-4 xl:grid-cols-4">
           <StatCard label="Total Payout Amount" value={formatCurrency(summary.totalAmount ?? 0)} icon={<DollarSign className="h-5 w-5" />} accent="blue" />
           <StatCard label="Total Commission" value={formatCurrency(summary.totalCommission ?? 0)} icon={<Receipt className="h-5 w-5" />} accent="emerald" />
           <StatCard label="Total Payouts" value={formatNumber(pagination?.totalCount ?? payoutsRaw.length)} icon={<Receipt className="h-5 w-5" />} accent="amber" />
@@ -372,57 +372,28 @@ export function PayoutsListTab({ initialStatus, onStatusChange }: PayoutsListTab
         </div>
       )}
 
-      {/* In-flight money — batch requests not yet in the ledger below */}
-      {inFlight && ((inFlight.awaitingApproval?.count ?? 0) > 0 || (inFlight.approvedAwaitingTransfer?.count ?? 0) > 0) && (
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <button
-            onClick={goToRequestsTab}
-            className={cn(
-              "flex items-center justify-between gap-3 rounded-xl border border-l-4 bg-surface-base p-4 text-left transition-colors hover:bg-surface-muted/60",
-              (inFlight.awaitingApproval?.count ?? 0) > 0 ? "border-l-status-pending" : "border-l-border"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-status-pending/10 text-status-pending-text">
-                <Clock className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-text-primary">Awaiting approval</p>
-                <p className="text-xs text-text-secondary tabular-nums">
-                  {formatNumber(inFlight.awaitingApproval?.count ?? 0)} request(s) · {formatCurrency(inFlight.awaitingApproval?.total ?? 0)}
-                </p>
-              </div>
-            </div>
-            <ArrowUpRight className="h-4 w-4 shrink-0 text-text-tertiary" />
-          </button>
-          <button
-            onClick={goToRequestsTab}
-            className={cn(
-              "flex items-center justify-between gap-3 rounded-xl border border-l-4 bg-surface-base p-4 text-left transition-colors hover:bg-surface-muted/60",
-              (inFlight.approvedAwaitingTransfer?.count ?? 0) > 0 ? "border-l-status-processing" : "border-l-border"
-            )}
-          >
-            <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-status-processing/10 text-status-processing-text">
-                <Send className="h-5 w-5" />
-              </span>
-              <div>
-                <p className="text-sm font-semibold text-text-primary">Approved · awaiting transfer</p>
-                <p className="text-xs text-text-secondary tabular-nums">
-                  {formatNumber(inFlight.approvedAwaitingTransfer?.count ?? 0)} request(s) · {formatCurrency(inFlight.approvedAwaitingTransfer?.total ?? 0)}
-                </p>
-              </div>
-            </div>
-            <ArrowUpRight className="h-4 w-4 shrink-0 text-text-tertiary" />
-          </button>
-        </div>
-      )}
-
-      {/* Sync explanation */}
-      <p className="flex items-start gap-2 rounded-lg border border-border/60 bg-surface-muted/40 px-3 py-2.5 text-xs text-text-secondary">
-        <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-tertiary" />
-        This register lists money actually sent to suppliers, one ledger row per booking. Supplier withdrawal requests appear here only after they are approved and marked as sent on the Payout Requests tab; everything still in flight is shown above.
-      </p>
+      {/* The register is the settled ledger. Anything still in flight belongs
+          on the Requests tab, so surface it as one link instead of repeating
+          the overview's queue cards here. */}
+      <div className="flex flex-col gap-3 rounded-xl border border-border bg-surface-base px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+        <p className="flex items-start gap-2 text-xs leading-relaxed text-text-secondary">
+          <Info className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-tertiary" />
+          This register lists money actually sent to suppliers, one row per booking. Requests appear
+          here only after they are approved and marked as sent.
+        </p>
+        {inFlight &&
+          ((inFlight.awaitingApproval?.count ?? 0) > 0 ||
+            (inFlight.approvedAwaitingTransfer?.count ?? 0) > 0) && (
+            <Button variant="outline" size="sm" className="shrink-0 gap-1.5" onClick={goToRequestsTab}>
+              {formatNumber(
+                (inFlight.awaitingApproval?.count ?? 0) +
+                  (inFlight.approvedAwaitingTransfer?.count ?? 0),
+              )}{" "}
+              in flight
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Button>
+          )}
+      </div>
 
       <Card>
         <CardHeader className="border-b border-border px-5 pb-4 pt-5">

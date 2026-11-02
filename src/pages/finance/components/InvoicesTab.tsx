@@ -62,8 +62,8 @@ function InvoiceStatusBadge({ status }: { status: Invoice["status"] }) {
       className={cn(
         "inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 text-xs font-medium",
         getStatusColor(status),
-        status === "INVOICED" && "border-amber-500/30 bg-amber-500/10 text-amber-700 dark:text-amber-400",
-        status === "APPROVED" && "border-sky-500/30 bg-sky-500/10 text-sky-700 dark:text-sky-400",
+        status === "INVOICED" && "border-status-pending/30 bg-status-pending/10 text-status-pending-text dark:text-status-pending-text",
+        status === "APPROVED" && "border-status-approved/30 bg-status-approved/10 text-status-approved-text dark:text-status-approved-text",
       )}
     >
       <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -138,11 +138,11 @@ function InvoiceDetail({ invoice: inv, loading }: { invoice: Invoice; loading?: 
     <div className="space-y-4">
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Destination</p>
+          <p className="text-[11px] font-semibold text-text-tertiary">Destination</p>
           <div className="mt-1.5"><MethodLabel invoice={inv} /></div>
         </div>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Timeline</p>
+          <p className="text-[11px] font-semibold text-text-tertiary">Timeline</p>
           <p className="mt-1.5 text-sm text-text-secondary">
             Invoiced {formatDateTime(inv.invoicedAt)}
             {(inv.status === "INVOICED" || inv.status === "APPROVED") && inv.paymentScheduledAt && ` · pay by ${formatDate(inv.paymentScheduledAt)}`}
@@ -152,7 +152,7 @@ function InvoiceDetail({ invoice: inv, loading }: { invoice: Invoice; loading?: 
           </p>
         </div>
         <div>
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Reference</p>
+          <p className="text-[11px] font-semibold text-text-tertiary">Reference</p>
           {inv.reference ? (
             <p className="mt-1.5 font-mono text-sm text-text-primary">{inv.reference}</p>
           ) : inv.status === "INVOICED" || inv.status === "APPROVED" ? (
@@ -164,41 +164,41 @@ function InvoiceDetail({ invoice: inv, loading }: { invoice: Invoice; loading?: 
       </div>
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        <div className="rounded-lg border border-border/60 bg-surface-base p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Gross</p>
-          <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">
+        <div className="rounded-xl border border-border bg-surface-base p-3">
+          <p className="text-[11px] font-semibold text-text-tertiary">Gross</p>
+          <p className="mt-0.5 text-sm font-semibold tnum text-text-primary">
             {formatCurrency(Number(inv.grossTotal), inv.currency)}
           </p>
         </div>
-        <div className="rounded-lg border border-border/60 bg-surface-base p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">
+        <div className="rounded-xl border border-border bg-surface-base p-3">
+          <p className="text-[11px] font-semibold text-text-tertiary">
             Commission ({commissionRate(inv)}%)
           </p>
-          <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">
+          <p className="mt-0.5 text-sm font-semibold tnum text-text-primary">
             {formatCurrency(Number(inv.commissionTotal), inv.currency)}
           </p>
         </div>
-        <div className="rounded-lg border border-border/60 bg-surface-base p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Net to supplier</p>
-          <p className="mt-0.5 text-sm font-semibold tabular-nums text-text-primary">
+        <div className="rounded-xl border border-border bg-surface-base p-3">
+          <p className="text-[11px] font-semibold text-text-tertiary">Net to supplier</p>
+          <p className="mt-0.5 text-sm font-semibold tnum text-text-primary">
             {formatCurrency(Number(inv.netTotal), inv.currency)}
           </p>
         </div>
-        <div className="rounded-lg border border-border/60 bg-surface-base p-3">
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Activity dates</p>
+        <div className="rounded-xl border border-border bg-surface-base p-3">
+          <p className="text-[11px] font-semibold text-text-tertiary">Activity dates</p>
           <p className="mt-0.5 text-sm text-text-secondary">
             {formatDate(inv.cycleStartDate)} – {formatDate(inv.cycleEndDate)}
           </p>
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-lg border border-border/60 bg-surface-base">
+      <div className="overflow-x-auto rounded-xl border border-border bg-surface-base">
         <table className="w-full text-sm">
           <caption className="sr-only">
             Bookings billed on invoice {inv.invoiceNumber}
           </caption>
           <thead>
-            <tr className="border-b border-border/60 text-left text-[11px] uppercase tracking-wider text-text-tertiary">
+            <tr className="border-b border-border text-left text-[11px] text-text-tertiary">
               <th className="px-4 py-2 font-semibold">Booking</th>
               <th className="px-4 py-2 font-semibold">Tour</th>
               <th className="px-4 py-2 font-semibold">Travel date</th>
@@ -219,21 +219,21 @@ function InvoiceDetail({ invoice: inv, loading }: { invoice: Invoice; loading?: 
                 <td className="px-4 py-2 text-text-tertiary">
                   {it.booking?.travelDate ? formatDate(it.booking.travelDate) : "—"}
                 </td>
-                <td className="px-4 py-2 text-right tabular-nums text-text-secondary">
+                <td className="px-4 py-2 text-right tnum text-text-secondary">
                   {formatCurrency(Number(it.grossAmount || 0), it.currency)}
                 </td>
-                <td className="px-4 py-2 text-right tabular-nums text-text-secondary">
+                <td className="px-4 py-2 text-right tnum text-text-secondary">
                   {formatCurrency(Number(it.platformCommission || 0), it.currency)}
                 </td>
-                <td className="px-4 py-2 text-right font-medium tabular-nums">
+                <td className="px-4 py-2 text-right font-medium tnum">
                   {formatCurrency(Number(it.supplierPayout || 0), it.currency)}
                 </td>
               </tr>
             ))}
           </tbody>
           <tfoot>
-            <tr className="border-t border-border/60">
-              <td colSpan={4} className="px-4 py-2 text-right text-[11px] uppercase tracking-wider text-text-tertiary">
+            <tr className="border-t border-border">
+              <td colSpan={4} className="px-4 py-2 text-right text-[11px] text-text-tertiary">
                 Items total ·{" "}
                 {check.matches ? (
                   <span className="inline-flex items-center gap-1 normal-case text-status-active-text">
@@ -246,7 +246,7 @@ function InvoiceDetail({ invoice: inv, loading }: { invoice: Invoice; loading?: 
                   </span>
                 )}
               </td>
-              <td colSpan={2} className="px-4 py-2 text-right font-semibold tabular-nums">
+              <td colSpan={2} className="px-4 py-2 text-right font-semibold tnum">
                 {formatCurrency(check.sum, inv.currency)}
               </td>
             </tr>
@@ -438,7 +438,7 @@ export function InvoicesTab() {
       key: "bookingCount",
       header: "Bookings",
       numeric: true,
-      render: (inv) => <span className="text-sm tabular-nums text-text-secondary">{inv.bookingCount}</span>,
+      render: (inv) => <span className="text-sm tnum text-text-secondary">{inv.bookingCount}</span>,
     },
     {
       key: "netTotal",
@@ -446,7 +446,7 @@ export function InvoicesTab() {
       numeric: true,
       sortable: true,
       render: (inv) => (
-        <span className="text-sm font-semibold tabular-nums text-text-primary">
+        <span className="text-sm font-semibold tnum text-text-primary">
           {formatCurrency(Number(inv.netTotal), inv.currency)}
         </span>
       ),
@@ -464,7 +464,7 @@ export function InvoicesTab() {
       sortable: true,
       hideBelow: "md",
       render: (inv) => (
-        <div className="flex flex-col text-sm tabular-nums text-text-secondary">
+        <div className="flex flex-col text-sm tnum text-text-secondary">
           <span>{formatDate(inv.invoicedAt)}</span>
           <span className="text-xs text-text-tertiary">
             {inv.status === "PAID"
@@ -521,7 +521,7 @@ export function InvoicesTab() {
       {/* True totals across all statuses for the current search — the counts on
           the tabs are per-status, this is the pot they add up to. */}
       {!isLoading && !isError && (summary?.totalCount ?? 0) > 0 && (
-        <p className={cn("text-xs tabular-nums text-text-tertiary transition-opacity", isFetching && "opacity-50")}>
+        <p className={cn("text-xs tnum text-text-tertiary transition-opacity", isFetching && "opacity-50")}>
           {summary?.totalCount} invoice{summary?.totalCount === 1 ? "" : "s"} across all statuses ·{" "}
           {formatCurrency(summary?.totalAmount ?? 0)} net · showing {activeCount} {activeLabel}
         </p>
@@ -647,12 +647,12 @@ export function InvoicesTab() {
           onCancel={() => setMarkingId(null)}
         >
           <div className="space-y-3">
-            <div className="rounded-lg border border-border bg-surface-muted/40 p-3">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-text-tertiary">Paying to</p>
+            <div className="rounded-xl border border-border bg-surface-muted p-3">
+              <p className="text-[11px] font-semibold text-text-tertiary">Paying to</p>
               <div className="mt-1.5"><MethodLabel invoice={markingInvoice} /></div>
             </div>
-            <div className="rounded-lg border border-amber-300 bg-amber-50 p-3 dark:border-amber-800 dark:bg-amber-950/30">
-              <p className="text-xs text-amber-800 dark:text-amber-200">
+            <div className="rounded-xl border border-status-pending/30 bg-status-pending/10 p-3 dark:border-status-pending/30 dark:bg-status-pending/10">
+              <p className="text-xs text-status-pending-text dark:text-status-pending-text">
                 Only mark paid after the real bank/mobile-money transfer has been sent. Record the exact reference
                 your bank confirms — the supplier sees it on their invoice.
               </p>

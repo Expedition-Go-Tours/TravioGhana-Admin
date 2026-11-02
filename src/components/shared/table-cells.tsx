@@ -14,7 +14,7 @@ interface CellAvatarProps {
 export function CellAvatar({ src, alt = "", initials, size = "md", className }: CellAvatarProps) {
   const box = size === "sm" ? "h-8 w-8 text-[10px]" : "h-9 w-9 text-xs";
   return (
-    <div className={cn("relative flex shrink-0 items-center justify-center overflow-hidden rounded-md bg-accent font-bold text-accent-foreground", box, className)}>
+    <div className={cn("relative flex shrink-0 items-center justify-center overflow-hidden rounded-md bg-accent font-semibold text-accent-foreground", box, className)}>
       {src ? (
         <OptimizedImage src={src} alt={alt} width={36} className="absolute inset-0 h-full w-full object-cover" />
       ) : null}
@@ -67,7 +67,7 @@ interface MoneyCellProps {
 export function MoneyCell({ value, currency, className, faint }: MoneyCellProps) {
   return (
     <span className={cn(
-      "whitespace-nowrap tabular-nums",
+      "whitespace-nowrap tnum",
       faint ? "text-sm text-text-secondary" : "text-sm font-semibold text-text-primary",
       className,
     )}>

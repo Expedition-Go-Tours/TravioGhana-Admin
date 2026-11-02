@@ -35,7 +35,7 @@ function Field({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
   return (
     <div className="min-w-0">
-      <p className="text-[10px] font-semibold text-text-tertiary uppercase tracking-widest">{label}</p>
+      <p className="text-[10px] font-semibold text-text-tertiary ">{label}</p>
       <p className="mt-0.5 truncate text-sm text-text-primary">{value}</p>
     </div>
   );
@@ -55,8 +55,8 @@ export function PayoutMethodCard({ method, onVerifyToggle, verifying, className 
   const accent = isMobile ? "border-primary/30" : isBank ? "border-status-approved/30" : "border-status-flagged/30";
 
   return (
-    <div className={cn("overflow-hidden rounded-lg border border-border bg-surface-base shadow-sm", className)}>
-      <div className={cn("flex items-center justify-between border-b bg-gradient-to-r from-surface-base to-surface-muted/60 px-5 py-3.5", accent)}>
+    <div className={cn("overflow-hidden rounded-xl border border-border bg-surface-base ", className)}>
+      <div className={cn("flex items-center justify-between border-b bg-surface-muted px-5 py-3.5", accent)}>
         <div className="flex items-center gap-3">
           <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-full", iconWrap)}>
             <Icon className="h-4 w-4" />

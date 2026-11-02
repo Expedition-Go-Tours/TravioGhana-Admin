@@ -23,11 +23,11 @@ export function TopSuppliers({ suppliers = [], loading }: TopSuppliersProps) {
   const navigate = useNavigate();
 
   return (
-    <Card className="h-full border border-border/60 shadow-soft bg-surface-base rounded-2xl">
+    <Card className="h-full border border-border  bg-surface-base rounded-xl">
       <CardHeader className="pb-3 pt-5 px-5">
         <div className="flex items-center justify-between">
           <CardTitle className="flex items-center gap-2 text-[15px] font-semibold text-text-primary">
-            <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300">
+            <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary/10 dark:bg-primary/10 text-primary dark:text-primary">
               <Users className="h-4 w-4" />
             </span>
             Top Suppliers
@@ -59,22 +59,24 @@ export function TopSuppliers({ suppliers = [], loading }: TopSuppliersProps) {
         ) : (
           <div className="space-y-1">
             {suppliers.slice(0, 5).map((supplier, idx) => (
-              <div
+              <button
                 key={supplier.id || idx}
-                className="flex items-center gap-3 rounded-lg p-2.5 transition-colors hover:bg-emerald-50/50 dark:hover:bg-emerald-950/20 cursor-pointer"
+                type="button"
+                disabled={!supplier.id}
+                className="flex w-full items-center gap-3 rounded-lg p-2.5 text-left transition-colors hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:cursor-default disabled:hover:bg-transparent"
                 onClick={() => supplier.id && navigate(`/admin/suppliers/${supplier.id}`)}
               >
                 <div className="relative">
                   {supplier.user?.photoURL ? (
                     <OptimizedImage src={supplier.user.photoURL} alt="" width={40} className="h-10 w-10 rounded-full object-cover" />
                   ) : (
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/20 to-primary/10 text-sm font-semibold text-primary">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-accent text-sm font-semibold text-primary">
                       {supplier.user?.name?.charAt(0)?.toUpperCase() || "S"}
                     </div>
                   )}
                   <span className={cn(
-                    "absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-white shadow-sm",
-                    idx === 0 ? "bg-emerald-600" : idx === 1 ? "bg-blue-500" : idx === 2 ? "bg-violet-500" : "bg-text-tertiary"
+                    "absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold text-white ",
+                    idx === 0 ? "bg-primary" : idx === 1 ? "bg-status-approved" : idx === 2 ? "bg-status-processing" : "bg-text-tertiary"
                   )}>
                     {idx + 1}
                   </span>
@@ -84,13 +86,13 @@ export function TopSuppliers({ suppliers = [], loading }: TopSuppliersProps) {
                   <p className="text-xs text-text-tertiary">{formatNumber(supplier.totalBookings)} bookings</p>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-text-primary">{formatCurrency(supplier.totalEarnings, supplier.currency)}</p>
-                  <div className="flex items-center gap-1 justify-end">
-                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
-                    <span className="text-xs text-text-tertiary">{supplier.averageRating != null ? Number(supplier.averageRating).toFixed(1) : "—"}</span>
+                  <p className="tnum text-sm font-semibold text-text-primary">{formatCurrency(supplier.totalEarnings, supplier.currency)}</p>
+                  <div className="flex items-center justify-end gap-1">
+                    <Star className="h-3 w-3 fill-status-pending text-status-pending-text" />
+                    <span className="tnum text-xs text-text-tertiary">{supplier.averageRating != null ? Number(supplier.averageRating).toFixed(1) : "—"}</span>
                   </div>
                 </div>
-              </div>
+              </button>
             ))}
           </div>
         )}

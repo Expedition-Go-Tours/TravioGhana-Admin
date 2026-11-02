@@ -1,7 +1,6 @@
-import { useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { createPortal } from "react-dom";
-import { motion } from "framer-motion";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -47,15 +46,15 @@ import type { CancellationRequest, CancellationStatus } from "@/services/cancell
 
 // Booking source = the storefront the sale happened on. Three entities:
 // Expedition Go (company storefront), Travio Ghana, Travio Africa.
-// The DB stores these as uppercase enum values (EXPEDITION / GHANA /
+// The DB stores these as enum values (EXPEDITION / GHANA /
 // TRAVIO_AFRICA); TRAVIO is a legacy value from seed data only.
 const SOURCE_META: Record<string, { label: string; className: string }> = {
-  EXPEDITION: { label: "Expedition Go", className: "bg-emerald-50 text-emerald-700" },
-  GHANA: { label: "Travio Ghana", className: "bg-yellow-50 text-yellow-700" },
-  TRAVIO_AFRICA: { label: "Travio Africa", className: "bg-sky-50 text-sky-700" },
+  EXPEDITION: { label: "Expedition Go", className: "bg-primary/10 text-primary" },
+  GHANA: { label: "Travio Ghana", className: "bg-status-pending/10 text-status-pending-text" },
+  TRAVIO_AFRICA: { label: "Travio Africa", className: "bg-status-approved/10 text-status-approved-text" },
 };
 const sourceMeta = (source: string) =>
-  SOURCE_META[String(source).toUpperCase()] || { label: source, className: "bg-gray-50 text-gray-600" };
+  SOURCE_META[String(source).toUpperCase()] || { label: source, className: "bg-surface-muted text-text-secondary" };
 
 interface BookingDetailPanelProps {
   booking: Booking;
@@ -69,7 +68,7 @@ function StatusChip({ status }: { status: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide",
+        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ",
         getStatusColor(status),
       )}
     >
@@ -78,34 +77,33 @@ function StatusChip({ status }: { status: string }) {
   );
 }
 
-function SectionTitle({ children }: { children: React.ReactNode }) {
+function SectionTitle({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-2 mb-2">
-      <div className="h-px flex-1 bg-border" />
-      <span className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">{children}</span>
-      <div className="h-px flex-1 bg-border" />
+    <div className="mb-3 flex items-center justify-between gap-3">
+      <h3 className="text-[13px] font-semibold text-text-primary">{children}</h3>
+      {action}
     </div>
   );
 }
 
 function DetailRow({ icon, label, children }: { icon: React.ReactNode; label: string; children: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between py-1.5">
-      <div className="flex items-center gap-1.5 text-xs text-text-secondary">
+    <div className="flex items-start justify-between gap-4 py-2">
+      <span className="flex min-w-0 items-center gap-1.5 text-xs text-text-tertiary">
         {icon}
         <span>{label}</span>
-      </div>
-      <div className="text-xs font-medium text-text-primary text-right">{children}</div>
+      </span>
+      <span className="min-w-0 text-right text-xs font-medium text-text-primary">{children}</span>
     </div>
   );
 }
 
 function TravelerBreakdown({ travelers }: { travelers: TravelerData }) {
   const categories = [
-    { label: "Adults", count: travelers.adults || 0, icon: <User className="h-3.5 w-3.5" /> },
-    { label: "Children", count: travelers.children || 0, icon: <PersonStanding className="h-3.5 w-3.5" /> },
-    { label: "Infants", count: travelers.infants || 0, icon: <Baby className="h-3.5 w-3.5" /> },
-    { label: "Seniors", count: travelers.seniors || 0, icon: <Users className="h-3.5 w-3.5" /> },
+    { singular: "Adult", plural: "Adults", count: travelers.adults || 0, icon: <User className="h-3.5 w-3.5" /> },
+    { singular: "Child", plural: "Children", count: travelers.children || 0, icon: <PersonStanding className="h-3.5 w-3.5" /> },
+    { singular: "Infant", plural: "Infants", count: travelers.infants || 0, icon: <Baby className="h-3.5 w-3.5" /> },
+    { singular: "Senior", plural: "Seniors", count: travelers.seniors || 0, icon: <Users className="h-3.5 w-3.5" /> },
   ].filter((c) => c.count > 0);
 
   if (categories.length === 0) return null;
@@ -113,10 +111,10 @@ function TravelerBreakdown({ travelers }: { travelers: TravelerData }) {
   return (
     <div className="flex flex-wrap gap-2">
       {categories.map((cat) => (
-        <div key={cat.label} className="flex items-center gap-1.5 rounded-lg border border-border bg-surface-base px-2.5 py-1.5">
+        <div key={cat.plural} className="flex items-center gap-1.5 rounded-xl border border-border bg-surface-base px-2.5 py-1.5">
           <span className="text-text-tertiary">{cat.icon}</span>
           <span className="text-xs font-semibold text-text-primary">{cat.count}</span>
-          <span className="text-xs text-text-secondary">{cat.label}</span>
+          <span className="text-xs text-text-secondary">{cat.count === 1 ? cat.singular : cat.plural}</span>
         </div>
       ))}
     </div>
@@ -130,29 +128,27 @@ function TravelerManifest({ details }: { details: NonNullable<TravelerData["deta
     <div className="rounded-xl border border-border overflow-hidden">
       <table className="w-full text-xs">
         <thead>
-          <tr className="bg-surface-muted/50 border-b border-border">
-            <th className="px-3 py-2 text-left font-semibold text-text-secondary">#</th>
-            <th className="px-3 py-2 text-left font-semibold text-text-secondary">Name</th>
-            <th className="px-3 py-2 text-left font-semibold text-text-secondary">Age</th>
-            <th className="px-3 py-2 text-left font-semibold text-text-secondary">Category</th>
+          <tr className="bg-surface-muted border-b border-border">
+            <th className="px-3 py-2 text-left text-[11px] font-semibold text-text-tertiary">#</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold text-text-tertiary">Name</th>
+            <th className="px-3 py-2 text-left text-[11px] font-semibold text-text-tertiary">Traveler type</th>
           </tr>
         </thead>
         <tbody>
           {details.map((t, i) => (
-            <tr key={i} className="border-b border-border/50 last:border-0">
-              <td className="px-3 py-2 text-text-tertiary">{i + 1}</td>
-              <td className="px-3 py-2 font-medium text-text-primary">{t.name || "—"}</td>
-              <td className="px-3 py-2 text-text-secondary">{t.age ?? "—"}</td>
-              <td className="px-3 py-2">
+            <tr key={i} className="border-b border-border last:border-0">
+              <td className="tnum px-3 py-2.5 text-text-tertiary">{i + 1}</td>
+              <td className="px-3 py-2.5 font-medium text-text-primary">{t.name || "—"}</td>
+              <td className="px-3 py-2.5">
                 <span className={cn(
                   "inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold",
-                  t.ageGroup === "adult" && "bg-blue-50 text-blue-700",
-                  t.ageGroup === "child" && "bg-amber-50 text-amber-700",
-                  t.ageGroup === "infant" && "bg-pink-50 text-pink-700",
-                  t.ageGroup === "senior" && "bg-purple-50 text-purple-700",
-                  !t.ageGroup && "bg-gray-50 text-gray-500",
+                  t.ageGroup === "adult" && "bg-status-approved/10 text-status-approved-text",
+                  t.ageGroup === "child" && "bg-status-pending/10 text-status-pending-text",
+                  t.ageGroup === "infant" && "bg-status-rejected/10 text-status-rejected-text",
+                  t.ageGroup === "senior" && "bg-status-processing/10 text-status-processing-text",
+                  !t.ageGroup && "bg-surface-muted text-text-tertiary",
                 )}>
-                  {t.ageGroup || "—"}
+                  {t.ageGroup ? t.ageGroup.charAt(0).toUpperCase() + t.ageGroup.slice(1) : "—"}
                 </span>
               </td>
             </tr>
@@ -167,6 +163,89 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
   const navigate = useNavigate();
   const { can } = usePermission();
   const queryClient = useQueryClient();
+
+  // Exit animation needs the panel to stay mounted for one frame longer than
+  // the parent's open state. Every close path funnels through runAfterClose so
+  // the overlay, X, Escape key, and footer button all behave the same way.
+  const [closing, setClosing] = useState(false);
+  const closingRef = useRef(false);
+  const closeTimer = useRef<number | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const onCloseRef = useRef(onClose);
+  useEffect(() => {
+    onCloseRef.current = onClose;
+  }, [onClose]);
+
+  const runAfterClose = useCallback((action: () => void) => {
+    if (closingRef.current) return;
+    closingRef.current = true;
+    setClosing(true);
+    const reduceMotion =
+      typeof window !== "undefined" &&
+      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    closeTimer.current = window.setTimeout(action, reduceMotion ? 0 : 240);
+  }, []);
+
+  const requestClose = useCallback(() => {
+    runAfterClose(() => onCloseRef.current());
+  }, [runAfterClose]);
+
+  const requestViewCustomer = useCallback(
+    (customerId: string) => {
+      runAfterClose(() => onViewCustomer(customerId));
+    },
+    [onViewCustomer, runAfterClose],
+  );
+
+  // Modal behaviour: lock the page behind the drawer, trap Tab inside it,
+  // close on Escape, and return focus to whatever opened it.
+  useEffect(() => {
+    const previousFocus = document.activeElement as HTMLElement | null;
+    const node = panelRef.current;
+    const focusable = () =>
+      Array.from(
+        node?.querySelectorAll<HTMLElement>(
+          'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        ) ?? [],
+      ).filter((el) => el.offsetParent !== null && getComputedStyle(el).visibility !== "hidden");
+
+    closeButtonRef.current?.focus();
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      // A nested Radix dialog (e.g. the cancellation decision) owns Escape
+      // and focus while it is open; the drawer must not close underneath it.
+      if (document.querySelector('[role="dialog"][data-state="open"]')) return;
+      if (event.key === "Escape") {
+        event.preventDefault();
+        requestClose();
+        return;
+      }
+      if (event.key !== "Tab") return;
+      const items = focusable();
+      if (items.length === 0) return;
+      const first = items[0];
+      const last = items[items.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+      if (closeTimer.current) window.clearTimeout(closeTimer.current);
+      previousFocus?.focus?.();
+    };
+  }, [requestClose]);
 
   const canDecideCancellation = can(PERMISSIONS.CANCELLATIONS_APPROVE);
 
@@ -285,51 +364,90 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
 
   const numTravelers = travelerCount(booking.travelers);
   const commissionRate = Number(booking.commissionRate || 0) * 100;
+  const canChargeNow =
+    booking.paymentTiming === "later" &&
+    booking.paymentStatus !== "SUCCEEDED" &&
+    can("bookings.confirm-payment");
+  const canConfirmPayment =
+    booking.paymentTiming !== "later" &&
+    booking.paymentStatus === "PENDING" &&
+    can("bookings.confirm-payment");
 
   return createPortal(
     <>
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        exit={{ opacity: 0 }}
-        transition={{ duration: 0.2 }}
-        className="fixed inset-0 z-40 bg-black/10"
-        onClick={onClose}
+      <div
+        className={cn(
+          "fixed inset-0 z-40 bg-text-primary/30 motion-reduce:animate-none",
+          closing ? "animate-out fade-out-0 duration-200" : "animate-in fade-in-0 duration-200",
+        )}
+        onClick={requestClose}
+        aria-hidden="true"
       />
-      <motion.div
-        initial={{ x: "100%" }}
-        animate={{ x: 0 }}
-        exit={{ x: "100%" }}
-        transition={{ type: "spring", damping: 30, stiffness: 300 }}
-        className="fixed right-0 top-0 z-50 h-full w-full sm:w-[420px] md:w-[480px] bg-surface-base border-l border-border shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col"
+      <div
+        ref={panelRef}
+        className={cn(
+          "fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-border bg-surface-base shadow-[-8px_0_24px_rgba(0,0,0,0.12)] motion-reduce:animate-none sm:w-[480px] lg:w-[560px]",
+          closing
+            ? "animate-out slide-out-to-right duration-200 ease-in"
+            : "animate-in slide-in-from-right duration-300 ease-out",
+        )}
+        role="dialog"
+        aria-modal="true"
+        aria-label={`Booking ${booking.bookingNumber}`}
       >
-        <div className="flex items-start justify-between gap-3 px-5 py-4 border-b border-border shrink-0">
-          <div className="min-w-0">
-            <p className="text-[10px] font-semibold uppercase tracking-wider text-text-tertiary">Booking Detail</p>
-            <h2 className="text-base font-semibold text-text-primary truncate mt-0.5">{booking.bookingNumber}</h2>
-            <div className="flex items-center gap-1.5 mt-2">
-              <StatusChip status={booking.status} />
-              <StatusChip status={booking.paymentStatus} />
+        <div className="shrink-0 border-b border-border px-6 py-5">
+          <div className="flex items-start justify-between gap-4">
+            <div className="min-w-0">
+              <p className="text-[11px] font-medium text-text-tertiary">Booking detail</p>
+              <h2 className="mt-1 truncate text-lg font-semibold tracking-[-0.01em] text-text-primary">
+                {booking.bookingNumber}
+              </h2>
+              <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                <StatusChip status={booking.status} />
+                <StatusChip status={booking.paymentStatus} />
+              </div>
+            </div>
+            <button
+              ref={closeButtonRef}
+              onClick={requestClose}
+              aria-label="Close booking detail"
+              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-text-tertiary transition-colors hover:bg-surface-muted hover:text-text-primary"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+
+          <div className="mt-4 grid grid-cols-3 gap-3 rounded-xl bg-surface-muted px-4 py-3">
+            <div className="min-w-0">
+              <p className="text-[10px] font-medium text-text-tertiary">Total</p>
+              <p className="tnum mt-0.5 truncate text-sm font-semibold text-text-primary">
+                {formatCurrency(Number(booking.grossAmount), booking.currency)}
+              </p>
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-medium text-text-tertiary">Travel date</p>
+              <p className="mt-0.5 truncate text-sm font-medium text-text-primary">
+                {new Date(booking.travelDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+              </p>
+            </div>
+            <div className="min-w-0">
+              <p className="text-[10px] font-medium text-text-tertiary">Guests</p>
+              <p className="tnum mt-0.5 text-sm font-medium text-text-primary">
+                {numTravelers}
+              </p>
             </div>
           </div>
-          <button
-            onClick={onClose}
-            aria-label="Close booking detail"
-            className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-text-tertiary hover:text-text-primary hover:bg-surface-muted transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
         </div>
 
         <div className="flex-1 overflow-y-auto">
-          <div className="p-5 space-y-5">
+          <div className="space-y-7 p-6">
             <div className="flex items-start gap-4">
               <button
-                onClick={() => onViewCustomer(booking.customer.id)}
+                onClick={() => requestViewCustomer(booking.customer.id)}
                 className="shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-full"
                 title="View customer profile"
               >
-                <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-base font-bold text-primary ring-2 ring-primary/10">
+                <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-base font-semibold text-primary ring-2 ring-primary/10">
                   {booking.customer.photoURL ? (
                     <OptimizedImage src={booking.customer.photoURL} alt="" width={48} className="absolute inset-0 h-full w-full object-cover" />
                   ) : null}
@@ -338,8 +456,17 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                   </span>
                 </div>
               </button>
-              <div className="flex-1 min-w-0 space-y-1">
-                <h3 className="text-sm font-semibold text-text-primary truncate">{booking.customer.name}</h3>
+              <div className="min-w-0 flex-1 space-y-1">
+                <div className="flex items-start justify-between gap-3">
+                  <h3 className="truncate text-sm font-semibold text-text-primary">{booking.customer.name}</h3>
+                  <button
+                    type="button"
+                    onClick={() => requestViewCustomer(booking.customer.id)}
+                    className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+                  >
+                    View profile <ArrowUpRight className="h-3 w-3" />
+                  </button>
+                </div>
                 {booking.customer.email && (
                   <p className="flex items-center gap-1.5 text-xs text-text-secondary truncate">
                     <Mail className="h-3 w-3 shrink-0" />
@@ -357,10 +484,10 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
 
             <button
               onClick={() => navigate(`/admin/tours/${booking.tour.id}`)}
-              className="w-full rounded-xl border border-border bg-surface-base p-4 space-y-1 text-left cursor-pointer hover:border-primary/40 hover:shadow-tinted transition-all"
+              className="w-full cursor-pointer space-y-1 rounded-xl border border-border bg-surface-base p-4 text-left transition-colors hover:border-primary/40"
             >
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg shrink-0 overflow-hidden bg-surface-muted border border-border">
+                <div className="w-10 h-10 rounded-xl shrink-0 overflow-hidden bg-surface-muted border border-border">
                   {booking.tour.coverPhoto ? (
                     <OptimizedImage src={booking.tour.coverPhoto} alt="" width={40} className="w-full h-full object-cover" />
                   ) : (
@@ -416,7 +543,11 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
             </div>
 
             <div>
-              <SectionTitle>Travelers</SectionTitle>
+              <SectionTitle
+                action={<span className="tnum text-[11px] font-medium text-text-tertiary">{numTravelers} total</span>}
+              >
+                Travelers
+              </SectionTitle>
               <div className="space-y-3">
                 <TravelerBreakdown travelers={booking.travelers} />
                 {booking.travelers.details && booking.travelers.details.length > 0 && (
@@ -472,7 +603,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                 <SectionTitle>Pickup Details</SectionTitle>
                 <div className="rounded-xl border border-border p-4 space-y-2">
                   {booking.pickup.pickupLater ? (
-                    <div className="flex items-center gap-2 text-xs text-amber-600">
+                    <div className="flex items-center gap-2 text-xs text-status-pending-text">
                       <Clock className="h-3.5 w-3.5" />
                       <span className="font-medium">Customer will choose pickup location later</span>
                     </div>
@@ -498,7 +629,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                         </div>
                       )}
                       {booking.pickup.instructions && (
-                        <p className="text-[10px] text-text-tertiary bg-surface-muted/50 rounded-lg p-2">{booking.pickup.instructions}</p>
+                        <p className="text-[10px] text-text-tertiary bg-surface-muted rounded-xl p-2">{booking.pickup.instructions}</p>
                       )}
                     </>
                   )}
@@ -516,39 +647,39 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
               <SectionTitle>Pricing</SectionTitle>
               <div className="rounded-xl border border-border p-4 space-y-0.5">
                 <DetailRow icon={<Banknote className="h-3 w-3" />} label="Subtotal">
-                  {booking.currency} {Number(booking.subtotal).toLocaleString()}
+                  <span className="tnum">{formatCurrency(Number(booking.subtotal), booking.currency)}</span>
                 </DetailRow>
                 <DetailRow icon={<CreditCard className="h-3 w-3" />} label="Fees">
-                  {booking.currency} {Number(booking.fees).toLocaleString()}
+                  <span className="tnum">{formatCurrency(Number(booking.fees), booking.currency)}</span>
                 </DetailRow>
                 {Number(booking.discounts) > 0 && (
                   <DetailRow icon={<Percent className="h-3 w-3" />} label="Discounts">
-                    <span className="text-red-600 font-medium">
-                      -{booking.currency} {Number(booking.discounts).toLocaleString()}
+                    <span className="text-status-rejected-text font-medium">
+                      <span className="tnum">-{formatCurrency(Number(booking.discounts), booking.currency)}</span>
                     </span>
                     {booking.offerName && (
-                      <span className="ml-1.5 inline-flex items-center gap-0.5 px-1.5 py-0 rounded-full bg-red-50 border border-red-200/60 text-[10px] font-medium text-red-700">
+                      <span className="ml-1.5 inline-flex items-center gap-0.5 px-1.5 py-0 rounded-full bg-status-rejected/10 border border-status-rejected/30 text-[10px] font-medium text-status-rejected-text">
                         <Tag size={9} />
                         {booking.offerName}
                         {booking.offerPromoCode && (
-                          <span className="ml-0.5 px-1 py-px rounded bg-red-100 text-red-800 font-mono text-[9px]">
+                          <span className="ml-0.5 px-1 py-px rounded bg-status-rejected/10 text-status-rejected-text font-mono text-[9px]">
                             {booking.offerPromoCode}
                           </span>
                         )}
                       </span>
                     )}
                     {booking.offerDiscountType === 'PERCENTAGE' && booking.offerDiscountPct && (
-                      <span className="ml-1 text-xs text-red-600">({booking.offerDiscountPct}% off)</span>
+                      <span className="ml-1 text-xs text-status-rejected-text">({booking.offerDiscountPct}% off)</span>
                     )}
                     {booking.offerDiscountType === 'FIXED' && booking.offerDiscountFix && (
-                      <span className="ml-1 text-xs text-red-600">(-{booking.currency} {booking.offerDiscountFix} off)</span>
+                      <span className="ml-1 text-xs text-status-rejected-text">(-{formatCurrency(Number(booking.offerDiscountFix), booking.currency)} off)</span>
                     )}
                   </DetailRow>
                 )}
                 <div className="border-t border-border pt-2 mt-2 flex items-center justify-between">
                   <span className="text-xs font-semibold text-text-primary">Total</span>
-                  <span className="text-sm font-bold text-text-primary tabular-nums">
-                    {booking.currency} {Number(booking.grossAmount).toLocaleString()}
+                  <span className="tnum text-sm font-semibold text-text-primary">
+                    {formatCurrency(Number(booking.grossAmount), booking.currency)}
                   </span>
                 </div>
               </div>
@@ -560,18 +691,18 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                 <div className="rounded-xl border border-border p-4 space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-text-secondary">Commission Rate</span>
-                    <span className="text-xs font-medium text-text-primary tabular-nums">{commissionRate}%</span>
+                    <span className="text-xs font-medium text-text-primary tnum">{commissionRate}%</span>
                   </div>
                   <div className="flex items-center justify-between">
                     <span className="text-xs text-text-secondary">Platform Commission</span>
-                    <span className="text-xs font-medium text-text-primary tabular-nums">
-                      {booking.currency} {Number(booking.platformCommission).toLocaleString()}
+                    <span className="tnum text-xs font-medium text-text-primary">
+                      {formatCurrency(Number(booking.platformCommission), booking.currency)}
                     </span>
                   </div>
                   <div className="border-t border-border pt-2 flex items-center justify-between">
                     <span className="text-xs font-medium text-text-primary">Supplier Payout</span>
-                    <span className="text-xs font-semibold text-text-primary tabular-nums">
-                      {booking.currency} {Number(booking.supplierPayout).toLocaleString()}
+                    <span className="tnum text-xs font-semibold text-text-primary">
+                      {formatCurrency(Number(booking.supplierPayout), booking.currency)}
                     </span>
                   </div>
                 </div>
@@ -589,32 +720,12 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                   <StatusChip status={booking.paymentStatus} />
                 </div>
                 {booking.paymentTiming === "later" && (
-                  <div className="flex items-center gap-2 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2">
-                    <Clock className="h-3.5 w-3.5 text-amber-600 shrink-0" />
-                    <span className="text-xs text-amber-700">
+                  <div className="flex items-center gap-2 rounded-xl bg-status-pending/10 border border-status-pending/30 px-3 py-2">
+                    <Clock className="h-3.5 w-3.5 text-status-pending-text shrink-0" />
+                    <span className="text-xs text-status-pending-text">
                       Reserve now, pay later — card on file, auto-charges before activity date
                     </span>
                   </div>
-                )}
-                {booking.paymentTiming === "later" && booking.paymentStatus !== "SUCCEEDED" && can('bookings.confirm-payment') && (
-                  <Button
-                    onClick={() => onChargeNow(booking)}
-                    size="sm"
-                    className="w-full h-8 bg-amber-600 hover:bg-amber-700 text-white"
-                  >
-                    <Zap className="h-3.5 w-3.5" />
-                    Charge Now
-                  </Button>
-                )}
-                {booking.paymentTiming !== "later" && booking.paymentStatus === "PENDING" && can('bookings.confirm-payment') && (
-                  <Button
-                    onClick={() => onConfirmPayment(booking)}
-                    size="sm"
-                    className="w-full h-8"
-                  >
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    Confirm Payment
-                  </Button>
                 )}
               </div>
             </div>
@@ -627,8 +738,8 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                     <div key={payout.id} className="flex items-center justify-between gap-2">
                       <div className="flex items-center gap-2 min-w-0">
                         <Banknote className="h-4 w-4 text-text-tertiary shrink-0" />
-                        <span className="text-xs font-medium text-text-primary">
-                          {payout.currency} {Number(payout.amount).toLocaleString()}
+                        <span className="tnum text-xs font-medium text-text-primary">
+                          {formatCurrency(Number(payout.amount), payout.currency)}
                         </span>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
@@ -649,7 +760,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
             {booking.specialRequests && (
               <div>
                 <SectionTitle>Special Requests</SectionTitle>
-                <div className="rounded-xl border border-border bg-surface-muted/50 p-3">
+                <div className="rounded-xl border border-border bg-surface-muted p-3">
                   <p className="text-xs text-text-secondary">{booking.specialRequests}</p>
                 </div>
               </div>
@@ -711,7 +822,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                         )}
                       </div>
                       {pending.payload?.explanation && (
-                        <p className="whitespace-pre-wrap rounded-lg bg-surface-muted/60 p-2 text-[11px] text-text-secondary">
+                        <p className="whitespace-pre-wrap rounded-xl bg-surface-muted p-2 text-[11px] text-text-secondary">
                           {String(pending.payload.explanation)}
                         </p>
                       )}
@@ -749,7 +860,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                   ) : localDecision ? (
                     <div
                       className={cn(
-                        "rounded-lg border p-3",
+                        "rounded-xl border p-3",
                         localDecision.status === "APPROVED"
                           ? "border-status-active/30 bg-status-active/5"
                           : "border-status-rejected/30 bg-status-rejected/5",
@@ -832,7 +943,30 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
             </div>
           </div>
         </div>
-      </motion.div>
+
+        <div className="shrink-0 border-t border-border bg-surface-base p-4">
+          <div className="flex gap-2">
+            <Button variant="outline" className="flex-1" onClick={requestClose}>
+              Close
+            </Button>
+            {canChargeNow && (
+              <Button
+                className="flex-1 bg-status-pending text-white hover:bg-status-pending/90"
+                onClick={() => onChargeNow(booking)}
+              >
+                <Zap className="h-3.5 w-3.5" />
+                Charge now
+              </Button>
+            )}
+            {canConfirmPayment && (
+              <Button className="flex-1" onClick={() => onConfirmPayment(booking)}>
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Confirm payment
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
 
       {decisionMode && decisionRequest && (
         <CancellationDecisionDialog

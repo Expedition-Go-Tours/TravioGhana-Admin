@@ -1,29 +1,3 @@
-.container {
-  padding-left: 0.75rem;
-  padding-right: 0.75rem;
-}
-
-@media (min-width: 768px) {
-  .container {
-    padding-left: 1rem;
-    padding-right: 1rem;
-  }
-}
-
-@media (min-width: 1024px) {
-  .container {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
-@media (min-width: 1440px) {
-  .container {
-    padding-left: 2rem;
-    padding-right: 2rem;
-  }
-}
-
 .kpiGrid {
   display: flex;
   flex-wrap: wrap;
@@ -52,48 +26,19 @@
   }
 }
 
-.contentGrid3 {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
-}
-
-@media (min-width: 768px) {
-  .contentGrid3 {
-    grid-template-columns: 2fr 1fr;
-  }
-}
-
-@media (min-width: 1024px) {
-  .contentGrid3 {
-    grid-template-columns: 1fr 1fr 1fr;
-  }
-}
-
-.contentGrid2 {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 1.25rem;
-}
-
-@media (min-width: 768px) {
-  .contentGrid2 {
-    grid-template-columns: 1fr 1fr;
-  }
-}
-
 .hideMobile {
   display: none;
 }
 
 @media (min-width: 640px) {
   .hideMobile {
-    display: table-cell;
+    display: inline-block;
   }
 }
 
 .chartBar {
   width: 100%;
+  min-width: 0;
   height: 160px;
 }
 
@@ -105,6 +50,7 @@
 
 .chartPie {
   width: 100%;
+  min-width: 0;
   height: 160px;
 }
 

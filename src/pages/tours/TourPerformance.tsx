@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { Search, Map, DollarSign, Star, Eye, TrendingUp, X, ArrowLeft } from "lucide-react";
@@ -13,7 +12,6 @@ import { CellThumb, CellTitle, MoneyCell, DateCell, StatusCell } from "@/compone
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import api from "@/lib/axios";
-import { staggerContainer, fadeIn } from "@/lib/animations";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 
 interface Tour {
@@ -101,7 +99,7 @@ export default function TourPerformancePage() {
       header: "Bookings",
       sortable: true,
       align: "right",
-      render: (r) => <span className="font-semibold text-text-primary tabular-nums">{formatNumber(r._count?.bookings ?? r.totalBookings)}</span>,
+      render: (r) => <span className="font-semibold text-text-primary tnum">{formatNumber(r._count?.bookings ?? r.totalBookings)}</span>,
     },
     {
       key: "totalRevenue",
@@ -121,7 +119,7 @@ export default function TourPerformancePage() {
         const views = Number(r.viewCount || 0);
         const bookings = Number(r._count?.bookings ?? r.totalBookings ?? 0);
         const rate = views > 0 ? (bookings / views) * 100 : 0;
-        return <span className="text-xs font-medium text-text-secondary tabular-nums">{rate.toFixed(1)}%</span>;
+        return <span className="text-xs font-medium text-text-secondary tnum">{rate.toFixed(1)}%</span>;
       },
     },
     {
@@ -130,8 +128,8 @@ export default function TourPerformancePage() {
       sortable: true,
       align: "right",
       render: (r) => (
-        <span className="inline-flex items-center gap-1 text-sm font-medium text-text-primary tabular-nums">
-          {Number(r.averageRating ?? 0).toFixed(1)} <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+        <span className="inline-flex items-center gap-1 text-sm font-medium text-text-primary tnum">
+          {Number(r.averageRating ?? 0).toFixed(1)} <Star className="h-3 w-3 fill-status-pending text-status-pending-text" />
         </span>
       ),
     },
@@ -140,14 +138,14 @@ export default function TourPerformancePage() {
       header: "Reviews",
       sortable: true,
       align: "right",
-      render: (r) => <span className="text-text-secondary tabular-nums">{formatNumber(r.reviewCount)}</span>,
+      render: (r) => <span className="text-text-secondary tnum">{formatNumber(r.reviewCount)}</span>,
     },
     {
       key: "viewCount",
       header: "Views",
       sortable: true,
       align: "right",
-      render: (r) => <span className="text-text-secondary tabular-nums">{formatNumber(r.viewCount)}</span>,
+      render: (r) => <span className="text-text-secondary tnum">{formatNumber(r.viewCount)}</span>,
     },
     { key: "createdAt", header: "Created", render: (r) => <DateCell value={r.createdAt} /> },
   ];
@@ -159,7 +157,7 @@ export default function TourPerformancePage() {
           <button onClick={() => navigate(-1)} className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-border bg-surface-base text-text-secondary transition-colors hover:bg-surface-muted hover:text-text-primary">
             <ArrowLeft className="h-4 w-4" />
           </button>
-          <h1 className="text-lg font-semibold text-text-primary">Tour Performance</h1>
+          <h1 className="text-[26px] font-light leading-8 tracking-[-0.26px] text-text-primary">Tour Performance</h1>
         </div>
         {totalCount > 0 && (
           <span className="text-xs text-text-tertiary">{totalCount} tour{totalCount > 1 ? "s" : ""}</span>
@@ -167,35 +165,35 @@ export default function TourPerformancePage() {
       </div>
 
       {/* Summary Cards */}
-      <motion.div variants={staggerContainer} initial="hidden" animate="visible" className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <motion.div variants={fadeIn}><KpiCard
+      <div  className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div><KpiCard
           label="Total Tours"
           value={isLoading ? "..." : formatNumber(totalCount)}
           icon={<Map className="h-5 w-5" />}
           accent="emerald"
-        /></motion.div>
-        <motion.div variants={fadeIn}><KpiCard
+        /></div>
+        <div><KpiCard
           label="Total Revenue"
           value={isLoading ? "..." : formatCurrency(aggregate.revenue)}
           icon={<DollarSign className="h-5 w-5" />}
           accent="blue"
-        /></motion.div>
-        <motion.div variants={fadeIn}><KpiCard
+        /></div>
+        <div><KpiCard
           label="Total Bookings"
           value={isLoading ? "..." : formatNumber(aggregate.bookings)}
           icon={<TrendingUp className="h-5 w-5" />}
           accent="amber"
-        /></motion.div>
-        <motion.div variants={fadeIn}><KpiCard
+        /></div>
+        <div><KpiCard
           label="Total Views"
           value={isLoading ? "..." : formatNumber(aggregate.views)}
           icon={<Eye className="h-5 w-5" />}
           accent="emerald"
-        /></motion.div>
-      </motion.div>
+        /></div>
+      </div>
 
       <Card>
-        <CardHeader className="border-b border-border/60 pb-4 pl-5 pr-5 pt-5">
+        <CardHeader className="border-b border-border pb-4 pl-5 pr-5 pt-5">
           <div className="flex flex-wrap items-center gap-3">
             <div className="relative flex-1 min-w-[200px] max-w-xs">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
@@ -253,25 +251,20 @@ export default function TourPerformancePage() {
 }
 
 function KpiCard({ label, value, icon, accent }: { label: string; value: string; icon: React.ReactNode; accent: "emerald" | "blue" | "amber" }) {
-  const bg = {
-    emerald: "bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/30 dark:to-emerald-900/20",
-    blue: "bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950/30 dark:to-blue-900/20",
-    amber: "bg-gradient-to-br from-amber-50 to-amber-100 dark:from-amber-950/30 dark:to-amber-900/20",
+  const tone = {
+    emerald: "bg-primary/10 text-primary",
+    blue: "bg-status-approved/10 text-status-approved-text",
+    amber: "bg-status-pending/10 text-status-pending-text",
   }[accent];
   return (
-    <motion.div
-      whileHover={{ y: -2 }}
-      whileTap={{ scale: 0.98 }}
-      transition={{ duration: 0.2, ease: "easeOut" }}
-      className={`rounded-lg shadow-sm border-0 p-5 ${bg}`}
-    >
-      <div className="flex items-start justify-between">
-        <div className="space-y-1.5">
-          <p className="text-sm font-medium text-muted-foreground">{label}</p>
-          <p className="text-3xl font-bold tracking-tight text-text-primary tabular-nums">{value}</p>
+    <div className="rounded-xl border border-border bg-surface-base p-5">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0 space-y-1.5">
+          <p className="text-[13px] font-medium leading-snug text-text-tertiary">{label}</p>
+          <p className="tnum text-[26px] font-light leading-tight tracking-[-0.26px] text-text-primary">{value}</p>
         </div>
-        <div className="rounded-xl bg-primary/10 p-3 text-primary">{icon}</div>
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${tone}`}>{icon}</div>
       </div>
-    </motion.div>
+    </div>
   );
 }

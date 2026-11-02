@@ -1,5 +1,4 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { Send, ChevronDown, Paperclip, ChevronRight, Trash2, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -91,20 +90,20 @@ const accent = (type: "suppliers" | "customers" | "expedition") => {
   const isExp = type === "expedition";
   return {
     bg: isSup ? "green" : isExp ? "purple" : "blue",
-    bg30: isSup ? "bg-green-50/30" : isExp ? "bg-purple-50/30" : "bg-blue-50/30",
-    bg50: isSup ? "bg-green-50" : isExp ? "bg-purple-50" : "bg-blue-50",
-    text: isSup ? "text-green-600" : isExp ? "text-purple-600" : "text-blue-600",
-    text400: isSup ? "text-green-400" : isExp ? "text-purple-400" : "text-blue-400",
-    text700: isSup ? "text-green-700" : isExp ? "text-purple-700" : "text-blue-700",
-    border: isSup ? "focus-visible:border-green-400" : isExp ? "focus-visible:border-purple-400" : "focus-visible:border-blue-400",
-    gradient: isSup ? "bg-green-500" : isExp ? "bg-purple-500" : "bg-status-approved",
-    hover: isSup ? "hover:bg-green-50" : isExp ? "hover:bg-purple-50" : "hover:bg-blue-50",
-    hoverText: isSup ? "hover:text-green-600" : isExp ? "hover:text-purple-600" : "hover:text-blue-600",
-    hoverText700: isSup ? "hover:text-green-700" : isExp ? "hover:text-purple-700" : "hover:text-blue-700",
-    button: isSup ? "bg-green-600 hover:bg-green-700" : isExp ? "bg-purple-600 hover:bg-purple-700" : "bg-blue-600 hover:bg-blue-700",
-    scrollBg: isSup ? "hover:bg-green-50" : isExp ? "hover:bg-purple-50" : "hover:bg-blue-50",
-    loadMore: isSup ? "hover:bg-green-50 text-green-600" : isExp ? "hover:bg-purple-50 text-purple-600" : "hover:bg-blue-50 text-blue-600",
-    badge: isSup ? "bg-green-600" : isExp ? "bg-purple-600" : "bg-blue-600",
+    bg30: isSup ? "bg-primary/10" : isExp ? "bg-status-processing/10" : "bg-status-approved/10",
+    bg50: isSup ? "bg-primary/10" : isExp ? "bg-status-processing/10" : "bg-status-approved/10",
+    text: isSup ? "text-primary" : isExp ? "text-status-processing-text" : "text-status-approved-text",
+    text400: isSup ? "text-primary" : isExp ? "text-status-processing-text" : "text-status-approved-text",
+    text700: isSup ? "text-primary" : isExp ? "text-status-processing-text" : "text-status-approved-text",
+    border: isSup ? "focus-visible:border-border" : isExp ? "focus-visible:border-status-processing/30" : "focus-visible:border-status-approved/30",
+    gradient: isSup ? "bg-primary" : isExp ? "bg-status-processing" : "bg-status-approved",
+    hover: isSup ? "hover:bg-primary/10" : isExp ? "hover:bg-status-processing/10" : "hover:bg-status-approved/10",
+    hoverText: isSup ? "hover:text-primary" : isExp ? "hover:text-status-processing-text" : "hover:text-status-approved-text",
+    hoverText700: isSup ? "hover:text-primary" : isExp ? "hover:text-status-processing-text" : "hover:text-status-approved-text",
+    button: isSup ? "bg-primary hover:bg-primary" : isExp ? "bg-status-processing hover:bg-status-processing" : "bg-status-approved hover:bg-status-approved",
+    scrollBg: isSup ? "hover:bg-primary/10" : isExp ? "hover:bg-status-processing/10" : "hover:bg-status-approved/10",
+    loadMore: isSup ? "hover:bg-primary/10 text-primary" : isExp ? "hover:bg-status-processing/10 text-status-processing-text" : "hover:bg-status-approved/10 text-status-approved-text",
+    badge: isSup ? "bg-primary" : isExp ? "bg-status-processing" : "bg-status-approved",
   };
 };
 
@@ -296,8 +295,8 @@ export function ChatWindow({
 
   if (!conversation) {
     return (
-      <div className={cn("flex flex-1 w-full flex-col items-center justify-center text-center", a.bg30)}>
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-surface-base shadow-sm">
+      <div className={cn("flex flex-1 w-full flex-col items-center justify-center text-center bg-surface-muted")}>
+        <div className="flex h-16 w-16 items-center justify-center rounded-full border border-border bg-surface-base">
           <Send className={cn("h-6 w-6", a.text400)} />
         </div>
         <p className="mt-4 text-sm font-medium text-text-secondary">
@@ -313,7 +312,7 @@ export function ChatWindow({
   return (
     <div className="flex flex-1 min-h-0 flex-col">
       <div
-        className="group flex items-center gap-1 border-b border-border/50 bg-surface-base px-5 py-3"
+        className="group flex items-center gap-1 border-b border-border bg-surface-base px-5 py-3"
       >
         {onBack && (
           <button
@@ -328,7 +327,7 @@ export function ChatWindow({
           className="flex cursor-pointer items-center gap-3 flex-1 min-w-0"
           onClick={() => otherParticipant?.id && onViewProfile?.(otherParticipant.id)}
         >
-          <div className={cn("relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br text-sm font-bold text-white shadow-sm", a.gradient)}>
+          <div className={cn("relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white ", a.gradient)}>
             <span>{headerName.charAt(0).toUpperCase()}</span>
             {otherParticipant?.photoURL && (
               <OptimizedImage
@@ -348,8 +347,8 @@ export function ChatWindow({
               <span className={cn(
                 "shrink-0 rounded-full px-1.5 py-[1px] text-[10px] font-medium leading-normal",
                 otherParticipant?.roles?.includes('supplier')
-                  ? "bg-blue-50 text-blue-600"
-                  : "bg-purple-50 text-purple-600"
+                  ? "bg-status-approved/10 text-status-approved-text"
+                  : "bg-status-processing/10 text-status-processing-text"
               )}>
                 {otherParticipant?.roles?.includes('supplier')
                   ? "Supplier"
@@ -360,7 +359,7 @@ export function ChatWindow({
             </div>
             <p className="text-xs text-text-tertiary">{formatLastSeen(otherParticipant?.lastLoginAt)}</p>
           </div>
-          <ChevronRight className={cn("h-4 w-4 shrink-0 text-text-tertiary transition-all duration-200 group-hover:translate-x-0.5", chatType === "suppliers" ? "group-hover:text-green-600" : "group-hover:text-blue-600")} />
+          <ChevronRight className={cn("h-4 w-4 shrink-0 text-text-tertiary transition-colors duration-200", chatType === "suppliers" ? "group-hover:text-primary" : "group-hover:text-status-approved-text")} />
         </div>
         {onDeleteConversation && (
           <button
@@ -369,7 +368,7 @@ export function ChatWindow({
                 await onDeleteConversation();
               }
             }}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-text-tertiary transition-all hover:bg-red-50 hover:text-red-500"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-text-tertiary transition-colors hover:bg-status-rejected/10 hover:text-status-rejected-text"
             title="Delete conversation"
           >
             <Trash2 className="h-4 w-4" />
@@ -380,7 +379,7 @@ export function ChatWindow({
       <div
         ref={messagesContainerRef}
         onScroll={handleScroll}
-        className={cn("flex-1 overflow-y-auto min-h-0 scrollbar-none", a.bg30)}
+        className={cn("flex-1 overflow-y-auto min-h-0 scrollbar-none", "bg-surface-muted")}
       >
         <div className="px-4 py-3">
           {hasMore && (
@@ -388,7 +387,7 @@ export function ChatWindow({
               <button
                 onClick={onLoadMore}
                 disabled={loadingMore}
-                className={cn("rounded-full bg-surface-base px-4 py-1.5 text-xs shadow-sm disabled:opacity-50 transition-colors", a.loadMore)}
+                className={cn("rounded-full bg-surface-base px-4 py-1.5 text-xs disabled:opacity-50 transition-colors", a.loadMore)}
               >
                 {loadingMore ? "Loading..." : "Load older messages"}
               </button>
@@ -406,20 +405,20 @@ export function ChatWindow({
                 <div key={msg.id}>
                   {showDateSep && (
                     <div className="my-4 flex items-center gap-3">
-                      <div className="flex-1 border-t border-border/40" />
+                      <div className="flex-1 border-t border-border" />
                       <span className="shrink-0 text-[11px] font-medium text-text-tertiary">
                         {formatDateSeparator(msg.createdAt)}
                       </span>
-                      <div className="flex-1 border-t border-border/40" />
+                      <div className="flex-1 border-t border-border" />
                     </div>
                   )}
                   {idx === 0 && (
                     <div className="my-4 flex items-center gap-3">
-                      <div className="flex-1 border-t border-border/40" />
+                      <div className="flex-1 border-t border-border" />
                       <span className="shrink-0 text-[11px] font-medium text-text-tertiary">
                         {formatDateSeparator(msg.createdAt)}
                       </span>
-                      <div className="flex-1 border-t border-border/40" />
+                      <div className="flex-1 border-t border-border" />
                     </div>
                   )}
                   <div className="py-0.5">
@@ -440,21 +439,18 @@ export function ChatWindow({
             })}
             {typingUser && (
               <div className="flex items-start gap-2 py-0.5">
-                <div className={cn("relative mt-1 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br text-xs font-bold text-white", a.gradient)}>
+                <div className={cn("relative mt-1 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-semibold text-white", a.gradient)}>
                   <span>{headerName.charAt(0).toUpperCase()}</span>
                   {otherParticipant?.photoURL && (
                     <OptimizedImage src={otherParticipant.photoURL} alt="" width={32} className="absolute inset-0 h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
                   )}
                 </div>
-                <div className="flex items-center gap-1.5 rounded-[18px] rounded-bl-[4px] border border-border/50 bg-surface-base px-4 py-3 shadow-sm">
+                <div className="flex items-center gap-1.5 rounded-xl rounded-bl-sm border border-border bg-surface-base px-4 py-3 ">
                   <span className="flex gap-1">
                     {[0, 1, 2].map((i) => (
-                      <motion.span
+                      <span
                         key={i}
-                        className={cn("h-2 w-2 rounded-full", a.badge)}
-                        animate={{ y: [0, -5, 0] }}
-                        transition={{ duration: 0.6, repeat: Infinity, delay: i * 0.15, ease: "easeInOut" }}
-                      />
+                        className={cn("h-2 w-2 rounded-full", a.badge)} />
                     ))}
                   </span>
                 </div>
@@ -464,21 +460,17 @@ export function ChatWindow({
         </div>
       </div>
 
-      <AnimatePresence>
+      <>
         {showScrollBtn && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.8 }}
-            animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.8 }}
+          <button 
             onClick={() => scrollToBottom(true)}
-            className={cn("absolute bottom-20 right-8 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-surface-base shadow-lg border border-border/50 transition-colors", a.scrollBg)}
-          >
+            className={cn("absolute bottom-20 right-8 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-surface-base shadow-lg border border-border transition-colors", a.scrollBg)}>
             <ChevronDown className="h-4 w-4 text-text-primary" />
-          </motion.button>
+          </button>
         )}
-      </AnimatePresence>
+      </>
 
-      <div className="border-t border-border/50 bg-surface-base px-4 py-3">
+      <div className="border-t border-border bg-surface-base px-4 py-3">
         <div className="flex items-end gap-2">
           <button
             onClick={handleAttachmentClick}
@@ -501,14 +493,14 @@ export function ChatWindow({
               placeholder="Type a message..."
               rows={1}
               disabled={sending}
-              className={cn("w-full resize-none rounded-2xl border border-border/70 px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus-visible:outline-none focus-visible:ring-0 focus-visible:bg-surface-base transition-colors disabled:cursor-not-allowed disabled:opacity-50 scrollbar-none", a.bg30, a.border)}
+              className={cn("w-full resize-none rounded-xl border border-border px-4 py-2.5 text-sm text-text-primary placeholder:text-text-tertiary focus-visible:outline-none focus-visible:ring-0 focus-visible:bg-surface-base transition-colors disabled:cursor-not-allowed disabled:opacity-50 scrollbar-none", "bg-surface-muted", a.border)}
               style={{ maxHeight: "120px" }}
             />
           </div>
           <button
             onClick={handleSend}
             disabled={!input.trim() || sending}
-            className={cn("flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed shadow-sm hover:shadow-md", a.button)}
+            className={cn("flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed", a.button)}
           >
             <Send className="h-[18px] w-[18px]" />
           </button>
