@@ -259,6 +259,7 @@ export function CustomerRefundClaimsTab() {
       key: "claim",
       header: "Request",
       rowHeader: true,
+      className: "w-[62%] md:w-[60%] xl:w-[62%]",
       render: (claim) => {
         const ready = claim.status === "SUPPLIER_APPROVED";
         const releasing = claim.status === "PROCESSING";
@@ -282,36 +283,43 @@ export function CustomerRefundClaimsTab() {
                 {booking.tour?.title || "Unknown tour"}
                 <span className="font-mono text-xs text-text-tertiary"> · {booking.bookingNumber || ""}</span>
               </p>
+              <p className="mt-0.5 truncate text-xs text-text-tertiary">
+                {booking.customer?.name || "Customer"} · {claim.type === "FULL" ? "Full refund" : "Partial refund"}
+              </p>
+              <p className="mt-0.5 text-xs font-semibold text-text-secondary md:hidden">
+                {formatCurrency(
+                  claim.type === "FULL"
+                    ? Number(booking.grossAmount || 0)
+                    : Number(claim.requestedAmount || 0),
+                  booking.currency,
+                )}{" "}
+                requested
+              </p>
             </div>
           </div>
         );
       },
     },
     {
-      key: "customer",
-      header: "Customer",
-      hideBelow: "md",
-      render: (claim) => {
-        const booking = claim.booking || {};
-        return (
-          <p className="max-w-[220px] truncate text-xs text-text-tertiary">
-            {booking.customer?.name || "Customer"} · {claim.type === "FULL" ? "Full refund" : "Partial refund"}
-          </p>
-        );
-      },
-    },
-    {
       key: "amount",
-      header: "Paid",
+      header: "Requested",
       numeric: true,
-      hideBelow: "sm",
+      hideBelow: "md",
+      className: "w-[16%]",
       render: (claim) => {
         const booking = claim.booking || {};
         const paidTotal = Number(booking.grossAmount || 0);
+        const requested = claim.type === "FULL"
+          ? paidTotal
+          : Number(claim.requestedAmount || 0);
         return (
           <span className="block">
-            <span className="block text-sm font-semibold text-text-primary tnum">{formatCurrency(paidTotal, booking.currency)}</span>
-            <span className="block text-xs text-text-tertiary">paid</span>
+            <span className="block text-sm font-semibold text-text-primary tnum">
+              {formatCurrency(requested, booking.currency)}
+            </span>
+            <span className="block text-xs text-text-tertiary">
+              of {formatCurrency(paidTotal, booking.currency)}
+            </span>
           </span>
         );
       },
@@ -320,6 +328,7 @@ export function CustomerRefundClaimsTab() {
       key: "actions",
       header: "Actions",
       align: "right",
+      className: "w-[38%] md:w-[24%] xl:w-[22%]",
       render: (claim) => {
         const ready = claim.status === "SUPPLIER_APPROVED";
         const releasing = claim.status === "PROCESSING";
@@ -329,14 +338,29 @@ export function CustomerRefundClaimsTab() {
         return (
           <span className="inline-flex items-center gap-2">
             {(ready || releasing) && (
-              <Button size="sm" variant="outline" className="gap-1" onClick={() => openRelease(claim)}>
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1"
+                aria-label={`${releasing ? "Retry release" : "Release"} ${claim.claimNumber}`}
+                title={releasing ? "Retry release" : "Release refund"}
+                onClick={() => openRelease(claim)}
+              >
                 <RotateCcw className="h-3.5 w-3.5" />
-                {releasing ? "Retry release" : "Release"}
+                <span className="hidden md:inline">{releasing ? "Retry release" : "Release"}</span>
               </Button>
             )}
             {canDecline && (
-              <Button size="sm" variant="outline" className="gap-1" onClick={() => openDecline(claim)}>
-                <XCircle className="h-3.5 w-3.5" /> Decline
+              <Button
+                size="sm"
+                variant="outline"
+                className="gap-1"
+                aria-label={`Decline ${claim.claimNumber}`}
+                title="Decline claim"
+                onClick={() => openDecline(claim)}
+              >
+                <XCircle className="h-3.5 w-3.5" />
+                <span className="hidden xl:inline">Decline</span>
               </Button>
             )}
           </span>
@@ -372,6 +396,7 @@ export function CustomerRefundClaimsTab() {
         keyExtractor={(claim) => claim.id}
         caption={`Refund claims — ${STATUS_TABS.find((t) => t.key === statusTab)?.label ?? statusTab}`}
         size="compact"
+        tableClassName="table-fixed"
         expandedRow={expandedId}
         onRowClick={(claim) => setExpandedId(expandedId === claim.id ? null : claim.id)}
         renderExpanded={(claim) => <ClaimDetail claim={claim} />}

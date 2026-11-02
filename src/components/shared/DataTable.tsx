@@ -89,6 +89,8 @@ interface DataTableProps<T> {
   totals?: React.ReactNode;
   /** Label for the checkbox column, used as its accessible name. */
   selectionLabel?: string;
+  /** Extra classes for the <table> element, e.g. "table-fixed". */
+  tableClassName?: string;
 }
 
 const alignClass: Record<NonNullable<Column<never>["align"]>, string> = {
@@ -147,6 +149,7 @@ export function DataTable<T>({
   rowPending,
   totals,
   selectionLabel = "Select row",
+  tableClassName,
 }: DataTableProps<T>) {
   const { rowPad, rowMinH, headPad } = sizeMap[size];
   const captionId = useId();
@@ -228,6 +231,7 @@ export function DataTable<T>({
           alignClass[col.align ?? (col.numeric ? "right" : "left")],
           col.hideBelow && hideBelowClass[col.hideBelow],
           col.numeric && "tnum",
+          col.className,
         )}
       >
         {col.numeric ? (
@@ -261,7 +265,7 @@ export function DataTable<T>({
             scrollbarGutter: "stable",
           }}
         >
-          <table className="w-full text-sm" aria-busy="true">
+          <table className={cn("w-full text-sm", tableClassName)} aria-busy="true">
             {caption && <caption id={captionId} className="sr-only">{caption}</caption>}
             <thead>
               <tr className={cn("border-b border-border bg-surface-base", headPad)}>
@@ -336,7 +340,7 @@ export function DataTable<T>({
         className="overflow-auto scrollbar-thin"
         style={maxHeight ? { maxHeight } : undefined}
       >
-        <table className="w-full text-sm" aria-busy={false} aria-describedby={caption ? captionId : undefined}>
+        <table className={cn("w-full text-sm", tableClassName)} aria-busy={false} aria-describedby={caption ? captionId : undefined}>
           {caption && <caption id={captionId} className="sr-only">{caption}</caption>}
           <thead>
             <tr className={cn("sticky top-0 z-10 border-b border-border bg-surface-base", headPad)}>
@@ -370,6 +374,7 @@ export function DataTable<T>({
                       alignClass[col.align ?? (col.numeric ? "right" : "left")],
                       col.hideBelow && hideBelowClass[col.hideBelow],
                       col.numeric && "tnum",
+                      col.className,
                       headPad,
                     )}
                   >
@@ -472,7 +477,13 @@ export function DataTable<T>({
                   {columns.map((col) => {
                     const cellPad = cn(rowPad, "align-middle");
                     const align = alignClass[col.align ?? (col.numeric ? "right" : "left")];
-                    const common = cn(cellPad, align, col.hideBelow && hideBelowClass[col.hideBelow], col.numeric && "tnum");
+                    const common = cn(
+                      cellPad,
+                      align,
+                      col.hideBelow && hideBelowClass[col.hideBelow],
+                      col.numeric && "tnum",
+                      col.className,
+                    );
                     if (col.rowHeader) {
                       return (
                         <th
