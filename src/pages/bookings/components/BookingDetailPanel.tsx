@@ -7,6 +7,7 @@ import {
   X,
   MapPin,
   Calendar,
+  CalendarCheck,
   Clock,
   Hash,
   CreditCard,
@@ -56,6 +57,32 @@ const SOURCE_META: Record<string, { label: string; className: string }> = {
 const sourceMeta = (source: string) =>
   SOURCE_META[String(source).toUpperCase()] || { label: source, className: "bg-surface-muted text-text-secondary" };
 
+const BOOKING_STATUS_META: Record<string, { label: string; hint: string }> = {
+  PENDING: { label: "Pending", hint: "Waiting for the supplier to accept this booking." },
+  CONFIRMED: { label: "Confirmed", hint: "The supplier has accepted this booking and the traveler is expected." },
+  COMPLETED: { label: "Completed", hint: "The activity date has passed and the booking is closed." },
+  CANCELLED: { label: "Cancelled", hint: "This booking was cancelled and is no longer active." },
+  NO_SHOW: { label: "No-show", hint: "The customer did not attend the activity." },
+  REFUNDED: { label: "Refunded", hint: "The booking was refunded to the customer." },
+};
+
+const PAYMENT_STATUS_META: Record<string, { label: string; hint: string }> = {
+  PENDING: { label: "Payment pending", hint: "The customer has not been charged yet." },
+  SUCCEEDED: { label: "Paid in full", hint: "The customer's payment was captured successfully." },
+  PROCESSING: { label: "Payment processing", hint: "The payment is still being processed." },
+  FAILED: { label: "Payment failed", hint: "The payment attempt was unsuccessful." },
+  CANCELLED: { label: "Payment cancelled", hint: "The payment was cancelled." },
+  REFUNDED: { label: "Refunded", hint: "The payment was returned to the customer." },
+  PARTIALLY_REFUNDED: { label: "Partially refunded", hint: "Part of the payment was returned to the customer." },
+};
+
+function humanizeStatus(status: string) {
+  return String(status || "Unknown")
+    .replace(/_/g, " ")
+    .toLowerCase()
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
 interface BookingDetailPanelProps {
   booking: Booking;
   onClose: () => void;
@@ -64,16 +91,43 @@ interface BookingDetailPanelProps {
   onViewCustomer: (customerId: string) => void;
 }
 
-function StatusChip({ status }: { status: string }) {
+function StatusChip({ status, label }: { status: string; label?: string }) {
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2 py-0.5 text-[10px] font-semibold ",
+        "inline-flex items-center rounded-full border px-2 py-0.5 text-[11px] font-medium",
         getStatusColor(status),
       )}
     >
-      {status}
+      {label || humanizeStatus(status)}
     </span>
+  );
+}
+
+function StatusTile({
+  label,
+  status,
+  value,
+  hint,
+  icon,
+}: {
+  label: string;
+  status: string;
+  value: string;
+  hint: string;
+  icon: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-surface-base px-3.5 py-3">
+      <div className="flex items-start justify-between gap-2">
+        <span className="flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">
+          {icon}
+          {label}
+        </span>
+        <StatusChip status={status} label={value} />
+      </div>
+      <p className="mt-1.5 text-xs leading-relaxed text-text-secondary">{hint}</p>
+    </div>
   );
 }
 
@@ -372,13 +426,27 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
     booking.paymentTiming !== "later" &&
     booking.paymentStatus === "PENDING" &&
     can("bookings.confirm-payment");
+  const bookingStatusMeta = BOOKING_STATUS_META[booking.status] || {
+    label: humanizeStatus(booking.status),
+    hint: "The current state of this booking.",
+  };
+  const paymentStatusMeta = PAYMENT_STATUS_META[booking.paymentStatus] || {
+    label: humanizeStatus(booking.paymentStatus),
+    hint: "The current state of the customer payment.",
+  };
+  const paymentHint =
+    booking.paymentStatus === "PENDING" && booking.paymentTiming === "later"
+      ? "The customer chose to pay later. Nothing has been charged yet."
+      : paymentStatusMeta.hint;
 
   return createPortal(
     <>
       <div
         className={cn(
           "fixed inset-0 z-40 bg-text-primary/30 motion-reduce:animate-none",
-          closing ? "animate-out fade-out-0 duration-200" : "animate-in fade-in-0 duration-200",
+          closing
+            ? "animate-out fade-out-0 duration-200 [animation-fill-mode:forwards]"
+            : "animate-in fade-in-0 duration-200",
         )}
         onClick={requestClose}
         aria-hidden="true"
@@ -388,7 +456,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
         className={cn(
           "fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-border bg-surface-base shadow-[-8px_0_24px_rgba(0,0,0,0.12)] motion-reduce:animate-none sm:w-[480px] lg:w-[560px]",
           closing
-            ? "animate-out slide-out-to-right duration-200 ease-in"
+            ? "animate-out slide-out-to-right duration-200 ease-in [animation-fill-mode:forwards]"
             : "animate-in slide-in-from-right duration-300 ease-out",
         )}
         role="dialog"
@@ -402,10 +470,6 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
               <h2 className="mt-1 truncate text-lg font-semibold tracking-[-0.01em] text-text-primary">
                 {booking.bookingNumber}
               </h2>
-              <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                <StatusChip status={booking.status} />
-                <StatusChip status={booking.paymentStatus} />
-              </div>
             </div>
             <button
               ref={closeButtonRef}
@@ -441,6 +505,26 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
 
         <div className="flex-1 overflow-y-auto">
           <div className="space-y-7 p-6">
+            <div>
+              <SectionTitle>Status</SectionTitle>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                <StatusTile
+                  label="Booking"
+                  status={booking.status}
+                  value={bookingStatusMeta.label}
+                  hint={bookingStatusMeta.hint}
+                  icon={<CalendarCheck className="h-3 w-3" />}
+                />
+                <StatusTile
+                  label="Payment"
+                  status={booking.paymentStatus}
+                  value={paymentStatusMeta.label}
+                  hint={paymentHint}
+                  icon={<CreditCard className="h-3 w-3" />}
+                />
+              </div>
+            </div>
+
             <div className="flex items-start gap-4">
               <button
                 onClick={() => requestViewCustomer(booking.customer.id)}
@@ -717,7 +801,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                     <CreditCard className="h-4 w-4 text-text-tertiary" />
                     <span className="text-xs font-medium text-text-secondary">Payment Status</span>
                   </span>
-                  <StatusChip status={booking.paymentStatus} />
+                  <StatusChip status={booking.paymentStatus} label={paymentStatusMeta.label} />
                 </div>
                 {booking.paymentTiming === "later" && (
                   <div className="flex items-center gap-2 rounded-xl bg-status-pending/10 border border-status-pending/30 px-3 py-2">
