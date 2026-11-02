@@ -28,6 +28,7 @@ import { useSocketInvalidate } from "@/hooks/useSocketEvent";
 import api from "@/lib/axios";
 import { cn } from "@/lib/utils";
 import { BookingDetailPanel } from "./components/BookingDetailPanel";
+import { CustomerProfilePanel } from "@/pages/reviews/components/CustomerProfilePanel";
 import { ConfirmPaymentDialog } from "./components/ConfirmPaymentDialog";
 import { ChargeNowDialog } from "./components/ChargeNowDialog";
 import type { Booking } from "@/types/booking";
@@ -70,6 +71,7 @@ export default function BookingsPage() {
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [viewCustomerId, setViewCustomerId] = useState<string | null>(null);
   const [confirmPayBooking, setConfirmPayBooking] = useState<Booking | null>(null);
   const limit = 20;
 
@@ -495,13 +497,24 @@ export default function BookingsPage() {
             onChargeNow={(booking) => {
               setChargeNowBooking(booking);
             }}
-            onViewCustomer={() => {
+            onViewCustomer={(customerId) => {
               setSelectedBooking(null);
               setDeepLinkedBookingId(null);
+              setViewCustomerId(customerId);
+              const next = new URLSearchParams(searchParams);
+              next.delete("bookingId");
+              setSearchParams(next, { replace: true });
             }}
           />
         )}
       </>
+
+      {viewCustomerId && (
+        <CustomerProfilePanel
+          customerId={viewCustomerId}
+          onClose={() => setViewCustomerId(null)}
+        />
+      )}
 
       {confirmPayBooking && (
         <ConfirmPaymentDialog
