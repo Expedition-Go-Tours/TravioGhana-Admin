@@ -279,7 +279,7 @@ export function SearchDropdown() {
           setOpen(!open);
         }}
         className={cn(
-          "hidden md:flex h-9 items-center gap-2 rounded-full border px-3 text-sm transition-colors",
+          "hidden h-9 w-[280px] items-center gap-2 rounded-md border px-3 text-sm transition-colors md:flex lg:w-[320px]",
           open
             ? "border-primary/40 bg-surface-base text-text-primary"
             : "border-border bg-surface-muted text-text-tertiary hover:border-text-tertiary hover:text-text-secondary",
@@ -288,10 +288,10 @@ export function SearchDropdown() {
         aria-expanded={open}
         aria-haspopup="dialog"
       >
-        <Search className="h-3.5 w-3.5" />
-        <span>{query || "Search…"}</span>
+        <Search className="h-3.5 w-3.5 shrink-0" />
+        <span className="min-w-0 flex-1 truncate text-left">{query || "Search…"}</span>
         {!open && (
-          <kbd className="ml-2 rounded-md border border-border bg-surface-base px-1.5 py-0.5 text-[10px] font-medium text-text-tertiary">
+          <kbd className="ml-auto shrink-0 rounded-md border border-border bg-surface-base px-1.5 py-0.5 text-[10px] font-medium text-text-tertiary">
             Ctrl K
           </kbd>
         )}
