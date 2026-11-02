@@ -57,7 +57,6 @@ interface OverviewData {
   topSuppliers?: Array<{ id?: string; user?: { name?: string; email?: string; photoURL?: string }; totalEarnings?: number; totalBookings?: number; averageRating?: number }>;
   weeklyBookingData?: Array<{ day: string; count: number }>;
   bookingStatusDistribution?: Array<{ status?: string; count?: number }>;
-  eventFeed?: Array<{ message?: string; userName?: string; createdAt?: string; resource?: string }>;
 }
 
 const statusLabel = (status?: string | null) => {
@@ -117,12 +116,6 @@ export default function OverviewPage() {
           })),
           weeklyBookingData: (d?.weeklyBookingData as Array<{ day: string; count: number }>) || [],
           bookingStatusDistribution: (d?.bookingStatusDistribution as Array<Record<string, unknown>>) || [],
-          eventFeed: ((d?.eventFeed as Array<Record<string, unknown>>) || []).map((e) => ({
-            message: typeof e.properties === "object" && e.properties ? ((e.properties as Record<string, unknown>).message as string) || (e.name as string) : (e.name as string),
-            userName: (e.userName as string) || null,
-            createdAt: e.createdAt as string,
-            resource: (e.resource as string) || "",
-          })),
         } as OverviewData;
       } catch (err: unknown) {
         if (err && typeof err === "object" && "response" in err) {
@@ -280,43 +273,6 @@ export default function OverviewPage() {
   // comparison and changed meaning with the filter.
   const weeklyTrend = calcTrend(overview?.bookings?.today, overview?.bookings?.yesterday);
 
-  // Transform event feed for RecentActivityPanel
-  const activities = (overview?.eventFeed || []).slice(0, 10).map((event, idx) => {
-    const resource = (event.resource || "").toLowerCase();
-    const type:
-      | "booking"
-      | "user"
-      | "review"
-      | "alert"
-      | "update"
-      | "message"
-      | "payout"
-      | "supplier"
-      | "offer"
-      | "team"
-      | "role"
-      | "webhook" =
-      resource === "booking" || resource === "payment" ? "booking"
-      : resource === "user" || resource === "customer" || resource === "authentication" ? "user"
-      : resource === "review" ? "review"
-      : resource === "security" ? "alert"
-      : resource === "tour" || resource === "systemconfig" || resource === "settings" ? "update"
-      : resource === "payout" || resource === "payoutmethod" ? "payout"
-      : resource === "supplierprofile" ? "supplier"
-      : resource === "specialoffer" ? "offer"
-      : resource === "teammember" ? "team"
-      : resource === "adminrole" ? "role"
-      : resource === "webhook" || resource === "socket" ? "webhook"
-      : idx % 3 === 0 ? "booking" : idx % 3 === 1 ? "user" : "update";
-    return {
-      id: String(idx),
-      type,
-      title: event.message || "Activity",
-      description: event.userName || "System",
-      timestamp: event.createdAt || "",
-    };
-  });
-
   const userName = localStorage.getItem("userName") || "Admin";
   const periodShort =
     timeFilter === "last_month" ? "Last month"
@@ -432,10 +388,7 @@ export default function OverviewPage() {
               />
             </div>
             <div className="xl:col-span-1">
-              <RecentActivityPanel
-                activities={activities}
-                loading={overviewLoading}
-              />
+              <RecentActivityPanel />
             </div>
           </div>
 

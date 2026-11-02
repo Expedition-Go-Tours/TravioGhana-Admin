@@ -144,6 +144,9 @@ export default function BookingsPage() {
   const bookingIdFromState = (location.state as { bookingId?: string })?.bookingId;
   const bookingIdFromUrl = searchParams.get("bookingId");
   const bookingId = bookingIdFromState || bookingIdFromUrl;
+  const customerIdFromUrl = searchParams.get("customerId");
+  // The URL is the source of truth for deep links; state covers in-page opens.
+  const activeCustomerId = viewCustomerId || customerIdFromUrl;
 
   // Which booking id the detail sidebar is showing because of a deep link
   // (`?bookingId=` from a booking notification or a marked row). Tracking the
@@ -198,6 +201,13 @@ export default function BookingsPage() {
       setSearchParams(next, { replace: true });
     }
   }, [bookingId, deepLinkBooking, deepLinkedBookingId, location.pathname, location.state?.bookingId, navigate, searchParams, setSearchParams]);
+
+  const closeCustomerProfile = () => {
+    setViewCustomerId(null);
+    const next = new URLSearchParams(searchParams);
+    next.delete("customerId");
+    setSearchParams(next, { replace: true });
+  };
 
   return (
     <div className="space-y-4 md:space-y-5 w-full h-full flex flex-col">
@@ -503,16 +513,17 @@ export default function BookingsPage() {
               setViewCustomerId(customerId);
               const next = new URLSearchParams(searchParams);
               next.delete("bookingId");
+              next.set("customerId", customerId);
               setSearchParams(next, { replace: true });
             }}
           />
         )}
       </>
 
-      {viewCustomerId && (
+      {activeCustomerId && (
         <CustomerProfilePanel
-          customerId={viewCustomerId}
-          onClose={() => setViewCustomerId(null)}
+          customerId={activeCustomerId}
+          onClose={closeCustomerProfile}
         />
       )}
 
