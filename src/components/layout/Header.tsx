@@ -25,6 +25,7 @@ const breadcrumbMap: Record<string, string> = {
   chat: "Messages",
   bookings: "Bookings",
   cancellations: "Cancellations",
+  "refund-requests": "Refund requests",
   settings: "Settings",
 };
 
