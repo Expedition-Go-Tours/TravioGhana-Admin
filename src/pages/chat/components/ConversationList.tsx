@@ -103,7 +103,7 @@ export function ConversationList({
               Unread
             </span>
             {unreadCount > 0 && (
-              <span className={cn("flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold leading-none text-white ", a.badge)}>
+              <span className={cn("flex h-5 min-w-[20px] items-center justify-center rounded-full px-1.5 text-[11px] font-semibold leading-none text-primary-foreground ", a.badge)}>
                 {unreadCount}
               </span>
             )}
@@ -176,7 +176,7 @@ export function ConversationList({
                     selectedId === conv.id && a.bg50
                   )}
                 >
-                  <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white", a.gradient)}>
+                  <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-primary-foreground", a.gradient)}>
                     <span>{name.charAt(0).toUpperCase()}</span>
                     {otherUser?.photoURL && (
                       <OptimizedImage
@@ -230,7 +230,7 @@ export function ConversationList({
                         </span>
                       )}
                       {conv.unreadCount > 0 && (
-                        <span className={cn("flex h-4 min-w-[16px] shrink-0 items-center justify-center rounded-full px-1 text-[10px] font-semibold text-white", a.badge)}>
+                        <span className={cn("flex h-4 min-w-[16px] shrink-0 items-center justify-center rounded-full px-1 text-[10px] font-semibold text-primary-foreground", a.badge)}>
                           {conv.unreadCount}
                         </span>
                       )}

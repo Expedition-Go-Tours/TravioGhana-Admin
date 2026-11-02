@@ -90,9 +90,9 @@ function GrowthTooltip({ active, payload, label, granularity, compare }: GrowthT
   const prev = payload.find((p) => p.dataKey === "prevTotal")?.value;
 
   const rows = [
-    { color: chartColors.blue, name: "Customers", display: formatNumber(customers) },
-    { color: chartColors.amber, name: "Suppliers", display: formatNumber(suppliers) },
-    { color: chartColors.green, name: "Total", display: formatNumber(customers + suppliers) },
+    { color: chartColors.emerald, name: "Customers", display: formatNumber(customers) },
+    { color: chartColors.gold, name: "Suppliers", display: formatNumber(suppliers) },
+    { color: chartColors.primary, name: "Total", display: formatNumber(customers + suppliers) },
   ];
 
   return (
@@ -248,7 +248,7 @@ export default function UserGrowthPage() {
           loading={isLoading}
           trend={makeTrend(deltas.total)}
           trendNote={deltas.total != null ? windowNote : undefined}
-          sparkline={{ data: series.total, color: chartColors.green }}
+          sparkline={{ data: series.total, color: chartColors.primary }}
           subtitle={bucketLabel(latest?.total)}
           onClick={() => openDialog("all")}
         />
@@ -260,7 +260,7 @@ export default function UserGrowthPage() {
           loading={isLoading}
           trend={makeTrend(deltas.customers)}
           trendNote={deltas.customers != null ? windowNote : undefined}
-          sparkline={{ data: series.customers, color: chartColors.blue }}
+          sparkline={{ data: series.customers, color: chartColors.emerald }}
           subtitle={bucketLabel(latest?.customers)}
           onClick={() => openDialog("customer")}
         />
@@ -272,7 +272,7 @@ export default function UserGrowthPage() {
           loading={isLoading}
           trend={makeTrend(deltas.suppliers)}
           trendNote={deltas.suppliers != null ? windowNote : undefined}
-          sparkline={{ data: series.suppliers, color: chartColors.amber }}
+          sparkline={{ data: series.suppliers, color: chartColors.gold }}
           subtitle={bucketLabel(latest?.suppliers)}
           onClick={() => openDialog("supplier")}
         />
@@ -282,7 +282,7 @@ export default function UserGrowthPage() {
           icon={<Activity className="h-5 w-5" />}
           accent="emerald"
           loading={isLoading}
-          sparkline={{ data: series.total, color: chartColors.violet }}
+          sparkline={{ data: series.total, color: chartColors.olive }}
           subtitle={growth.length ? `over ${growth.length} ${bucketNoun.toLowerCase()}s` : undefined}
         />
       </div>
@@ -340,12 +340,12 @@ export default function UserGrowthPage() {
                 <ComposedChart data={chartData} barCategoryGap="18%">
                   <defs>
                     <linearGradient id="uc" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={chartColors.blue} stopOpacity={1} />
-                      <stop offset="100%" stopColor={chartColors.blue} stopOpacity={0.25} />
+                      <stop offset="0%" stopColor={chartColors.emerald} stopOpacity={1} />
+                      <stop offset="100%" stopColor={chartColors.emerald} stopOpacity={0.25} />
                     </linearGradient>
                     <linearGradient id="us" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor={chartColors.amber} stopOpacity={1} />
-                      <stop offset="100%" stopColor={chartColors.amber} stopOpacity={0.25} />
+                      <stop offset="0%" stopColor={chartColors.gold} stopOpacity={1} />
+                      <stop offset="100%" stopColor={chartColors.gold} stopOpacity={0.25} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke={chartAxis.grid} vertical={false} />
@@ -405,11 +405,11 @@ export default function UserGrowthPage() {
               </ResponsiveContainer>
               <div className="flex flex-wrap justify-center gap-6 pt-2">
                 <div className="flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                  <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: chartColors.blue }} />
+                  <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: chartColors.emerald }} />
                   Customers
                 </div>
                 <div className="flex items-center gap-1.5 text-xs font-medium text-text-secondary">
-                  <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: chartColors.amber }} />
+                  <span className="h-2.5 w-2.5 rounded-sm" style={{ backgroundColor: chartColors.gold }} />
                   Suppliers
                 </div>
                 {compare && (
@@ -448,7 +448,7 @@ export default function UserGrowthPage() {
               <div className="divide-y divide-border">
                 {dialogUsers.map((u) => (
                   <div key={u.id} className="flex items-start gap-3 py-3.5 first:pt-0">
-                    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-semibold text-white">
+                    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-semibold text-primary-foreground">
                       <span>{(u.name || u.email || "?").charAt(0).toUpperCase()}</span>
                       {u.photoURL && (
                         <OptimizedImage

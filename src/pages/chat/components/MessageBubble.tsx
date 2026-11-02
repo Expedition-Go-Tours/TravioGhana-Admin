@@ -31,7 +31,7 @@ const statusIcon: Record<MessageStatus, React.ReactNode> = {
   sending: <Loader2 className="h-3 w-3 animate-spin" />,
   sent: <Check className="h-3 w-3" />,
   delivered: <CheckCheck className="h-3 w-3" />,
-  read: <CheckCheck className="h-3 w-3 text-[#53bdeb]" />,
+  read: <CheckCheck className="h-3 w-3 text-primary" />,
 };
 
 export function MessageBubble({
@@ -131,7 +131,7 @@ export function MessageBubble({
         <div className="w-8 shrink-0" />
       ) : showAvatar ? (
         <div
-          className="relative mt-1 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary/100 text-xs font-semibold text-white"
+          className="relative mt-1 flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-semibold text-primary-foreground"
           onClick={() => message.sender?.id && onAvatarClick?.(message.sender.id)}
         >
           <span>{senderName?.charAt(0)?.toUpperCase() || "?"}</span>
@@ -157,7 +157,7 @@ export function MessageBubble({
           className={cn(
             "relative px-3.5 py-2 text-sm leading-relaxed ",
             isOwn
-              ? "rounded-xl rounded-br-sm bg-primary text-white"
+              ? "rounded-xl rounded-br-sm bg-primary text-primary-foreground"
               : "rounded-xl rounded-bl-sm border border-border bg-surface-base text-text-primary"
           )}
         >
@@ -183,7 +183,7 @@ export function MessageBubble({
                 <button
                   onClick={handleSaveEdit}
                   disabled={saving || !editValue.trim()}
-                  className="rounded-full bg-primary px-3 py-1 text-xs font-medium text-white hover:bg-primary transition-colors disabled:opacity-50"
+                  className="rounded-full bg-primary px-3 py-1 text-xs font-medium text-primary-foreground hover:bg-primary transition-colors disabled:opacity-50"
                 >
                   {saving ? "Saving..." : "Save"}
                 </button>
@@ -210,7 +210,7 @@ export function MessageBubble({
                 <span className="whitespace-pre-wrap break-all">{message.content}</span>
               )}
               {message.editedAt && (
-                <span className={cn("ml-1 text-[10px]", isOwn ? "text-white/50" : "text-text-tertiary")}>
+                <span className={cn("ml-1 text-[10px]", isOwn ? "text-primary-foreground/50" : "text-text-tertiary")}>
                   (edited)
                 </span>
               )}
@@ -223,7 +223,7 @@ export function MessageBubble({
                 <span
                   className={cn(
                     "text-[10px] leading-none",
-                    isOwn ? "text-white/70" : "text-text-tertiary"
+                    isOwn ? "text-primary-foreground/70" : "text-text-tertiary"
                   )}
                 >
                   {formatMessageTime(message.createdAt)}

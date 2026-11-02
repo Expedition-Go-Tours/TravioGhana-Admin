@@ -75,7 +75,8 @@ export function TopSuppliers({ suppliers = [], loading }: TopSuppliersProps) {
                     </div>
                   )}
                   <span className={cn(
-                    "absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold text-white ",
+                    "absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-semibold",
+                    idx <= 2 ? "text-primary-foreground" : "text-white",
                     idx === 0 ? "bg-primary" : idx === 1 ? "bg-status-approved" : idx === 2 ? "bg-status-processing" : "bg-text-tertiary"
                   )}>
                     {idx + 1}

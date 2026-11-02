@@ -37,9 +37,9 @@ const periods = [
  * tables directly so phantom steps and fabricated rates can never appear.
  */
 const STEP_META = [
-  { key: "viewed", label: "Tour Viewed", description: "Saw a tour page", icon: Eye, color: chartColors.blue },
-  { key: "checkout_started", label: "Checkout Started", description: "Seat held — checkout begun", icon: CreditCard, color: chartColors.violet },
-  { key: "booking_completed", label: "Booking Completed", description: "Booking created (paid or pay-later)", icon: CheckCircle, color: chartColors.green },
+  { key: "viewed", label: "Tour Viewed", description: "Saw a tour page", icon: Eye, color: chartColors.emerald },
+  { key: "checkout_started", label: "Checkout Started", description: "Seat held — checkout begun", icon: CreditCard, color: chartColors.olive },
+  { key: "booking_completed", label: "Booking Completed", description: "Booking created (paid or pay-later)", icon: CheckCircle, color: chartColors.primary },
 ];
 
 const STEP_LABELS: Record<string, string> = Object.fromEntries(
@@ -47,9 +47,9 @@ const STEP_LABELS: Record<string, string> = Object.fromEntries(
 );
 
 const LEGEND = [
-  { key: "views", label: "Views", color: chartColors.blue },
-  { key: "checkouts", label: "Checkouts", color: chartColors.amber },
-  { key: "bookings", label: "Bookings", color: chartColors.green },
+  { key: "views", label: "Views", color: chartColors.emerald },
+  { key: "checkouts", label: "Checkouts", color: chartColors.gold },
+  { key: "bookings", label: "Bookings", color: chartColors.primary },
 ];
 
 interface FunnelStep {

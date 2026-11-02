@@ -294,7 +294,7 @@ export function NewConversationDialog({
                         isFocused && a.bg50
                       )}
                     >
-                      <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white ", a.gradient)}>
+                      <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-primary-foreground ", a.gradient)}>
                         <span>{initial}</span>
                         {supplier.user?.photoURL && (
                           <OptimizedImage
@@ -348,7 +348,7 @@ export function NewConversationDialog({
                       isFocused && a.bg50
                     )}
                   >
-                    <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white ", a.gradient)}>
+                    <div className={cn("relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-primary-foreground ", a.gradient)}>
                       <span>{initial}</span>
                       {user.photoURL && (
                         <OptimizedImage

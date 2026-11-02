@@ -33,9 +33,9 @@ interface RevenueMonth {
 }
 
 const METRICS = [
-  { key: "revenue", label: "Revenue", color: chartColors.blue },
-  { key: "commission", label: "Commission", color: chartColors.green },
-  { key: "supplierPayout", label: "Supplier payout", color: chartColors.amber },
+  { key: "revenue", label: "Revenue", color: chartColors.emerald },
+  { key: "commission", label: "Commission", color: chartColors.primary },
+  { key: "supplierPayout", label: "Supplier payout", color: chartColors.gold },
 ] as const;
 
 const RANGES: Range[] = [6, 12, 24];

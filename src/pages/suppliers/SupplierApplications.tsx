@@ -92,7 +92,7 @@ function SupplierCard({
       onClick={onView}
     >
       <div className="flex items-start gap-3">
-        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-semibold text-white">
+        <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-sm font-semibold text-primary-foreground">
           <span>{initial}</span>
           {s.user?.photoURL && (
             <OptimizedImage
@@ -259,7 +259,7 @@ export default function SuppliersPage() {
         const initial = name.charAt(0).toUpperCase();
         return (
           <div className="flex items-center gap-3">
-            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-semibold text-white">
+            <div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-semibold text-primary-foreground">
               <span>{initial}</span>
               {r.user?.photoURL && (
                 <OptimizedImage

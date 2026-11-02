@@ -33,7 +33,7 @@ function toFeatureCollection(list: LatLngTuple[][]) {
 
 /**
  * Read-only rendered pickup geoshapes for admin/moderation views: drawn
- * service zones (indigo) plus no-pickup exclusions (rose). Production-safe:
+ * service zones (brand green) plus no-pickup exclusions (rose). Production-safe:
  * WebGL failure and tile/style outages degrade to a textual fallback
  * instead of a blank box or a crashed page.
  */

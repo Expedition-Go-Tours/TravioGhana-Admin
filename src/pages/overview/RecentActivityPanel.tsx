@@ -35,6 +35,8 @@ const activityIcons: Record<string, React.ReactNode> = {
   webhook: <Activity className="h-4 w-4" />,
 };
 
+const greenActivityTypes = new Set(["booking", "user", "update", "message", "payout", "team", "webhook"]);
+
 const activityColors: Record<string, string> = {
   booking: "bg-status-approved",
   user: "bg-status-active",
@@ -133,7 +135,13 @@ export function RecentActivityPanel({ activities = [], loading }: RecentActivity
           ) : (
             filteredActivities.map((activity, index) => (
               <div key={activity.id || index} className="flex items-start gap-3 py-3">
-                <div className={cn("flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-white", activityColors[activity.type])}>
+                <div
+                  className={cn(
+                    "flex h-9 w-9 shrink-0 items-center justify-center rounded-full",
+                    greenActivityTypes.has(activity.type) ? "text-primary-foreground" : "text-white",
+                    activityColors[activity.type],
+                  )}
+                >
                   {activityIcons[activity.type]}
                 </div>
                 <div className="flex-1 min-w-0">

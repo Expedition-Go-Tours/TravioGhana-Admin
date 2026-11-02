@@ -130,7 +130,7 @@ export function PayoutsMethodsTab() {
         const photoUrl = r.photoURL || r.user?.photoURL;
         return (
           <div className="flex items-center gap-2.5">
-            <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-semibold text-white">
+            <div className="relative flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary text-xs font-semibold text-primary-foreground">
               <span>{initial}</span>
               {photoUrl && (
                 <OptimizedImage

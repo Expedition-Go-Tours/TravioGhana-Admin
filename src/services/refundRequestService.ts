@@ -137,10 +137,10 @@ export const STATUS_LABEL: Record<RefundRequestStatus, string> = {
 };
 
 export const STATUS_CLASS: Record<RefundRequestStatus, string> = {
-  PENDING_APPROVAL: "bg-amber-50 text-amber-700 border-amber-200",
-  EXECUTING: "bg-sky-50 text-sky-700 border-sky-200",
-  COMPLETED: "bg-emerald-50 text-emerald-700 border-emerald-200",
-  REJECTED: "bg-red-50 text-red-700 border-red-200",
-  WITHDRAWN: "bg-slate-100 text-slate-600 border-slate-200",
-  FAILED: "bg-red-50 text-red-700 border-red-200",
+  PENDING_APPROVAL: "bg-status-pending/10 text-status-pending-text border-status-pending/30",
+  EXECUTING: "bg-status-processing/10 text-status-processing-text border-status-processing/30",
+  COMPLETED: "bg-status-approved/10 text-status-approved-text border-status-approved/30",
+  REJECTED: "bg-status-rejected/10 text-status-rejected-text border-status-rejected/30",
+  WITHDRAWN: "bg-surface-muted text-text-secondary border-border",
+  FAILED: "bg-status-rejected/10 text-status-rejected-text border-status-rejected/30",
 };

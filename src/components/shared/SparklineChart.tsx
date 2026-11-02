@@ -7,7 +7,7 @@ interface SparklineChartProps {
   height?: number;
 }
 
-export function SparklineChart({ data, color = chartColors.green, height = 40 }: SparklineChartProps) {
+export function SparklineChart({ data, color = chartColors.primary, height = 40 }: SparklineChartProps) {
   const chartData = data.map((value, index) => ({ value, index }));
 
   return (

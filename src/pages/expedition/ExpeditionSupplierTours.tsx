@@ -344,7 +344,7 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
                 alt={supplier.name}
                 className="h-16 w-16 rounded-xl object-cover ring-2 ring-border"
                 fallback={
-                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary text-xl font-semibold text-white">
+                  <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-primary text-xl font-semibold text-primary-foreground">
                     {supplier.name.charAt(0).toUpperCase()}
                   </div>
                 }

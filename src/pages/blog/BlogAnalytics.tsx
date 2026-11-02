@@ -8,7 +8,15 @@ import { SectionError } from "@/components/shared/SectionError";
 import { SectionEmpty } from "@/components/shared/SectionEmpty";
 import api from "@/lib/axios";
 
-const CATEGORY_COLORS = ["hsl(var(--chart-5))", "hsl(var(--status-active))", "#d45a0a", "hsl(var(--status-approved))", "#eab308", "#ec4899", "#06b6d4"];
+const CATEGORY_COLORS = [
+  "hsl(var(--chart-1))",
+  "hsl(var(--chart-2))",
+  "hsl(var(--chart-3))",
+  "hsl(var(--chart-4))",
+  "hsl(var(--chart-5))",
+  "hsl(var(--status-pending))",
+  "hsl(var(--status-suspended))",
+];
 
 export default function BlogAnalytics() {
   const navigate = useNavigate();

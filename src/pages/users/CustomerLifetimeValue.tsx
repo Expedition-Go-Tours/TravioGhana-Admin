@@ -17,7 +17,7 @@ import { chartColors } from "@/components/shared/chartTheme";
 import api from "@/lib/axios";
 import { formatCurrency, formatNumber, formatDate } from "@/lib/utils";
 
-const DIST_COLORS = [chartColors.blue, chartColors.green, chartColors.amber, chartColors.violet, chartColors.red];
+const DIST_COLORS = [chartColors.emerald, chartColors.primary, chartColors.gold, chartColors.olive, chartColors.ruby];
 
 const BOOKING_LABELS: Record<string, string> = {
   "1": "1 Booking",

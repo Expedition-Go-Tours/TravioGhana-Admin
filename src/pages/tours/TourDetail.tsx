@@ -501,7 +501,7 @@ export default function TourDetailPage() {
                     size="sm"
                     onClick={() => reviewMutation.mutate({ action: "approve" })}
                     disabled={reviewMutation.isPending}
-                    className="h-8 bg-primary hover:bg-primary text-white"
+                    className="h-8 bg-primary hover:bg-primary text-primary-foreground"
                   >
                     {isPendingEdits ? "Approve edits" : "Approve"}
                   </Button>

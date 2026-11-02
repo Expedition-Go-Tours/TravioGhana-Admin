@@ -1,12 +1,12 @@
 const v = (name: string) => `hsl(var(--${name}))`;
 
-/** Indigo leads; supporting hues only separate series. */
+/** Green-led data ramp; gold and ruby keep adjacent series distinct. */
 export const chartColors = {
-  green: v("chart-1"),
-  blue: v("chart-2"),
-  amber: v("chart-3"),
-  red: v("chart-4"),
-  violet: v("chart-5"),
+  primary: v("chart-1"),
+  emerald: v("chart-2"),
+  gold: v("chart-3"),
+  ruby: v("chart-4"),
+  olive: v("chart-5"),
 } as const;
 
 export const chartAxis = {

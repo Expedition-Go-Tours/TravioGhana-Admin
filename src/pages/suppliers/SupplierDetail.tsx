@@ -449,9 +449,9 @@ export default function SupplierDetailPage() {
               <BreakdownCard
                 title="Tours by Status"
                 items={[
-                  { label: "Active", value: stats?.tours.active ?? 0, color: chartColors.green },
-                  { label: "Draft", value: stats?.tours.draft ?? 0, color: chartColors.blue },
-                  { label: "Paused", value: stats?.tours.paused ?? 0, color: chartColors.amber },
+                  { label: "Active", value: stats?.tours.active ?? 0, color: chartColors.primary },
+                  { label: "Draft", value: stats?.tours.draft ?? 0, color: chartColors.emerald },
+                  { label: "Paused", value: stats?.tours.paused ?? 0, color: chartColors.gold },
                   { label: "Archived", value: stats?.tours.archived ?? 0, color: "hsl(var(--text-tertiary))" },
                 ]}
                 total={stats?.tours.total ?? 0}
@@ -460,10 +460,10 @@ export default function SupplierDetailPage() {
               <BreakdownCard
                 title="Bookings by Status"
                 items={[
-                  { label: "Confirmed", value: stats?.bookings.confirmed ?? 0, color: chartColors.green },
-                  { label: "Pending", value: stats?.bookings.pending ?? 0, color: chartColors.amber },
-                  { label: "Completed", value: stats?.bookings.completed ?? 0, color: chartColors.blue },
-                  { label: "Cancelled", value: stats?.bookings.cancelled ?? 0, color: chartColors.red },
+                  { label: "Confirmed", value: stats?.bookings.confirmed ?? 0, color: chartColors.primary },
+                  { label: "Pending", value: stats?.bookings.pending ?? 0, color: chartColors.gold },
+                  { label: "Completed", value: stats?.bookings.completed ?? 0, color: chartColors.emerald },
+                  { label: "Cancelled", value: stats?.bookings.cancelled ?? 0, color: chartColors.ruby },
                 ]}
                 total={stats?.bookings.total ?? 0}
                 loading={!stats}
@@ -933,12 +933,12 @@ function AnalyticsCard({ data, loading }: { data?: AnalyticsPoint[]; loading?: b
               <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 0, bottom: 0 }}>
                 <defs>
                   <linearGradient id="supplierGross" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={chartColors.green} stopOpacity={0.25} />
-                    <stop offset="95%" stopColor={chartColors.green} stopOpacity={0} />
+                    <stop offset="5%" stopColor={chartColors.primary} stopOpacity={0.25} />
+                    <stop offset="95%" stopColor={chartColors.primary} stopOpacity={0} />
                   </linearGradient>
                   <linearGradient id="supplierCommission" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor={chartColors.blue} stopOpacity={0.25} />
-                    <stop offset="95%" stopColor={chartColors.blue} stopOpacity={0} />
+                    <stop offset="5%" stopColor={chartColors.emerald} stopOpacity={0.25} />
+                    <stop offset="95%" stopColor={chartColors.emerald} stopOpacity={0} />
                   </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke={chartAxis.grid} />
@@ -963,17 +963,17 @@ function AnalyticsCard({ data, loading }: { data?: AnalyticsPoint[]; loading?: b
                   content={<ChartTooltip formatter={(v) => formatCurrency(Number(v))} />}
                   cursor={{ stroke: chartAxis.reference }}
                 />
-                <Area type="monotone" dataKey="gross" stroke={chartColors.green} strokeWidth={2.5} fillOpacity={1} fill="url(#supplierGross)" name="Gross Revenue" />
-                <Area type="monotone" dataKey="commission" stroke={chartColors.blue} strokeWidth={2.5} fillOpacity={1} fill="url(#supplierCommission)" name="Commission" />
+                <Area type="monotone" dataKey="gross" stroke={chartColors.primary} strokeWidth={2.5} fillOpacity={1} fill="url(#supplierGross)" name="Gross Revenue" />
+                <Area type="monotone" dataKey="commission" stroke={chartColors.emerald} strokeWidth={2.5} fillOpacity={1} fill="url(#supplierCommission)" name="Commission" />
               </AreaChart>
             </ResponsiveContainer>
             <div className="mt-4 flex justify-center gap-6">
               <span className="inline-flex items-center gap-2 text-xs text-text-secondary">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: chartColors.green }} />
+                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: chartColors.primary }} />
                 Gross Revenue
               </span>
               <span className="inline-flex items-center gap-2 text-xs text-text-secondary">
-                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: chartColors.blue }} />
+                <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: chartColors.emerald }} />
                 Commission
               </span>
             </div>
@@ -1264,7 +1264,7 @@ function PayoutMethodCard({ method }: { method: PayoutMethodItem }) {
             <span className="text-sm font-semibold text-text-primary">{method.type?.replace(/_/g, " ") || "Unknown"}</span>
             <div className="mt-0.5 flex items-center gap-2">
               {method.isDefault && (
-                <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold text-white", scheme.badge)}>
+                <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold text-primary-foreground", scheme.badge)}>
                   <Check className="h-3 w-3" /> Default
                 </span>
               )}

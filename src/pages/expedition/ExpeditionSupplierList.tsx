@@ -197,7 +197,7 @@ export default function ExpeditionSupplierList({ onSelectSupplier }: SupplierLis
                       alt={supplier.name}
                       className="h-12 w-12 rounded-full object-cover ring-2 ring-border"
                       fallback={
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-white ring-2 ring-primary/30 dark:ring-primary/30">
+                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground ring-2 ring-primary/30 dark:ring-primary/30">
                           {supplier.name.charAt(0).toUpperCase()}
                         </div>
                       }

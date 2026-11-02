@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    /* Stripe product palette. Indigo is the only brand accent; ink carries all
-       text; hairlines do the structural work. */
+    /* Travio product palette. The wordmark green carries the brand accent;
+       gold and ruby support charts; ink carries all text. */
     --background: 0 0% 100%;
     --foreground: 210 65% 14.5%;
     --card: 0 0% 100%;
@@ -13,8 +13,8 @@
     --popover: 0 0% 100%;
     --popover-foreground: 210 65% 14.5%;
 
-    /* #533afd on #ffffff = 6.19:1. Every fill/label pair below is AA. */
-    --primary: 248 98% 61%;
+    /* #00663A on #ffffff = 7.09:1. White on it = 7.09:1. */
+    --primary: 154 100% 20%;
     /* Fixed dark surface for inverted panels; stays dark in both themes. */
     --brand-dark: 210 65% 14.5%;
     --primary-foreground: 0 0% 100%;
@@ -22,19 +22,19 @@
     --secondary-foreground: 210 65% 14.5%;
     --muted: 210 45% 96%;
     --muted-foreground: 217 17% 46%;
-    --accent: 250 100% 97%;
-    --accent-foreground: 248 70% 42%;
+    --accent: 145 81% 96%;
+    --accent-foreground: 163 88% 20%;
     --destructive: 340 80% 52%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 248 80% 52%;
+    --success: 152 85% 26%;
     --success-foreground: 0 0% 100%;
     --warning: 32 90% 38%;
     --warning-foreground: 0 0% 100%;
 
     --border: 213 24% 91%;
     --input: 210 35% 76%;
-    --ring: 248 98% 61%;
+    --ring: 154 100% 20%;
     --radius: 8px;
 
     /* Ink ramp. primary 15.6:1 on white, secondary 11.2:1, tertiary 4.8:1 on
@@ -47,29 +47,29 @@
     --border-muted: 213 20% 86%;
 
     --status-pending: 32 90% 48%;
-    --status-approved: 214 90% 52%;
-    --status-active: 248 80% 52%;
+    --status-approved: 153 79% 27%;
+    --status-active: 154 100% 20%;
     --status-rejected: 340 80% 52%;
     --status-suspended: 215 12% 48%;
     --status-flagged: 20 85% 50%;
-    --status-processing: 262 60% 58%;
+    --status-processing: 86 78% 27%;
 
     /* Label steps for status badges. The fills above sit at 10% alpha behind
        the badge; these darker steps carry the text and stay above 4.5:1. */
     --status-pending-text: 30 90% 26%;
-    --status-approved-text: 214 90% 32%;
-    --status-active-text: 248 80% 36%;
+    --status-approved-text: 163 88% 20%;
+    --status-active-text: 164 86% 16%;
     --status-rejected-text: 340 80% 32%;
     --status-suspended-text: 215 15% 30%;
     --status-flagged-text: 18 90% 30%;
-    --status-processing-text: 262 70% 38%;
+    --status-processing-text: 86 69% 23%;
 
-    /* Data ramp: indigo first, then blue, amber, ruby, navy. */
-    --chart-1: 248 98% 61%;
-    --chart-2: 210 90% 52%;
-    --chart-3: 32 85% 48%;
-    --chart-4: 340 80% 55%;
-    --chart-5: 238 50% 35%;
+    /* Data ramp: forest, emerald and olive lead; gold and ruby separate series. */
+    --chart-1: 154 100% 20%;
+    --chart-2: 160 84% 34%;
+    --chart-3: 40 100% 36%;
+    --chart-4: 347 77% 50%;
+    --chart-5: 85 85% 35%;
 
 
     --font-display: "Inter", system-ui, sans-serif;
@@ -89,27 +89,27 @@
     --popover: 222 30% 11%;
     --popover-foreground: 210 25% 92%;
 
-    /* #6b5cf0 on white text = 4.8:1. Fills stay bright; labels stay white. */
-    --primary: 248 82% 65%;
+    /* #48D880 on #10151c = 9.96:1. Dark ink on the fill = 8.1:1. */
+    --primary: 143 65% 56%;
     --brand-dark: 222 45% 12%;
-    --primary-foreground: 0 0% 100%;
+    --primary-foreground: 145 80% 10%;
     --secondary: 222 22% 15%;
     --secondary-foreground: 210 22% 86%;
     --muted: 222 20% 14%;
     --muted-foreground: 215 15% 62%;
-    --accent: 248 40% 20%;
-    --accent-foreground: 248 90% 84%;
+    --accent: 149 58% 10%;
+    --accent-foreground: 142 77% 73%;
     --destructive: 340 70% 55%;
     --destructive-foreground: 0 0% 100%;
 
-    --success: 248 82% 68%;
-    --success-foreground: 248 40% 8%;
+    --success: 142 69% 58%;
+    --success-foreground: 145 80% 10%;
     --warning: 32 80% 52%;
     --warning-foreground: 32 40% 8%;
 
     --border: 222 18% 19%;
     --input: 222 18% 24%;
-    --ring: 248 82% 65%;
+    --ring: 143 65% 56%;
 
     /* Dark ink ramp — same spacing rule as the light block. */
     --text-primary: 210 25% 92%;
@@ -120,26 +120,26 @@
     --border-muted: 222 18% 24%;
 
     --status-pending: 32 80% 55%;
-    --status-approved: 214 85% 62%;
-    --status-active: 248 82% 68%;
+    --status-approved: 158 64% 52%;
+    --status-active: 142 69% 58%;
     --status-rejected: 340 70% 60%;
     --status-suspended: 215 10% 55%;
     --status-flagged: 20 80% 56%;
-    --status-processing: 262 60% 62%;
+    --status-processing: 83 78% 55%;
 
     --status-pending-text: 32 90% 72%;
-    --status-approved-text: 214 90% 76%;
-    --status-active-text: 248 90% 82%;
+    --status-approved-text: 152 76% 80%;
+    --status-active-text: 141 79% 85%;
     --status-rejected-text: 340 85% 74%;
     --status-suspended-text: 215 12% 74%;
     --status-flagged-text: 24 90% 72%;
-    --status-processing-text: 262 80% 80%;
+    --status-processing-text: 81 88% 80%;
 
-    --chart-1: 248 82% 68%;
-    --chart-2: 210 90% 62%;
-    --chart-3: 32 85% 58%;
-    --chart-4: 340 80% 64%;
-    --chart-5: 238 45% 74%;
+    --chart-1: 143 65% 56%;
+    --chart-2: 158 64% 52%;
+    --chart-3: 43 96% 56%;
+    --chart-4: 351 95% 71%;
+    --chart-5: 83 78% 55%;
 
 
     --sidebar-bg: 222 35% 7%;

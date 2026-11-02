@@ -360,11 +360,11 @@ export function PayoutsPaymentsTab({
             <div className="flex flex-wrap items-center gap-2">
               <div className="hidden items-center gap-3 pr-1 text-[11px] text-text-tertiary sm:flex">
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartColors.green }} />
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartColors.primary }} />
                   Paid
                 </span>
                 <span className="inline-flex items-center gap-1.5">
-                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartColors.amber }} />
+                  <span className="h-2 w-2 rounded-full" style={{ backgroundColor: chartColors.gold }} />
                   Commission
                 </span>
               </div>
@@ -475,7 +475,7 @@ export function PayoutsPaymentsTab({
                   <Bar
                     yAxisId="paid"
                     dataKey="totalAmount"
-                    fill={chartColors.green}
+                    fill={chartColors.primary}
                     fillOpacity={0.85}
                     name="Paid"
                     radius={[4, 4, 0, 0]}
@@ -485,7 +485,7 @@ export function PayoutsPaymentsTab({
                     yAxisId="commission"
                     type="monotone"
                     dataKey="commission"
-                    stroke={chartColors.amber}
+                    stroke={chartColors.gold}
                     strokeWidth={2.5}
                     name="Commission"
                     dot={false}

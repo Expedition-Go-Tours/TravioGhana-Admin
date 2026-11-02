@@ -327,7 +327,7 @@ export function ChatWindow({
           className="flex cursor-pointer items-center gap-3 flex-1 min-w-0"
           onClick={() => otherParticipant?.id && onViewProfile?.(otherParticipant.id)}
         >
-          <div className={cn("relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-white ", a.gradient)}>
+          <div className={cn("relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full text-sm font-semibold text-primary-foreground ", a.gradient)}>
             <span>{headerName.charAt(0).toUpperCase()}</span>
             {otherParticipant?.photoURL && (
               <OptimizedImage
@@ -439,7 +439,7 @@ export function ChatWindow({
             })}
             {typingUser && (
               <div className="flex items-start gap-2 py-0.5">
-                <div className={cn("relative mt-1 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-semibold text-white", a.gradient)}>
+                <div className={cn("relative mt-1 flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full text-xs font-semibold text-primary-foreground", a.gradient)}>
                   <span>{headerName.charAt(0).toUpperCase()}</span>
                   {otherParticipant?.photoURL && (
                     <OptimizedImage src={otherParticipant.photoURL} alt="" width={32} className="absolute inset-0 h-full w-full object-cover" onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }} />
@@ -500,7 +500,7 @@ export function ChatWindow({
           <button
             onClick={handleSend}
             disabled={!input.trim() || sending}
-            className={cn("flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full text-white transition-colors disabled:opacity-40 disabled:cursor-not-allowed", a.button)}
+            className={cn("flex h-[42px] w-[42px] shrink-0 items-center justify-center rounded-full text-primary-foreground transition-colors disabled:opacity-40 disabled:cursor-not-allowed", a.button)}
           >
             <Send className="h-[18px] w-[18px]" />
           </button>
