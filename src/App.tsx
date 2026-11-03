@@ -11,6 +11,8 @@ import { getDefaultRoute } from "@/lib/permissions";
 import { useDataSocket } from "@/hooks/useDataSocket";
 
 import LoginPage from "@/pages/Login";
+import ForgotPasswordPage from "@/pages/ForgotPassword";
+import ResetPasswordPage from "@/pages/ResetPassword";
 import AuthCallback from "@/pages/auth/AuthCallback";
 import OverviewPage from "@/pages/Overview";
 import RevenueTrendPage from "@/pages/revenue/RevenueTrend";
@@ -83,6 +85,8 @@ function AdminLayout() {
 
 const router = createBrowserRouter([
   { path: "/admin/login", element: <LoginPage /> },
+  { path: "/admin/forgot-password", element: <ForgotPasswordPage /> },
+  { path: "/admin/reset-password", element: <ResetPasswordPage /> },
   { path: "/auth/callback", element: <AuthCallback /> },
   { path: "/cancellations", element: <CancellationsRedirect /> },
   {

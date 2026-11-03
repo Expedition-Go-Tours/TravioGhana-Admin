@@ -134,7 +134,9 @@ export function redirectToLogin() {
   disconnectAdminSocket();
   clearAuth();
   if (window.location.pathname !== "/admin/login") {
-    window.location.assign("/admin/login");
+    // Only reachable after a failed token refresh, so the session genuinely
+    // existed and expired. The login page explains it with a banner.
+    window.location.assign("/admin/login?reason=expired");
   }
 }
 
