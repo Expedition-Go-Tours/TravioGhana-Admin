@@ -13,7 +13,7 @@ import {
   MessageSquareText,
 } from "lucide-react";
 import api from "@/lib/axios";
-import { cn, timeAgo } from "@/lib/utils";
+import { cn, timeAgo, formatTravelDate } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import OptimizedImage from "@/components/shared/OptimizedImage";
@@ -276,7 +276,7 @@ export function CustomerProfilePanel({ customerId, onClose }: CustomerProfilePan
                             {booking.travelDate && (
                               <span className="flex items-center gap-1">
                                 <Calendar className="h-2.5 w-2.5" />
-                                {new Date(booking.travelDate).toLocaleDateString()}
+                                {formatTravelDate(booking.travelDate)}
                               </span>
                             )}
                             {booking.grossAmount != null && (

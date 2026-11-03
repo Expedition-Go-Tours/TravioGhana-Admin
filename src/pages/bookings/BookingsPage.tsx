@@ -26,7 +26,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/shared/Pagination";
 import { useSocketInvalidate } from "@/hooks/useSocketEvent";
 import api from "@/lib/axios";
-import { cn } from "@/lib/utils";
+import { cn, formatTravelDate } from "@/lib/utils";
 import { bookingContact, contactInitial } from "@/lib/bookingContact";
 import { BookingDetailPanel } from "./components/BookingDetailPanel";
 import { CustomerProfilePanel } from "@/pages/reviews/components/CustomerProfilePanel";
@@ -427,7 +427,7 @@ export default function BookingsPage() {
                           <div className="flex items-center gap-1.5">
                             <Calendar className="h-3 w-3 text-text-tertiary" />
                             <span className="text-xs text-text-secondary">
-                              {new Date(booking.travelDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                              {formatTravelDate(booking.travelDate, { month: "short", day: "numeric" })}
                             </span>
                           </div>
                         </td>

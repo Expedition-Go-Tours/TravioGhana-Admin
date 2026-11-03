@@ -49,6 +49,23 @@ export function formatDate(value: string | null | undefined): string {
   }
 }
 
+/**
+ * A booking's travel date is a *calendar date* (stored at UTC midnight), not an
+ * instant. Formatting it with `new Date(...).toLocaleDateString()` shifts it a
+ * day back for anyone west of UTC. Re-anchor to local midnight of the stored
+ * UTC day so every viewer reads the intended activity date.
+ */
+export function formatTravelDate(
+  value: string | null | undefined,
+  options: Intl.DateTimeFormatOptions = { month: "short", day: "numeric", year: "numeric" },
+): string {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "—";
+  const local = new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+  return local.toLocaleDateString("en-US", options);
+}
+
 export function formatDateTime(value: string | null | undefined): string {
   if (!value) return "—";
   try {

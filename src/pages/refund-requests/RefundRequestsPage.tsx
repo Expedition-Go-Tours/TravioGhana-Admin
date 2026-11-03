@@ -27,7 +27,7 @@ import { Pagination } from "@/components/shared/Pagination";
 import { SectionEmpty } from "@/components/shared/SectionEmpty";
 import { SectionError } from "@/components/shared/SectionError";
 import { usePermission } from "@/hooks/usePermission";
-import { cn, formatCurrency, formatDate } from "@/lib/utils";
+import { cn, formatCurrency, formatDate, formatTravelDate } from "@/lib/utils";
 import {
   STATUS_LABEL,
   approveRefundRequest,
@@ -243,7 +243,7 @@ export default function RefundRequestsPage() {
           </p>
           <p className="mt-0.5 truncate text-[11px] text-text-tertiary">
             {row.booking?.tourTitle || "—"}
-            {row.booking?.travelDate ? ` · ${formatDate(row.booking.travelDate)}` : ""}
+            {row.booking?.travelDate ? ` · ${formatTravelDate(row.booking.travelDate)}` : ""}
           </p>
         </div>
       ),
@@ -531,7 +531,7 @@ export default function RefundRequestsPage() {
                     </DetailValue>
                     <p className="mt-1 flex items-center gap-1.5 text-[11px] text-text-tertiary">
                       <CalendarDays className="h-3 w-3" />
-                      Travel {detail.booking?.travelDate ? formatDate(detail.booking.travelDate) : "—"}
+                      Travel {detail.booking?.travelDate ? formatTravelDate(detail.booking.travelDate) : "—"}
                     </p>
                     <p className="mt-1 text-[11px] text-text-tertiary">
                       Total {money(preview?.gross, currency)}

@@ -23,7 +23,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { CancellationStatusBadge } from "./CancellationStatusBadge";
 import { getCancellationRequest } from "@/services/cancellationService";
 import type { CancellationRequest } from "@/services/cancellationService";
-import { cn, formatCurrency, formatDateTime, timeAgo } from "@/lib/utils";
+import { cn, formatCurrency, formatDateTime, formatTravelDate, timeAgo } from "@/lib/utils";
 
 interface CancellationDetailDrawerProps {
   requestId: string | null;
@@ -157,7 +157,7 @@ export function CancellationDetailDrawer({
                   {request.supplier?.name || request.tour?.supplier?.name || "—"}
                 </InfoRow>
                 <InfoRow icon={<Calendar className="h-3.5 w-3.5" />} label="Activity date">
-                  {booking?.travelDate ? formatDateTime(booking.travelDate) : "—"}
+                  {booking?.travelDate ? formatTravelDate(booking.travelDate, { weekday: "short", month: "short", day: "numeric", year: "numeric" }) : "—"}
                   {booking?.selectedTime ? <span className="block text-text-tertiary">{booking.selectedTime}</span> : null}
                 </InfoRow>
                 <InfoRow icon={<Clock className="h-3.5 w-3.5" />} label="Requested">

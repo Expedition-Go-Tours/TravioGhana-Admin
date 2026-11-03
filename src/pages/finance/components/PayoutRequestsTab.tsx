@@ -15,7 +15,7 @@ import { ConfirmModal } from "@/components/shared/ConfirmModal";
 import { usePermission } from "@/hooks/usePermission";
 import { useSocketInvalidate } from "@/hooks/useSocketEvent";
 import api from "@/lib/axios";
-import { cn, formatCurrency, formatDate, formatDateTime, getStatusColor } from "@/lib/utils";
+import { cn, formatCurrency, formatDate, formatDateTime, formatTravelDate, getStatusColor } from "@/lib/utils";
 import { validateReference } from "@/pages/finance/reference";
 import type { PayoutRequest } from "@/types/payout";
 
@@ -1031,7 +1031,7 @@ function PayoutDetail({ request: r }: { request: PayoutRequest }) {
                         <span className="font-mono text-xs text-text-primary">{it.booking?.bookingNumber || it.bookingId}</span>
                       </th>
                       <td className="px-3 py-2 tnum text-text-secondary">
-                        {it.booking?.travelDate ? formatDate(it.booking.travelDate) : null}
+                        {it.booking?.travelDate ? formatTravelDate(it.booking.travelDate) : null}
                       </td>
                       <td className="px-3 py-2 text-right tnum text-text-secondary">
                         {formatCurrency(num(it.grossAmount), it.currency || rc.currency)}

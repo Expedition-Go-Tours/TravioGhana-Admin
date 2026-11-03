@@ -25,7 +25,7 @@ import { SectionError } from "@/components/shared/SectionError";
 import { usePermission } from "@/hooks/usePermission";
 import { PERMISSIONS } from "@/lib/permissions";
 import { useSocketInvalidate } from "@/hooks/useSocketEvent";
-import { cn, formatCurrency, timeAgo } from "@/lib/utils";
+import { cn, formatCurrency, formatTravelDate, timeAgo } from "@/lib/utils";
 import {
   approveCancellationRequest,
   batchApproveCancellationRequests,
@@ -427,7 +427,7 @@ export default function CancellationsPage() {
                         </div>
                         <div className="mt-1 flex items-center gap-1.5 text-[10px] text-text-tertiary">
                           <Calendar className="h-3 w-3" />
-                          {booking?.travelDate ? new Date(booking.travelDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" }) : "—"}
+                          {formatTravelDate(booking?.travelDate)}
                         </div>
                       </td>
                       <td className="px-4 py-3">

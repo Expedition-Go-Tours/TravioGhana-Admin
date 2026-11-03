@@ -30,7 +30,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { usePermission } from "@/hooks/usePermission";
 import { PERMISSIONS } from "@/lib/permissions";
-import { cn, timeAgo, getStatusColor, formatCurrency, formatDateTime } from "@/lib/utils";
+import { cn, timeAgo, getStatusColor, formatCurrency, formatDateTime, formatTravelDate } from "@/lib/utils";
 import { BookingTimeline } from "./BookingTimeline";
 import type { Booking, TravelerData } from "@/types/booking";
 import { isPaymentPaid, travelerCount } from "@/types/booking";
@@ -504,7 +504,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
             <div className="min-w-0">
               <p className="text-[10px] font-medium text-text-tertiary">Travel date</p>
               <p className="mt-0.5 truncate text-sm font-medium text-text-primary">
-                {new Date(booking.travelDate).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                {formatTravelDate(booking.travelDate)}
               </p>
             </div>
             <div className="min-w-0">
@@ -609,7 +609,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
               <SectionTitle>Booking Details</SectionTitle>
               <div className="space-y-0.5">
                 <DetailRow icon={<Calendar className="h-3 w-3" />} label="Travel Date">
-                  {new Date(booking.travelDate).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
+                  {formatTravelDate(booking.travelDate, { weekday: "short", month: "short", day: "numeric", year: "numeric" })}
                 </DetailRow>
                 {booking.selectedTime && (
                   <DetailRow icon={<Clock className="h-3 w-3" />} label="Time">

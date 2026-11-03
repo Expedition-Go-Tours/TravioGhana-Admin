@@ -14,7 +14,7 @@ import { PayoutStatusTabs } from "@/components/payouts/PayoutStatusTabs";
 import { usePermission } from "@/hooks/usePermission";
 import { useSocketInvalidate } from "@/hooks/useSocketEvent";
 import api from "@/lib/axios";
-import { cn, formatCurrency, formatDate } from "@/lib/utils";
+import { cn, formatCurrency, formatDate, formatTravelDate } from "@/lib/utils";
 import type { Dispute } from "@/types/payout";
 
 const STATUS_TABS = [
@@ -65,7 +65,7 @@ function DisputeDetail({ dispute: d }: { dispute: Dispute }) {
         <div>
           <p className="text-[11px] font-semibold text-text-tertiary">Travel date</p>
           <p className="mt-1 text-sm text-text-secondary">
-            {d.booking?.travelDate ? formatDate(d.booking.travelDate) : "—"}
+            {d.booking?.travelDate ? formatTravelDate(d.booking.travelDate) : "—"}
           </p>
         </div>
       </div>

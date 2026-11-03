@@ -16,7 +16,7 @@ import { ConfirmModal } from "@/components/shared/ConfirmModal";
 import { PayoutStatusTabs } from "@/components/payouts/PayoutStatusTabs";
 import { usePermission } from "@/hooks/usePermission";
 import api from "@/lib/axios";
-import { cn, formatCurrency, formatDate, formatDateTime, getStatusColor } from "@/lib/utils";
+import { cn, formatCurrency, formatDate, formatDateTime, formatTravelDate, getStatusColor } from "@/lib/utils";
 import { validateReference } from "@/pages/finance/reference";
 import type { Invoice, InvoiceItem } from "@/types/payout";
 
@@ -217,7 +217,7 @@ function InvoiceDetail({ invoice: inv, loading }: { invoice: Invoice; loading?: 
                   {it.booking?.tour?.title || "—"}
                 </td>
                 <td className="px-4 py-2 text-text-tertiary">
-                  {it.booking?.travelDate ? formatDate(it.booking.travelDate) : "—"}
+                  {it.booking?.travelDate ? formatTravelDate(it.booking.travelDate) : "—"}
                 </td>
                 <td className="px-4 py-2 text-right tnum text-text-secondary">
                   {formatCurrency(Number(it.grossAmount || 0), it.currency)}
