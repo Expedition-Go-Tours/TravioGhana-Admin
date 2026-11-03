@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   applyTheme,
-  defaultRevealOrigin,
+  revealOriginFor,
   getExplicitTheme,
   getStoredTheme,
   isLowPowerDevice,
@@ -64,16 +64,29 @@ describe("revealRadius", () => {
   });
 });
 
-describe("defaultRevealOrigin", () => {
-  it("is the bottom-left corner of the viewport", () => {
-    expect(defaultRevealOrigin()).toEqual({ x: 0, y: window.innerHeight });
+describe("revealOriginFor", () => {
+  it("sweeps dark up from the bottom-left corner", () => {
+    expect(revealOriginFor("dark")).toEqual({ x: 0, y: window.innerHeight });
   });
 
-  it("is wide enough to sweep the whole viewport from there", () => {
-    const { x, y } = defaultRevealOrigin();
-    const r = revealRadius(x, y, window.innerWidth, window.innerHeight);
-    // Farthest corner from bottom-left is top-right.
-    expect(Math.hypot(window.innerWidth, window.innerHeight)).toBeLessThanOrEqual(r + 1e-9);
+  it("mirrors light down from the top-right corner", () => {
+    expect(revealOriginFor("light")).toEqual({ x: window.innerWidth, y: 0 });
+  });
+
+  it("covers the whole viewport from either corner", () => {
+    for (const theme of ["dark", "light"] as const) {
+      const { x, y } = revealOriginFor(theme);
+      const r = revealRadius(x, y, window.innerWidth, window.innerHeight);
+      const corners = [
+        [0, 0],
+        [window.innerWidth, 0],
+        [0, window.innerHeight],
+        [window.innerWidth, window.innerHeight],
+      ];
+      for (const [cx, cy] of corners) {
+        expect(Math.hypot(cx - x, cy - y)).toBeLessThanOrEqual(r + 1e-9);
+      }
+    }
   });
 });
 

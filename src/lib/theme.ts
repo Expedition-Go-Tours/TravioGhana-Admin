@@ -84,11 +84,14 @@ export function revealRadius(x: number, y: number, width: number, height: number
 }
 
 /**
- * Where the theme reveal starts: the bottom-left corner, so the sweep crosses
- * the page diagonally instead of blooming out of a small header button.
+ * Where the theme reveal starts. Dark sweeps up from the bottom-left corner;
+ * light mirrors it from the top-right, so the two directions read as a pair
+ * rather than a random bloom out of a small header button.
  */
-export function defaultRevealOrigin(): { x: number; y: number } {
-  return { x: 0, y: typeof window === "undefined" ? 0 : window.innerHeight };
+export function revealOriginFor(theme: Theme): { x: number; y: number } {
+  const width = typeof window === "undefined" ? 0 : window.innerWidth;
+  const height = typeof window === "undefined" ? 0 : window.innerHeight;
+  return theme === "dark" ? { x: 0, y: height } : { x: width, y: 0 };
 }
 
 // ── Live theme sources (both apply without animation) ────────────────────────
