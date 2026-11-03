@@ -216,10 +216,11 @@ export default function OverviewPage() {
   // Notification Stats
   const { data: notifStats, isLoading: notifStatsLoading, isError: notifStatsError, refetch: notifStatsRefetch } = useQuery({
     queryKey: NOTIFICATION_OVERVIEW_ROOT,
-    // Pending only: this card is the "what still needs me" inbox, and its
-    // "Done" button acknowledges exactly these. Lifetime totals made the tiles
-    // read "117 apps" while nothing was actually waiting.
-    queryFn: () => getNotificationStats(true),
+    // Totals per queue for the four tiles; the red badge above them carries
+    // what is still unread, and "Done" acknowledges exactly that. Showing only
+    // the pending subset made the card read "0 0 0 0 — all clear" while the
+    // dashboard still had notifications, which looks like a broken card.
+    queryFn: () => getNotificationStats(),
     enabled: can("notifications.view"),
   });
 
