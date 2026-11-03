@@ -2,6 +2,7 @@ import { Zap, Loader2, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import type { Booking } from "@/types/booking";
+import { bookingContact } from "@/lib/bookingContact";
 
 interface ChargeNowDialogProps {
   booking: Booking;
@@ -11,6 +12,7 @@ interface ChargeNowDialogProps {
 }
 
 export function ChargeNowDialog({ booking, isPending, onConfirm, onClose }: ChargeNowDialogProps) {
+  const contact = bookingContact(booking);
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
       <DialogContent className="max-w-md">
@@ -31,7 +33,7 @@ export function ChargeNowDialog({ booking, isPending, onConfirm, onClose }: Char
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-text-secondary">Customer</span>
-              <span className="font-medium text-text-primary">{booking.customer.name}</span>
+              <span className="font-medium text-text-primary">{contact.name}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-text-secondary">Tour</span>

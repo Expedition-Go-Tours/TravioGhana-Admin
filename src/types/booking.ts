@@ -116,7 +116,12 @@ export interface Booking {
     fixedDiscountValue?: number | null;
     promoCode?: string | null;
   } | null;
-  customer: BookingCustomer;
+  /**
+   * Null for a booking placed without an account (guest checkout): the lead
+   * traveller below is then the only identity on the row. Read it through
+   * `bookingContact()` rather than dereferencing it directly.
+   */
+  customer: BookingCustomer | null;
   tour: BookingTour;
   payouts: BookingPayout[];
 

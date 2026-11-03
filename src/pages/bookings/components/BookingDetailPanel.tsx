@@ -35,6 +35,7 @@ import { BookingTimeline } from "./BookingTimeline";
 import type { Booking, TravelerData } from "@/types/booking";
 import { isPaymentPaid, travelerCount } from "@/types/booking";
 import OptimizedImage from "@/components/shared/OptimizedImage";
+import { bookingContact, contactInitial } from "@/lib/bookingContact";
 import { CancellationStatusBadge } from "@/components/cancellations/CancellationStatusBadge";
 import { CancellationDecisionDialog } from "@/components/cancellations/CancellationDecisionDialog";
 import {
@@ -250,6 +251,18 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
       runAfterClose(() => onViewCustomer(customerId));
     },
     [onViewCustomer, runAfterClose],
+  );
+
+  // A guest booking has no account behind it; the lead traveller is who the
+  // supplier will actually meet, so that is who the panel names.
+  const contact = bookingContact(booking);
+  const contactAvatar = (
+    <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-base font-semibold text-primary ring-2 ring-primary/10">
+      {contact.photoURL ? (
+        <OptimizedImage src={contact.photoURL} alt="" width={48} className="absolute inset-0 h-full w-full object-cover" />
+      ) : null}
+      <span className={contact.photoURL ? "opacity-0" : ""}>{contactInitial(contact)}</span>
+    </div>
   );
 
   // Modal behaviour: lock the page behind the drawer, trap Tab inside it,
@@ -526,41 +539,45 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
             </div>
 
             <div className="flex items-start gap-4">
-              <button
-                onClick={() => requestViewCustomer(booking.customer.id)}
-                className="shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-full"
-                title="View customer profile"
-              >
-                <div className="relative flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-primary/10 text-base font-semibold text-primary ring-2 ring-primary/10">
-                  {booking.customer.photoURL ? (
-                    <OptimizedImage src={booking.customer.photoURL} alt="" width={48} className="absolute inset-0 h-full w-full object-cover" />
-                  ) : null}
-                  <span className={booking.customer.photoURL ? "opacity-0" : ""}>
-                    {(booking.customer.name || "?").charAt(0).toUpperCase()}
-                  </span>
+              {contact.hasAccount ? (
+                <button
+                  onClick={() => contact.accountId && requestViewCustomer(contact.accountId)}
+                  className="shrink-0 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 rounded-full"
+                  title="View customer profile"
+                >
+                  {contactAvatar}
+                </button>
+              ) : (
+                <div className="shrink-0" title="Booked without an account">
+                  {contactAvatar}
                 </div>
-              </button>
+              )}
               <div className="min-w-0 flex-1 space-y-1">
                 <div className="flex items-start justify-between gap-3">
-                  <h3 className="truncate text-sm font-semibold text-text-primary">{booking.customer.name}</h3>
-                  <button
-                    type="button"
-                    onClick={() => requestViewCustomer(booking.customer.id)}
-                    className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-primary hover:underline"
-                  >
-                    View profile <ArrowUpRight className="h-3 w-3" />
-                  </button>
+                  <h3 className="truncate text-sm font-semibold text-text-primary">{contact.name}</h3>
+                  {contact.hasAccount && (
+                    <button
+                      type="button"
+                      onClick={() => contact.accountId && requestViewCustomer(contact.accountId)}
+                      className="flex shrink-0 items-center gap-1 text-[11px] font-medium text-primary hover:underline"
+                    >
+                      View profile <ArrowUpRight className="h-3 w-3" />
+                    </button>
+                  )}
                 </div>
-                {booking.customer.email && (
+                {!contact.hasAccount && (
+                  <p className="text-[11px] text-text-tertiary">Booked as a guest — no customer account</p>
+                )}
+                {contact.email && (
                   <p className="flex items-center gap-1.5 text-xs text-text-secondary truncate">
                     <Mail className="h-3 w-3 shrink-0" />
-                    <span className="truncate">{booking.customer.email}</span>
+                    <span className="truncate">{contact.email}</span>
                   </p>
                 )}
-                {booking.customer.phone && (
+                {contact.phone && (
                   <p className="flex items-center gap-1.5 text-xs text-text-secondary">
                     <Phone className="h-3 w-3 shrink-0" />
-                    {booking.customer.phone}
+                    {contact.phone}
                   </p>
                 )}
               </div>

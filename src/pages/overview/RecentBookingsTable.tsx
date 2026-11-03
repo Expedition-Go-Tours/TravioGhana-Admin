@@ -13,7 +13,7 @@ interface Booking {
   grossAmount: number;
   currency: string;
   createdAt: string;
-  customer: { name: string; email: string; photoURL?: string };
+  customer: { name: string; email: string; photoURL?: string } | null;
   tour: { title: string };
 }
 

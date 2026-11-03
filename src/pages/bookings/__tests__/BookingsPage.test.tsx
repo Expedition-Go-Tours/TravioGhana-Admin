@@ -176,3 +176,54 @@ describe("BookingsPage deep links", () => {
     expect(await screen.findByRole("heading", { name: "TG-1001" })).toBeInTheDocument();
   });
 });
+/**
+ * A checkout that never creates an account leaves `customer` null — the lead
+ * traveller is then the only identity on the row. One such booking used to
+ * take the whole page down with
+ * "Cannot read properties of null (reading 'photoURL')".
+ */
+describe("BookingsPage guest bookings (no account)", () => {
+  const guestBooking: Booking = {
+    ...makeBooking("bk_g", "TG-9009"),
+    customer: null,
+    leadTravelerName: "Thomas Rhodes",
+    leadTravelerEmail: "thomas@example.com",
+    leadTravelerPhone: "+233200000009",
+  };
+
+  beforeEach(() => {
+    mockGet.mockImplementation((url: string) => {
+      if (url.startsWith("/admin/bookings/") && !url.includes("?")) {
+        return Promise.resolve({ data: { data: guestBooking } });
+      }
+      return Promise.resolve({
+        data: {
+          data: {
+            bookings: [guestBooking],
+            pagination: { currentPage: 1, totalPages: 1, totalCount: 1, limit: 20 },
+            counts: {},
+          },
+        },
+      });
+    });
+  });
+
+  it("renders the lead traveller in the list instead of crashing", async () => {
+    renderWithProviders(<BookingsPage />, { initialEntries: ["/bookings"] });
+
+    expect(await screen.findByText("Thomas Rhodes")).toBeInTheDocument();
+    expect(screen.getByText("thomas@example.com")).toBeInTheDocument();
+  });
+
+  it("opens the detail panel with no customer profile to open", async () => {
+    renderWithProviders(<BookingsPage />, {
+      initialEntries: ["/bookings?bookingId=bk_g"],
+    });
+
+    expect(await screen.findByRole("heading", { name: "TG-9009" })).toBeInTheDocument();
+    expect(screen.getByText(/booked as a guest/i)).toBeInTheDocument();
+    // The address shows in the list row, the panel and a mailto link.
+    expect(screen.getAllByText("thomas@example.com").length).toBeGreaterThan(0);
+    expect(screen.queryByRole("button", { name: /view profile/i })).not.toBeInTheDocument();
+  });
+});

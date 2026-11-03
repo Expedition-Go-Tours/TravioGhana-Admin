@@ -27,6 +27,7 @@ import { Pagination } from "@/components/shared/Pagination";
 import { useSocketInvalidate } from "@/hooks/useSocketEvent";
 import api from "@/lib/axios";
 import { cn } from "@/lib/utils";
+import { bookingContact, contactInitial } from "@/lib/bookingContact";
 import { BookingDetailPanel } from "./components/BookingDetailPanel";
 import { CustomerProfilePanel } from "@/pages/reviews/components/CustomerProfilePanel";
 import { ConfirmPaymentDialog } from "./components/ConfirmPaymentDialog";
@@ -366,7 +367,11 @@ export default function BookingsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filtered.map((booking) => (
+                    {filtered.map((booking) => {
+                      // Guest checkouts have no account behind them, so the
+                      // row reads the lead traveller instead of a customer.
+                      const contact = bookingContact(booking);
+                      return (
                       <tr
                         key={booking.id} 
                         onClick={() => {
@@ -386,16 +391,18 @@ export default function BookingsPage() {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-2.5">
                             <div className="relative flex h-7 w-7 shrink-0 items-center justify-center overflow-hidden rounded-md bg-accent text-[10px] font-semibold text-accent-foreground">
-                              {booking.customer.photoURL ? (
-                                <OptimizedImage src={booking.customer.photoURL} alt="" width={28} className="absolute inset-0 h-full w-full object-cover" />
+                              {contact.photoURL ? (
+                                <OptimizedImage src={contact.photoURL} alt="" width={28} className="absolute inset-0 h-full w-full object-cover" />
                               ) : null}
-                              <span className={booking.customer.photoURL ? "opacity-0" : ""}>
-                                {(booking.customer.name || "?").charAt(0).toUpperCase()}
+                              <span className={contact.photoURL ? "opacity-0" : ""}>
+                                {contactInitial(contact)}
                               </span>
                             </div>
                             <div className="min-w-0">
-                              <p className="text-xs font-medium text-text-primary truncate">{booking.customer.name}</p>
-                              <p className="text-[10px] text-text-tertiary truncate">{booking.customer.email}</p>
+                              <p className="text-xs font-medium text-text-primary truncate">{contact.name}</p>
+                              <p className="text-[10px] text-text-tertiary truncate">
+                                {contact.email || "Guest booking"}
+                              </p>
                             </div>
                           </div>
                         </td>
@@ -471,7 +478,8 @@ export default function BookingsPage() {
                           </Badge>
                         </td>
                       </tr>
-                    ))}
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

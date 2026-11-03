@@ -172,7 +172,10 @@ export default function OverviewPage() {
         grossAmount: number;
         currency: string;
         createdAt: string;
-        customer: { id: string; name: string; email: string };
+        customer: { id: string; name: string; email: string } | null;
+        // Present on every row (the endpoint includes all scalars); a guest
+        // booking has no customer, and this is who it is for instead.
+        leadTravelerName?: string | null;
         tour: { id: string; title: string; supplier: { id: string; name: string } };
       }>;
     },
@@ -742,7 +745,9 @@ export default function OverviewPage() {
                     <div key={booking.id} className="px-4 py-3">
                       <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <div>
-                          <p className="text-sm text-text-primary truncate">{booking.customer?.name || "Unknown"}</p>
+                          <p className="text-sm text-text-primary truncate">
+                            {booking.customer?.name || booking.leadTravelerName || "Unknown"}
+                          </p>
                           <p className="text-xs text-text-tertiary truncate">{booking.bookingNumber}</p>
                         </div>
                         <div>

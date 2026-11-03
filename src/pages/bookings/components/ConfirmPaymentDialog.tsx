@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import type { Booking } from "@/types/booking";
+import { bookingContact } from "@/lib/bookingContact";
 
 interface ConfirmPaymentDialogProps {
   booking: Booking;
@@ -15,6 +16,7 @@ interface ConfirmPaymentDialogProps {
 
 export function ConfirmPaymentDialog({ booking, isPending, onConfirm, onClose }: ConfirmPaymentDialogProps) {
   const [reference, setReference] = useState("");
+  const contact = bookingContact(booking);
 
   return (
     <Dialog open onOpenChange={(open) => { if (!open) onClose(); }}>
@@ -36,7 +38,7 @@ export function ConfirmPaymentDialog({ booking, isPending, onConfirm, onClose }:
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-text-secondary">Customer</span>
-              <span className="font-medium text-text-primary">{booking.customer.name}</span>
+              <span className="font-medium text-text-primary">{contact.name}</span>
             </div>
             <div className="flex items-center justify-between text-sm">
               <span className="text-text-secondary">Tour</span>
