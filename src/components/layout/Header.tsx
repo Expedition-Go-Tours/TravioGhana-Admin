@@ -144,15 +144,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         </button>
         {hasPermission('notifications.view') && <NotificationBell />}
         <button
-          onClick={(event) => {
-            // Reveal starts where the user clicked, so the sweep reads as a
-            // response to the press rather than a random wipe.
-            const rect = event.currentTarget.getBoundingClientRect();
-            toggleWithTransition({
-              x: rect.left + rect.width / 2,
-              y: rect.top + rect.height / 2,
-            });
-          }}
+          onClick={() => toggleWithTransition()}
           className="flex h-9 w-9 items-center justify-center rounded-full text-text-secondary hover:bg-surface-muted hover:text-text-primary"
           aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
           aria-pressed={theme === "dark"}

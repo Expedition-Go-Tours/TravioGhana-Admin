@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { flushSync } from "react-dom";
 import {
   applyTheme,
+  defaultRevealOrigin,
   getStoredTheme,
   isLowPowerDevice,
   prefersReducedMotion,
@@ -13,7 +14,8 @@ import {
   type Theme,
 } from "@/lib/theme";
 
-/** Where the reveal should start, in viewport pixels (usually the toggle). */
+/** Where the reveal should start, in viewport pixels. Defaults to the
+ *  bottom-left corner (see defaultRevealOrigin). */
 export interface ThemeOrigin {
   x: number;
   y: number;
@@ -50,7 +52,9 @@ export function useTheme() {
   useEffect(() => watchThemeStorage(setTheme), []);
 
   /**
-   * Flip the theme with a circular reveal growing out of `origin`.
+   * Flip the theme with a circular reveal growing out of `origin` (bottom-left
+   * corner by default, so the sweep crosses the page rather than blooming out
+   * of a small header button).
    *
    * The class flip is atomic — one style recalc — so it runs inside the
    * transition callback while the browser holds a snapshot of the old theme
@@ -90,8 +94,9 @@ export function useTheme() {
       setIsSwitching(true);
 
       const doc = document as DocumentWithViewTransition;
-      const x = origin?.x ?? window.innerWidth / 2;
-      const y = origin?.y ?? 0;
+      const start = origin ?? defaultRevealOrigin();
+      const x = start.x;
+      const y = start.y;
       const radius = revealRadius(x, y, window.innerWidth, window.innerHeight);
 
       const transition = doc.startViewTransition!(() => {

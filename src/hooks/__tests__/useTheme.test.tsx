@@ -96,6 +96,25 @@ describe("useTheme — reveal", () => {
     expect(result.current.isSwitching).toBe(false);
   });
 
+  it("starts the reveal at the bottom-left corner by default", async () => {
+    const vt = installViewTransition();
+    const { result } = renderHook(() => useTheme());
+
+    act(() => {
+      result.current.toggleWithTransition();
+    });
+
+    await act(async () => {
+      vt.ready.resolve();
+      await vt.ready.promise;
+    });
+
+    const [keyframes] = vt.animate.mock.calls[0];
+    const y = window.innerHeight;
+    expect(keyframes.clipPath[0]).toBe(`circle(0px at 0px ${y}px)`);
+    expect(keyframes.clipPath[1]).toBe(`circle(${Math.hypot(window.innerWidth, y)}px at 0px ${y}px)`);
+  });
+
   it("ignores a second click while a reveal is in flight", async () => {
     const vt = installViewTransition();
     const { result } = renderHook(() => useTheme());

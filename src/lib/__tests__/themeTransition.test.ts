@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   applyTheme,
+  defaultRevealOrigin,
   getExplicitTheme,
   getStoredTheme,
   isLowPowerDevice,
@@ -60,6 +61,19 @@ describe("revealRadius", () => {
         expect(Math.hypot(cx - x, cy - y)).toBeLessThanOrEqual(r + 1e-9);
       }
     }
+  });
+});
+
+describe("defaultRevealOrigin", () => {
+  it("is the bottom-left corner of the viewport", () => {
+    expect(defaultRevealOrigin()).toEqual({ x: 0, y: window.innerHeight });
+  });
+
+  it("is wide enough to sweep the whole viewport from there", () => {
+    const { x, y } = defaultRevealOrigin();
+    const r = revealRadius(x, y, window.innerWidth, window.innerHeight);
+    // Farthest corner from bottom-left is top-right.
+    expect(Math.hypot(window.innerWidth, window.innerHeight)).toBeLessThanOrEqual(r + 1e-9);
   });
 });
 

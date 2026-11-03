@@ -83,6 +83,14 @@ export function revealRadius(x: number, y: number, width: number, height: number
   return Math.hypot(Math.max(x, width - x), Math.max(y, height - y));
 }
 
+/**
+ * Where the theme reveal starts: the bottom-left corner, so the sweep crosses
+ * the page diagonally instead of blooming out of a small header button.
+ */
+export function defaultRevealOrigin(): { x: number; y: number } {
+  return { x: 0, y: typeof window === "undefined" ? 0 : window.innerHeight };
+}
+
 // ── Live theme sources (both apply without animation) ────────────────────────
 
 /**
