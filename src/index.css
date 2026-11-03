@@ -227,3 +227,72 @@
     -webkit-text-size-adjust: 100%;
   }
 }
+
+/* ── Theme switch animation ─────────────────────────────────────────────
+   The theme flip is atomic (one style recalc), so the reveal animates the
+   browser's snapshot of the old theme being clipped away — not the colors.
+   The default cross-fade is disabled and the new theme sits on top. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+}
+
+/* Fallback when View Transitions are unavailable: soften the swap once, then
+   get out of the way so hover and focus states stay instant afterwards. */
+html.theme-switching,
+html.theme-switching * {
+  transition:
+    background-color 260ms ease,
+    color 260ms ease,
+    border-color 260ms ease,
+    fill 260ms ease,
+    stroke 260ms ease !important;
+}
+
+/* Toggle icon: sun and moon cross-fade with a slight rotation, so the
+   control itself reads as a switch rather than a label swap. */
+.theme-icon {
+  position: relative;
+  width: 1rem;
+  height: 1rem;
+}
+
+.theme-icon > svg {
+  position: absolute;
+  inset: 0;
+  transition:
+    opacity 200ms ease,
+    transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.theme-icon[data-theme="light"] > .theme-icon__moon,
+.theme-icon[data-theme="dark"] > .theme-icon__sun {
+  opacity: 0;
+  transform: rotate(60deg) scale(0.7);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
+  html.theme-switching,
+  html.theme-switching * {
+    transition: none !important;
+  }
+
+  .theme-icon > svg {
+    transition: none !important;
+  }
+}

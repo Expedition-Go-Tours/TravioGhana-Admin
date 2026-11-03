@@ -37,7 +37,7 @@ export function Header({ onMenuClick }: HeaderProps) {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout } = useAuth();
-  const { theme, toggle } = useTheme();
+  const { theme, toggleWithTransition } = useTheme();
   const [signingOut, setSigningOut] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -144,12 +144,24 @@ export function Header({ onMenuClick }: HeaderProps) {
         </button>
         {hasPermission('notifications.view') && <NotificationBell />}
         <button
-          onClick={toggle}
+          onClick={(event) => {
+            // Reveal starts where the user clicked, so the sweep reads as a
+            // response to the press rather than a random wipe.
+            const rect = event.currentTarget.getBoundingClientRect();
+            toggleWithTransition({
+              x: rect.left + rect.width / 2,
+              y: rect.top + rect.height / 2,
+            });
+          }}
           className="flex h-9 w-9 items-center justify-center rounded-full text-text-secondary hover:bg-surface-muted hover:text-text-primary"
           aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+          aria-pressed={theme === "dark"}
           title={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
         >
-          {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+          <span className="theme-icon" data-theme={theme}>
+            <Sun className="theme-icon__sun h-4 w-4" aria-hidden="true" />
+            <Moon className="theme-icon__moon h-4 w-4" aria-hidden="true" />
+          </span>
         </button>
         <div className="relative" ref={menuRef}>
           <button
