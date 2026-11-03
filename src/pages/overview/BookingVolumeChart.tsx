@@ -22,7 +22,7 @@ const periodTrendLabels: Record<string, string> = {
 interface BookingVolumeChartProps {
   data?: Array<{ day: string; count: number }>;
   total?: number;
-  trend?: { value: number; isPositive: boolean };
+  trend?: { value: number; isPositive: boolean; raw?: number };
   loading?: boolean;
   period?: string;
 }
@@ -52,8 +52,11 @@ export function BookingVolumeChart({ data, total, trend, loading, period = "this
         <div className="flex items-baseline gap-2 mb-6">
           <span className="tnum text-[26px] font-semibold leading-tight tracking-[-0.02em] text-text-primary">{formatNumber(total)}</span>
           {trend && (
-            <span className={cn("tnum text-sm font-semibold flex items-center gap-1", trend.isPositive ? "text-status-active-text" : "text-status-rejected-text")}>
-              {trend.isPositive ? "+" : ""}{trend.value}% {periodTrendLabels[period] || "vs previous period"}
+            <span
+              className={cn("tnum text-sm font-semibold flex items-center gap-1", trend.isPositive ? "text-status-active-text" : "text-status-rejected-text")}
+              title={trend.raw && trend.raw > trend.value ? `${trend.raw}% ${periodTrendLabels[period] || "vs previous period"}` : undefined}
+            >
+              {trend.isPositive ? "+" : ""}{trend.value}%{trend.raw && trend.raw > trend.value ? "+" : ""} {periodTrendLabels[period] || "vs previous period"}
             </span>
           )}
         </div>

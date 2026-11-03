@@ -153,10 +153,13 @@ export default function OverviewPage() {
 
 
   const { data: activeUsersData, isLoading: activeUsersLoading } = useQuery({
-    queryKey: ["admin", "active-users"],
+    queryKey: ["admin", "active-users", timeFilter],
     queryFn: async () => {
-      const res = await api.get("/admin/users/active");
-      return (res.data?.data?.users || []) as Array<{ id: string; name: string; email: string; photoURL?: string; roles?: string[]; lastLoginAt?: string }>;
+      // Same window as the tile that opened this: the count and the list must
+      // answer the same question, and "active" means activity here, not the
+      // timestamp of someone's most recent login.
+      const res = await api.get(`/admin/users/active?period=${encodeURIComponent(timeFilter)}`);
+      return (res.data?.data?.users || []) as Array<{ id: string; name: string; email: string; photoURL?: string; roles?: string[]; lastLoginAt?: string; lastActiveAt?: string }>;
     },
     enabled: showActiveUsers,
   });
@@ -213,7 +216,10 @@ export default function OverviewPage() {
   // Notification Stats
   const { data: notifStats, isLoading: notifStatsLoading, isError: notifStatsError, refetch: notifStatsRefetch } = useQuery({
     queryKey: NOTIFICATION_OVERVIEW_ROOT,
-    queryFn: () => getNotificationStats(),
+    // Pending only: this card is the "what still needs me" inbox, and its
+    // "Done" button acknowledges exactly these. Lifetime totals made the tiles
+    // read "117 apps" while nothing was actually waiting.
+    queryFn: () => getNotificationStats(true),
     enabled: can("notifications.view"),
   });
 
@@ -256,13 +262,20 @@ export default function OverviewPage() {
     };
   }, [queryClient]);
 
-  const calcTrend = (current: number | undefined | null, previous: number | undefined | null): { value: number; isPositive: boolean } | undefined => {
+  const calcTrend = (
+    current: number | undefined | null,
+    previous: number | undefined | null,
+  ): { value: number; isPositive: boolean; raw?: number } | undefined => {
     const cur = Number(current) || 0;
     if (cur === 0) return undefined;
     const prev = Number(previous) || 0;
     if (prev === 0) return undefined;
     const change = ((cur - prev) / prev) * 100;
-    return { value: Math.abs(Math.round(change)), isPositive: change >= 0 };
+    const raw = Math.abs(Math.round(change));
+    // Growth is a badge, not a ledger. Read next to an 83% card, "1,500%"
+    // looks like a broken number rather than "very up", so the badge stops at
+    // 100% (shown as "100%+") and the exact figure moves to the tooltip.
+    return { value: Math.min(raw, 100), isPositive: change >= 0, raw };
   };
 
   // Only real multi-point history is rendered as a sparkline. A single point
@@ -699,13 +712,13 @@ export default function OverviewPage() {
 
           {/* Dialogs */}
           {showActiveUsers && (
-            <ModalShell title="Active Users (30d)" onClose={() => setShowActiveUsers(false)}>
+            <ModalShell title={`Active Users (${periodShort})`} onClose={() => setShowActiveUsers(false)}>
               {activeUsersLoading ? (
                 <div className="p-6 space-y-3">
                   {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-12 w-full rounded-xl" />)}
                 </div>
               ) : !activeUsersData?.length ? (
-                <div className="py-12 text-center text-sm text-text-tertiary">No active users in the last 30 days</div>
+                <div className="py-12 text-center text-sm text-text-tertiary">No active users in this period</div>
               ) : (
                 <div className="divide-y divide-border">
                   {activeUsersData.map((user) => (
@@ -721,8 +734,8 @@ export default function OverviewPage() {
                         <p className="text-sm text-text-primary truncate">{user.name || "Unknown"}</p>
                         <p className="text-xs text-text-tertiary truncate">{user.email || "—"}</p>
                       </div>
-                      {user.lastLoginAt && (
-                        <span className="shrink-0 text-xs text-text-tertiary whitespace-nowrap pt-1">{formatDate(user.lastLoginAt)}</span>
+                      {(user.lastActiveAt || user.lastLoginAt) && (
+                        <span className="shrink-0 text-xs text-text-tertiary whitespace-nowrap pt-1">{formatDate(user.lastActiveAt || user.lastLoginAt!)}</span>
                       )}
                     </div>
                   ))}
@@ -928,7 +941,7 @@ function KPICardWithSparkline({
 }: {
   label: string;
   value: number;
-  trend?: { value: number; isPositive: boolean };
+  trend?: { value: number; isPositive: boolean; raw?: number };
   sparklineData?: number[];
   sparklineColor?: string;
   loading: boolean;
@@ -979,7 +992,10 @@ function KPICardWithSparkline({
         </p>
       )}
       {!loading && !error && trend && (
-        <p className={cn("mt-2 flex items-center gap-1 text-xs font-semibold", trend.isPositive ? "text-status-active-text" : "text-status-rejected-text")}>
+        <p
+          className={cn("mt-2 flex items-center gap-1 text-xs font-semibold", trend.isPositive ? "text-status-active-text" : "text-status-rejected-text")}
+          title={trend.raw && trend.raw > trend.value ? `${trend.raw}% ${trendLabel}` : undefined}
+        >
           {trend.isPositive ? (
             <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 10l7-7m0 0l7 7m-7-7v18" />
@@ -989,7 +1005,7 @@ function KPICardWithSparkline({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
             </svg>
           )}
-          {trend.value}% {trendLabel}
+          {trend.value}%{trend.raw && trend.raw > trend.value ? "+" : ""} {trendLabel}
         </p>
       )}
     </div>

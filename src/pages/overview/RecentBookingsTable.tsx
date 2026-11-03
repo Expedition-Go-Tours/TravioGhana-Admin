@@ -14,6 +14,8 @@ interface Booking {
   currency: string;
   createdAt: string;
   customer: { name: string; email: string; photoURL?: string } | null;
+  /** Present on every row; who the booking is for when there is no account. */
+  leadTravelerName?: string | null;
   tour: { title: string };
 }
 
@@ -72,13 +74,15 @@ export function RecentBookingsTable({ bookings = [], loading, error, onRetry }: 
                 />
               ) : (
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent text-sm font-semibold text-accent-foreground">
-                  {booking.customer?.name?.charAt(0)?.toUpperCase() || "?"}
+                  {(booking.customer?.name || booking.leadTravelerName)?.charAt(0)?.toUpperCase() || "?"}
                 </div>
               )}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
                   <p className="truncate text-sm font-medium text-text-primary">
-                    {booking.customer?.name || "Unknown"}
+                    {/* A guest checkout has no account: the lead traveller is
+                        the person the booking is for, not "Unknown". */}
+                    {booking.customer?.name || booking.leadTravelerName || "Guest"}
                   </p>
                   <StatusBadge status={booking.status} />
                 </div>

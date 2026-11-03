@@ -90,7 +90,6 @@ export function NotificationsCard({ data, loading, error, onRetry }: Notificatio
 
   const unacknowledged = data?.unacknowledged ?? 0;
   const recent = data?.recent ?? [];
-  const hasAnyContent = !error && (unacknowledged > 0 || recent.length > 0);
 
   return (
     <Card className="h-full border border-border  bg-surface-base rounded-xl">
@@ -124,12 +123,15 @@ export function NotificationsCard({ data, loading, error, onRetry }: Notificatio
       <CardContent className="px-5 pb-5">
         {error ? (
           <SectionError message="Failed to load notifications" onRetry={onRetry} />
-        ) : hasAnyContent ? (
+        ) : (
           <div className="space-y-5">
             <div className="flex gap-2.5">
               {statItems.map((item, idx) => {
                 const count = countFor(item.type);
                 const Icon = item.icon;
+                // Zero is a number. The dash read as "no data" when it meant
+                // "nothing waiting" — the card already says that in words when
+                // the whole inbox is clear.
                 const has = count > 0;
                 return (
                   <button
@@ -145,11 +147,7 @@ export function NotificationsCard({ data, loading, error, onRetry }: Notificatio
                     <div className={cn("p-1.5 rounded-xl", has ? iconBg[idx] : "bg-surface-muted")}>
                       <Icon className={cn("h-3.5 w-3.5", has ? numberColor[idx] : "text-text-tertiary")} />
                     </div>
-                    {has ? (
-                      <span className={cn("tnum text-lg font-semibold leading-none", numberColor[idx])}>{count}</span>
-                    ) : (
-                      <span className="text-lg font-semibold leading-none text-text-tertiary">&ndash;</span>
-                    )}
+                    <span className={cn("tnum text-lg font-semibold leading-none", has ? numberColor[idx] : "text-text-tertiary")}>{count}</span>
                     <span className={cn("text-[10px] font-medium", has ? "text-text-secondary" : "text-text-tertiary")}>
                       {item.label}
                     </span>
@@ -158,7 +156,7 @@ export function NotificationsCard({ data, loading, error, onRetry }: Notificatio
               })}
             </div>
 
-            {recent.length > 0 && (
+            {recent.length > 0 ? (
               <div className="divide-y divide-border">
                 {recent.slice(0, 8).map((n) => (
                   <button
@@ -186,15 +184,15 @@ export function NotificationsCard({ data, loading, error, onRetry }: Notificatio
                   </button>
                 ))}
               </div>
+            ) : (
+              <div className="flex flex-col items-center justify-center py-6 text-center">
+                <div className="p-2.5 rounded-full bg-primary/10 dark:bg-primary/10 mb-2.5">
+                  <CheckCheck className="h-5 w-5 text-primary" />
+                </div>
+                <p className="text-sm font-medium text-text-secondary">All clear</p>
+                <p className="text-xs text-text-tertiary mt-0.5">No pending notifications</p>
+              </div>
             )}
-          </div>
-        ) : (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
-            <div className="p-2.5 rounded-full bg-primary/10 dark:bg-primary/10 mb-2.5">
-              <CheckCheck className="h-5 w-5 text-primary" />
-            </div>
-            <p className="text-sm font-medium text-text-secondary">All clear</p>
-            <p className="text-xs text-text-tertiary mt-0.5">No pending notifications</p>
           </div>
         )}
       </CardContent>
