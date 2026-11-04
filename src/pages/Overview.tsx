@@ -87,7 +87,9 @@ export default function OverviewPage() {
     queryKey: ["admin", "overview", timeFilter],
     queryFn: async () => {
       try {
-        const res = await api.get("/admin/analytics/overview", { params: { period: timeFilter } });
+        const res = await api.get("/admin/analytics/overview", {
+        params: { period: timeFilter, tzOffsetMinutes: new Date().getTimezoneOffset() },
+      });
         const d = res.data?.data as Record<string, unknown> | undefined;
         const overview = (d?.overview as Record<string, unknown>) || {};
         return {
@@ -134,7 +136,9 @@ export default function OverviewPage() {
     queryKey: ["admin", "payout-summary"],
     enabled: can('payouts.view'),
     queryFn: async () => {
-      const res = await api.get("/payouts/admin/summary");
+      const res = await api.get("/payouts/admin/summary", {
+        params: { tzOffsetMinutes: new Date().getTimezoneOffset() },
+      });
       const d = res.data?.data as {
         pending?: { count: number; total: number };
         paidThisMonth?: { count: number; total: string };
