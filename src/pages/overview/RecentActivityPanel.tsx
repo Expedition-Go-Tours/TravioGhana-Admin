@@ -36,6 +36,7 @@ import { SectionEmpty } from "@/components/shared/SectionEmpty";
 import { SectionError } from "@/components/shared/SectionError";
 import OptimizedImage from "@/components/shared/OptimizedImage";
 import { getActivityFeed } from "@/services/activityService";
+import { windowRange, windowRangeLabel } from "@/lib/activityWindow";
 import type { ActivityFilter, ActivityItem, ActivityWindow } from "@/types/activity";
 import { cn, timeAgo } from "@/lib/utils";
 
@@ -161,8 +162,14 @@ export function RecentActivityPanel() {
     return () => window.clearTimeout(timer);
   }, [search]);
 
+  // The range is computed in the viewer's timezone. Keying the query on its
+  // start makes the feed refetch when the local day rolls over instead of
+  // serving yesterday's window until the next 30s poll.
+  const rangeLabel = windowRangeLabel(activeWindow);
+  const rangeFrom = windowRange(activeWindow).from;
+
   const query = useInfiniteQuery({
-    queryKey: ["admin", "activity", activeWindow, typeFilter, debouncedSearch],
+    queryKey: ["admin", "activity", activeWindow, typeFilter, debouncedSearch, rangeFrom],
     queryFn: ({ pageParam }) =>
       getActivityFeed({
         window: activeWindow,
@@ -232,6 +239,12 @@ export function RecentActivityPanel() {
             ))}
           </TabsList>
         </Tabs>
+
+        {/* The period actually covered, in the viewer's own calendar. "Today"
+            means nothing on its own once the server's day has rolled over. */}
+        <p className="mt-1.5 text-[11px] text-text-tertiary">
+          {rangeLabel}
+        </p>
 
         <div className="mt-2 flex items-center gap-2">
           <div className="relative min-w-0 flex-1">

@@ -1,4 +1,5 @@
 import api from "@/lib/axios";
+import { windowRange } from "@/lib/activityWindow";
 import type { ActivityFeedPage, ActivityFilter, ActivityWindow } from "@/types/activity";
 
 interface GetActivityFeedParams {
@@ -16,11 +17,16 @@ export async function getActivityFeed({
   cursor,
   limit = 20,
 }: GetActivityFeedParams): Promise<ActivityFeedPage> {
+  const range = windowRange(window);
   const res = await api.get("/admin/activity", {
     params: {
       window,
       type,
       limit,
+      // Explicit bounds win over `window` server-side: "today" is the viewer's
+      // calendar day, not the server's (UTC) one.
+      from: range.from,
+      to: range.to,
       ...(q ? { q } : {}),
       ...(cursor ? { cursor } : {}),
     },

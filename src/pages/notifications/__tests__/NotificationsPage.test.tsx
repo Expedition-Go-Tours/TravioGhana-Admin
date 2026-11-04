@@ -44,7 +44,16 @@ import { renderWithProviders } from "@/test/test-utils";
 
 // ── Fixtures ───────────────────────────────────────────────────────────────
 
-const hoursAgo = (hours: number) => new Date(Date.now() - hours * 3_600_000).toISOString();
+// Timestamps anchored to the viewer's calendar rather than to "now": a rolling
+// "30 hours ago" crosses midnight in the early hours, which made the
+// Today/Yesterday group headings flap depending on when the suite ran.
+const atLocalDay = (dayOffset: number, hours: number) => {
+  const d = new Date();
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + dayOffset);
+  d.setHours(hours);
+  return d.toISOString();
+};
 
 const baseNotification = {
   storefront: "ghana",
@@ -62,7 +71,7 @@ const feed = {
       message: "Kwame Tours requested GHC 4,200.",
       data: { payoutId: "p1" },
       read: false,
-      createdAt: hoursAgo(0.5),
+      createdAt: atLocalDay(0, 10),
     },
     {
       ...baseNotification,
@@ -72,7 +81,7 @@ const feed = {
       message: "Safari Lines applied to join.",
       data: { supplierId: "s1" },
       read: false,
-      createdAt: hoursAgo(2),
+      createdAt: atLocalDay(0, 8),
     },
     {
       ...baseNotification,
@@ -81,8 +90,8 @@ const feed = {
       title: "Scheduled maintenance",
       message: "The platform will be read-only for 20 minutes.",
       read: true,
-      readAt: hoursAgo(3),
-      createdAt: hoursAgo(30),
+      readAt: atLocalDay(-1, 21),
+      createdAt: atLocalDay(-1, 20),
     },
   ],
   pagination: { currentPage: 1, totalPages: 3, totalCount: 45, unreadCount: 2, limit: 20 },
