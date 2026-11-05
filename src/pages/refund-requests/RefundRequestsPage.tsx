@@ -478,7 +478,7 @@ export default function RefundRequestsPage() {
       </Card>
 
       <Dialog open={!!openId} onOpenChange={(open) => !open && close()}>
-        <DialogContent className="max-h-[90dvh] overflow-y-auto p-0 sm:max-w-2xl">
+        <DialogContent sheet className="max-h-[92dvh] overflow-y-auto p-0 sm:max-w-2xl">
           <DialogHeader className="sticky top-0 z-10 border-b border-border bg-surface-base px-5 py-5 text-left sm:px-6">
             <div className="flex items-start justify-between gap-4">
               <div className="min-w-0">

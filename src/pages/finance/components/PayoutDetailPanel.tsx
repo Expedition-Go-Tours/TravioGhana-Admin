@@ -23,6 +23,7 @@ import { StatusBadge } from "@/components/shared/StatusBadge";
 import { cn, formatCurrency, formatDate, formatDateTime } from "@/lib/utils";
 import type { Payout } from "@/types/payout";
 import OptimizedImage from "@/components/shared/OptimizedImage";
+import { useAnimatedClose } from "@/hooks/useAnimatedClose";
 
 interface PayoutDetailPanelProps {
   payout: Payout;
@@ -58,6 +59,7 @@ function SectionDivider({ label }: { label: string }) {
 
 export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove, onRelease, onSettle, onFail }: PayoutDetailPanelProps) {
   const navigate = useNavigate();
+  const { closing, requestClose } = useAnimatedClose(onClose);
 
   const status = payout.status || "UNKNOWN";
   const amount = Number(payout.amount) || 0;
@@ -84,10 +86,16 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
   return createPortal(
     <>
       <div 
-        className="fixed inset-0 z-40 bg-black/10 animate-in fade-in-0 duration-200 motion-reduce:animate-none"
-        onClick={onClose} />
+        className={cn(
+          "fixed inset-0 z-40 bg-black/10 transition-opacity duration-200",
+          closing ? "opacity-0" : "opacity-100",
+        )}
+        onClick={requestClose} />
       <div 
-        className="admin-sheet fixed right-0 top-0 z-50 h-full w-full sm:w-[480px] bg-surface-base border-l border-border shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col">
+        className={cn(
+          "admin-sheet fixed right-0 top-0 z-50 h-full w-full sm:w-[480px] bg-surface-base border-l border-border shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col",
+          closing && "admin-sheet-out",
+        )}>
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2 min-w-0">
@@ -95,7 +103,7 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
             <h2 className="text-sm font-semibold text-text-primary truncate">Payout {payout.id.slice(0, 8)}</h2>
           </div>
           <button
-            onClick={onClose}
+            onClick={requestClose}
             className="flex h-9 w-9 sm:h-7 sm:w-7 items-center justify-center rounded-md text-text-tertiary hover:text-text-primary hover:bg-surface-muted transition-colors shrink-0"
           >
             <X className="h-4 w-4" />
@@ -325,7 +333,7 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
         <div className="border-t border-border px-5 py-4 shrink-0 space-y-2">
           {status === "PENDING" && onApprove && (
             <Button
-              onClick={() => { onApprove(payout); onClose(); }}
+              onClick={() => { onApprove(payout); requestClose(); }}
               className="w-full gap-1.5"
               size="sm"
             >
@@ -336,7 +344,7 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
             <div className="flex gap-2">
               {onRelease && (
                 <Button
-                  onClick={() => { onRelease(payout); onClose(); }}
+                  onClick={() => { onRelease(payout); requestClose(); }}
                   className="flex-1 gap-1.5"
                   size="sm"
                 >
@@ -345,7 +353,7 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
               )}
               {onFail && (
                 <Button
-                  onClick={() => { onFail(payout); onClose(); }}
+                  onClick={() => { onFail(payout); requestClose(); }}
                   variant="outline"
                   className="flex-1 gap-1.5 border-status-rejected/30 text-status-rejected-text hover:bg-status-rejected/10"
                   size="sm"
@@ -359,7 +367,7 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
             <div className="flex gap-2">
               {onSettle && (
                 <Button
-                  onClick={() => { onSettle(payout); onClose(); }}
+                  onClick={() => { onSettle(payout); requestClose(); }}
                   className="flex-1 gap-1.5"
                   size="sm"
                 >
@@ -368,7 +376,7 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
               )}
               {onFail && (
                 <Button
-                  onClick={() => { onFail(payout); onClose(); }}
+                  onClick={() => { onFail(payout); requestClose(); }}
                   variant="outline"
                   className="flex-1 gap-1.5 border-status-rejected/30 text-status-rejected-text hover:bg-status-rejected/10"
                   size="sm"
@@ -379,7 +387,7 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
             </div>
           )}
           <Button
-            onClick={onClose}
+            onClick={requestClose}
             variant="ghost"
             className="w-full text-text-tertiary"
             size="sm"

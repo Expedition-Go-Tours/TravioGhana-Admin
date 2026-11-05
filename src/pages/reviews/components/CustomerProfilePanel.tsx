@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import api from "@/lib/axios";
 import { cn, timeAgo, formatTravelDate } from "@/lib/utils";
+import { useAnimatedClose } from "@/hooks/useAnimatedClose";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import OptimizedImage from "@/components/shared/OptimizedImage";
@@ -56,6 +57,7 @@ const STATUS_BADGE: Record<string, "success" | "warning" | "error" | "info"> = {
 };
 
 export function CustomerProfilePanel({ customerId, onClose }: CustomerProfilePanelProps) {
+  const { closing, requestClose } = useAnimatedClose(onClose);
   const [activeTab, setActiveTab] = useState<"reviews" | "bookings">("reviews");
   const { data, isLoading } = useQuery({
     queryKey: ["admin", "user", customerId],
@@ -83,14 +85,20 @@ export function CustomerProfilePanel({ customerId, onClose }: CustomerProfilePan
   return (
     <>
       <div 
-        className="fixed inset-0 z-40 bg-black/10 animate-in fade-in-0 duration-200 motion-reduce:animate-none"
-        onClick={onClose} />
+        className={cn(
+          "fixed inset-0 z-40 bg-black/10 transition-opacity duration-200",
+          closing ? "opacity-0" : "opacity-100",
+        )}
+        onClick={requestClose} />
       <div 
-        className="admin-sheet fixed right-0 top-0 z-50 h-full w-full sm:w-[420px] bg-surface-base border-l border-border shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col">
+        className={cn(
+          "admin-sheet fixed right-0 top-0 z-50 h-full w-full sm:w-[420px] bg-surface-base border-l border-border shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col",
+          closing && "admin-sheet-out",
+        )}>
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h2 className="text-sm font-semibold text-text-primary">Customer Profile</h2>
           <button
-            onClick={onClose}
+            onClick={requestClose}
             className="flex h-9 w-9 sm:h-7 sm:w-7 items-center justify-center rounded-md text-text-tertiary hover:text-text-primary hover:bg-surface-muted transition-colors"
           >
             <X className="h-4 w-4" />

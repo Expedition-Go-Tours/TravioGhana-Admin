@@ -24,6 +24,7 @@ import { CancellationStatusBadge } from "./CancellationStatusBadge";
 import { getCancellationRequest } from "@/services/cancellationService";
 import type { CancellationRequest } from "@/services/cancellationService";
 import { cn, formatCurrency, formatDateTime, formatTravelDate, timeAgo } from "@/lib/utils";
+import { useAnimatedClose } from "@/hooks/useAnimatedClose";
 
 interface CancellationDetailDrawerProps {
   requestId: string | null;
@@ -82,6 +83,7 @@ export function CancellationDetailDrawer({
   onApprove,
   onReject,
 }: CancellationDetailDrawerProps) {
+  const { closing, requestClose } = useAnimatedClose(onClose);
   const { data: request, isLoading, isError, refetch } = useQuery({
     queryKey: ["admin", "cancellation-request", requestId],
     queryFn: () => getCancellationRequest(requestId as string),
@@ -101,10 +103,16 @@ export function CancellationDetailDrawer({
   return createPortal(
     <>
       <div 
-        className="fixed inset-0 z-40 bg-text-primary/30 animate-in fade-in-0 duration-200 motion-reduce:animate-none"
-        onClick={onClose} />
+        className={cn(
+          "fixed inset-0 z-40 bg-text-primary/30 transition-opacity duration-200",
+          closing ? "opacity-0" : "opacity-100",
+        )}
+        onClick={requestClose} />
       <aside 
-        className="admin-sheet fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-border bg-surface-base shadow-[-4px_0_16px_rgba(0,0,0,0.08)] sm:w-[480px] md:w-[540px]"
+        className={cn(
+          "admin-sheet fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-border bg-surface-base shadow-[-4px_0_16px_rgba(0,0,0,0.08)] sm:w-[480px] md:w-[540px]",
+          closing && "admin-sheet-out",
+        )}
         aria-label="Cancellation request detail">
         <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div className="min-w-0">
@@ -124,7 +132,7 @@ export function CancellationDetailDrawer({
             )}
           </div>
           <button
-            onClick={onClose}
+            onClick={requestClose}
             className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md text-text-tertiary transition-colors hover:bg-surface-muted hover:text-text-primary"
             aria-label="Close"
           >
