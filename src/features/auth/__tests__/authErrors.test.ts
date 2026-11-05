@@ -34,6 +34,36 @@ describe("mapAuthError", () => {
     expect(mapped.retryable).toBe(false);
   });
 
+  it("tells a Google-only account to use Google", () => {
+    const mapped = mapAuthError(
+      httpError(401, "This account uses social login. Please sign in with Google."),
+    );
+    expect(mapped.kind).toBe("invalid");
+    expect(mapped.message).toBe("This account uses Google sign-in.");
+    expect(mapped.hint).toContain("Continue with Google");
+    expect(mapped.retryable).toBe(false);
+  });
+
+  it("points a password-less account at Forgot password?", () => {
+    const mapped = mapAuthError(
+      httpError(401, "Password not set. Please use the forgot password option to create one."),
+    );
+    expect(mapped.message).toBe("This account has no password yet.");
+    expect(mapped.hint).toContain("Forgot password?");
+  });
+
+  it("says when an account is deactivated", () => {
+    const mapped = mapAuthError(httpError(401, "Account has been deactivated"));
+    expect(mapped.message).toBe("This account has been deactivated.");
+    expect(mapped.hint).toContain("administrator");
+  });
+
+  it("never echoes an unrecognised 401 string", () => {
+    const mapped = mapAuthError(httpError(401, "This account uses social login. Please sign in with Google. — plus injected text"));
+    expect(mapped.message).toBe("Email or password is incorrect.");
+    expect(mapped.hint).toBeUndefined();
+  });
+
   it("keeps short, known validation messages", () => {
     const mapped = mapAuthError(httpError(400, "Password must be at least 8 characters"));
     expect(mapped.kind).toBe("validation");

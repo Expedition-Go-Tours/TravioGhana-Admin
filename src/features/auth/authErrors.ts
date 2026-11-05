@@ -32,6 +32,28 @@ const SAFE_MESSAGES = new Set([
   "Please provide your email address",
 ]);
 
+/**
+ * 401s the backend sends on purpose: the credentials were not wrong, the
+ * account simply cannot sign in this way. Collapsing them into "Email or
+ * password is incorrect." leaves a Google-only user stuck on a password box
+ * with no idea the button they need is right above it. Matched exactly, so an
+ * arbitrary server string can never reach the screen.
+ */
+const SAFE_AUTH_MESSAGES: Record<string, { message: string; hint: string }> = {
+  "This account uses social login. Please sign in with Google.": {
+    message: "This account uses Google sign-in.",
+    hint: "Use Continue with Google below — the password box cannot work for this account.",
+  },
+  "Password not set. Please use the forgot password option to create one.": {
+    message: "This account has no password yet.",
+    hint: "Use Forgot password? to set one, then sign in with it.",
+  },
+  "Account has been deactivated": {
+    message: "This account has been deactivated.",
+    hint: "Contact an administrator if you think this is a mistake.",
+  },
+};
+
 function axiosStatus(err: unknown): number | undefined {
   if (err instanceof AxiosError) return err.response?.status;
   if (err && typeof err === "object" && "response" in err) {
@@ -76,7 +98,20 @@ export function mapAuthError(err: unknown): AuthError {
   }
 
   if (status === 401) {
-    // Never say which of the two is wrong.
+    // Provider mismatch is the one case where the generic message is a dead
+    // end: the password box cannot work and the button that does is on the
+    // page. Everything else stays ambiguous — never say which of the two
+    // credentials was wrong.
+    const serverMessage = axiosMessage(err);
+    const mapped = serverMessage ? SAFE_AUTH_MESSAGES[serverMessage] : undefined;
+    if (mapped) {
+      return {
+        kind: "invalid",
+        message: mapped.message,
+        hint: mapped.hint,
+        retryable: false,
+      };
+    }
     return {
       kind: "invalid",
       message: "Email or password is incorrect.",
