@@ -159,10 +159,10 @@ export default function OverviewPage() {
   const { data: activeUsersData, isLoading: activeUsersLoading } = useQuery({
     queryKey: ["admin", "active-users", timeFilter],
     queryFn: async () => {
-      // Same window as the tile that opened this: the count and the list must
-      // answer the same question, and "active" means activity here, not the
-      // timestamp of someone's most recent login.
-      const res = await api.get(`/admin/users/active?period=${encodeURIComponent(timeFilter)}`);
+      // Same window and the same definition as the tile that opened this:
+      // signed in as a Ghana supplier, or did something on this storefront,
+      // during the selected period (viewer timezone, so it matches the KPI).
+      const res = await api.get(`/admin/users/active?period=${encodeURIComponent(timeFilter)}&tzOffsetMinutes=${new Date().getTimezoneOffset()}`);
       return (res.data?.data?.users || []) as Array<{ id: string; name: string; email: string; photoURL?: string; roles?: string[]; lastLoginAt?: string; lastActiveAt?: string }>;
     },
     enabled: showActiveUsers,
