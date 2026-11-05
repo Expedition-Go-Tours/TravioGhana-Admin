@@ -176,6 +176,64 @@ describe("BookingsPage deep links", () => {
     expect(await screen.findByRole("heading", { name: "TG-1001" })).toBeInTheDocument();
   });
 });
+describe("BookingsPage payment source", () => {
+  const paypalBooking: Booking = {
+    ...makeBooking("bk_paypal", "TG-3003"),
+    paymentProvider: "PAYPAL",
+    paypalOrderId: "ORDER-9",
+    paypalCaptureId: "CAPTURE-9",
+  };
+
+  const cardBooking: Booking = {
+    ...makeBooking("bk_card", "TG-3004"),
+    paymentProvider: "STRIPE",
+    paymentMethodBrand: "visa",
+    paymentMethodLast4: "4242",
+    stripePaymentIntentId: "pi_123",
+  };
+
+  beforeEach(() => {
+    mockGet.mockImplementation((url: string) => {
+      if (url.startsWith("/admin/bookings/") && !url.includes("?")) {
+        const id = url.split("/").pop();
+        const booking = [paypalBooking, cardBooking].find((b) => b.id === id);
+        return Promise.resolve({ data: { data: booking } });
+      }
+      return Promise.resolve({
+        data: {
+          data: {
+            bookings: [paypalBooking, cardBooking],
+            pagination: { currentPage: 1, totalPages: 1, totalCount: 2, limit: 20 },
+            counts: {},
+          },
+        },
+      });
+    });
+  });
+
+  it("shows the processor and the capture reference for a PayPal booking", async () => {
+    renderWithProviders(<BookingsPage />, {
+      initialEntries: ["/bookings?bookingId=bk_paypal"],
+    });
+
+    expect(await screen.findByRole("heading", { name: "TG-3003" })).toBeInTheDocument();
+    expect(screen.getByText("Payment Source")).toBeInTheDocument();
+    expect(screen.getByText("PayPal capture")).toBeInTheDocument();
+    expect(screen.getByText("CAPTURE-9")).toBeInTheDocument();
+  });
+
+  it("shows the saved card on the row and in the panel", async () => {
+    renderWithProviders(<BookingsPage />, {
+      initialEntries: ["/bookings?bookingId=bk_card"],
+    });
+
+    expect(await screen.findByRole("heading", { name: "TG-3004" })).toBeInTheDocument();
+    expect(screen.getAllByText("Visa •••• 4242").length).toBeGreaterThan(0);
+    expect(screen.getByText("Stripe PaymentIntent")).toBeInTheDocument();
+    expect(screen.getByText("pi_123")).toBeInTheDocument();
+  });
+});
+
 /**
  * A checkout that never creates an account leaves `customer` null — the lead
  * traveller is then the only identity on the row. One such booking used to

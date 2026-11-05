@@ -22,12 +22,14 @@ import {
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Pagination } from "@/components/shared/Pagination";
 import { useSocketInvalidate } from "@/hooks/useSocketEvent";
 import api from "@/lib/axios";
 import { cn, formatTravelDate } from "@/lib/utils";
 import { bookingContact, contactInitial } from "@/lib/bookingContact";
+import { paymentSource } from "@/lib/paymentSource";
 import { BookingDetailPanel } from "./components/BookingDetailPanel";
 import { CustomerProfilePanel } from "@/pages/reviews/components/CustomerProfilePanel";
 import { ConfirmPaymentDialog } from "./components/ConfirmPaymentDialog";
@@ -70,6 +72,7 @@ export default function BookingsPage() {
   const queryClient = useQueryClient();
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("All");
+  const [sourceFilter, setSourceFilter] = useState("ALL");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [viewCustomerId, setViewCustomerId] = useState<string | null>(null);
@@ -79,11 +82,13 @@ export default function BookingsPage() {
   useSocketInvalidate("admin:new-booking", ["admin", "bookings"]);
 
   const statusParam = statusFilter === "All" ? "" : statusFilter.toUpperCase();
+  const paymentSourceParam = sourceFilter === "ALL" ? "" : sourceFilter;
   const { data, isLoading, isError, refetch, isRefetching } = useQuery({
-    queryKey: ["admin", "bookings", { page, limit, status: statusParam }],
+    queryKey: ["admin", "bookings", { page, limit, status: statusParam, paymentProvider: paymentSourceParam }],
     queryFn: () => {
       const params = new URLSearchParams({ page: String(page), limit: String(limit) });
       if (statusParam) params.set("status", statusParam);
+      if (paymentSourceParam) params.set("paymentProvider", paymentSourceParam);
       return api.get(`/admin/bookings?${params.toString()}`).then((r) => r.data?.data);
     },
     refetchOnWindowFocus: false,
@@ -280,22 +285,38 @@ export default function BookingsPage() {
           )}
         </div>
 
-        <div className="flex gap-1 bg-surface-muted p-0.5 rounded-xl border border-border w-full sm:w-auto overflow-x-auto scrollbar-none">
-          {STATUS_PILLS.map((pill) => (
-            <button
-              key={pill} 
-              onClick={() => { setStatusFilter(pill); setPage(1); }}
-              className={cn(
-                "relative px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-colors",
-                statusFilter === pill ? "text-primary" : "text-text-secondary hover:text-text-primary",
-              )}>
-              {statusFilter === pill && (
-                <span 
-                  className="absolute inset-0 bg-surface-base rounded-md border border-border " />
-              )}
-              <span className="relative z-10">{pill}</span>
-            </button>
-          ))}
+        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
+          <div className="flex gap-1 bg-surface-muted p-0.5 rounded-xl border border-border min-w-0 overflow-x-auto scrollbar-none">
+            {STATUS_PILLS.map((pill) => (
+              <button
+                key={pill} 
+                onClick={() => { setStatusFilter(pill); setPage(1); }}
+                className={cn(
+                  "relative px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-colors",
+                  statusFilter === pill ? "text-primary" : "text-text-secondary hover:text-text-primary",
+                )}>
+                {statusFilter === pill && (
+                  <span 
+                    className="absolute inset-0 bg-surface-base rounded-md border border-border " />
+                )}
+                <span className="relative z-10">{pill}</span>
+              </button>
+            ))}
+          </div>
+
+          <Select
+            value={sourceFilter}
+            onValueChange={(value) => { setSourceFilter(value); setPage(1); }}
+          >
+            <SelectTrigger className="h-9 w-full shrink-0 text-xs sm:w-[142px]" aria-label="Filter by payment source">
+              <SelectValue placeholder="All sources" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All sources</SelectItem>
+              <SelectItem value="STRIPE">Stripe</SelectItem>
+              <SelectItem value="PAYPAL">PayPal</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -371,6 +392,7 @@ export default function BookingsPage() {
                       // Guest checkouts have no account behind them, so the
                       // row reads the lead traveller instead of a customer.
                       const contact = bookingContact(booking);
+                      const paidWith = paymentSource(booking);
                       return (
                       <tr
                         key={booking.id} 
@@ -463,19 +485,29 @@ export default function BookingsPage() {
                           </Badge>
                         </td>
                         <td className="px-4 py-3 text-center">
-                          <Badge variant={PAYMENT_BADGE[booking.paymentStatus] || "warning"} className="text-[10px] px-1.5 py-0">
-                            {isPaymentPaid(booking.paymentStatus) ? (
-                              <><CheckCircle2 className="h-2.5 w-2.5" /> Paid</>
-                            ) : booking.paymentStatus === "FAILED" ? (
-                              "Failed"
-                            ) : booking.paymentStatus === "PROCESSING" ? (
-                              "Processing"
-                            ) : booking.paymentTiming === "later" ? (
-                              <><Clock className="h-2.5 w-2.5" /> Pay Later</>
-                            ) : (
-                              "Pending"
+                          <div className="flex flex-col items-center gap-1">
+                            <Badge variant={PAYMENT_BADGE[booking.paymentStatus] || "warning"} className="text-[10px] px-1.5 py-0">
+                              {isPaymentPaid(booking.paymentStatus) ? (
+                                <><CheckCircle2 className="h-2.5 w-2.5" /> Paid</>
+                              ) : booking.paymentStatus === "FAILED" ? (
+                                "Failed"
+                              ) : booking.paymentStatus === "PROCESSING" ? (
+                                "Processing"
+                              ) : booking.paymentTiming === "later" ? (
+                                <><Clock className="h-2.5 w-2.5" /> Pay Later</>
+                              ) : (
+                                "Pending"
+                              )}
+                            </Badge>
+                            {/* Only rows a processor actually touched get a
+                                source. A pay-later row nobody has charged yet
+                                would otherwise claim "Stripe" by default. */}
+                            {paidWith.hasEvidence && (
+                              <span className="whitespace-nowrap text-[10px] text-text-tertiary">
+                                {paidWith.summary}
+                              </span>
                             )}
-                          </Badge>
+                          </div>
                         </td>
                       </tr>
                       );

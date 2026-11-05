@@ -11,6 +11,7 @@ import {
   Clock,
   Hash,
   CreditCard,
+  Wallet,
   Banknote,
   CheckCircle2,
   Users,
@@ -31,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { usePermission } from "@/hooks/usePermission";
 import { PERMISSIONS } from "@/lib/permissions";
 import { cn, timeAgo, getStatusColor, formatCurrency, formatDateTime, formatTravelDate } from "@/lib/utils";
+import { paymentSource } from "@/lib/paymentSource";
 import { BookingTimeline } from "./BookingTimeline";
 import type { Booking, TravelerData } from "@/types/booking";
 import { isPaymentPaid, travelerCount } from "@/types/booking";
@@ -451,6 +453,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
     booking.paymentStatus === "PENDING" && booking.paymentTiming === "later"
       ? "The customer chose to pay later. Nothing has been charged yet."
       : paymentStatusMeta.hint;
+  const paidWith = paymentSource(booking);
 
   return createPortal(
     <>
@@ -820,6 +823,33 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                   </span>
                   <StatusChip status={booking.paymentStatus} label={paymentStatusMeta.label} />
                 </div>
+                {paidWith.hasEvidence && (
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      {paidWith.provider === "PAYPAL" ? (
+                        <Wallet className="h-4 w-4 text-text-tertiary" />
+                      ) : (
+                        <CreditCard className="h-4 w-4 text-text-tertiary" />
+                      )}
+                      <span className="text-xs font-medium text-text-secondary">Payment Source</span>
+                    </span>
+                    <span className="text-xs font-medium text-text-primary">{paidWith.label}</span>
+                  </div>
+                )}
+                {paidWith.card && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-text-secondary">Card</span>
+                    <span className="tnum text-xs font-medium text-text-primary">{paidWith.card}</span>
+                  </div>
+                )}
+                {paidWith.reference && (
+                  <div className="rounded-lg bg-surface-muted px-3 py-2">
+                    <p className="text-[10px] text-text-tertiary">{paidWith.reference.label}</p>
+                    <p className="mt-0.5 break-all font-mono text-[10px] text-text-secondary">
+                      {paidWith.reference.value}
+                    </p>
+                  </div>
+                )}
                 {booking.paymentTiming === "later" && (
                   <div className="flex items-center gap-2 rounded-xl bg-status-pending/10 border border-status-pending/30 px-3 py-2">
                     <Clock className="h-3.5 w-3.5 text-status-pending-text shrink-0" />

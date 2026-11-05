@@ -14,6 +14,9 @@ export type PaymentStatus =
   | "CANCELLED"
   | "REFUNDED";
 
+/** The processor that took the money. Stripe is the default for older rows. */
+export type PaymentProvider = "STRIPE" | "PAYPAL";
+
 export function isPaymentPaid(status: PaymentStatus | string): boolean {
   return status === "SUCCEEDED";
 }
@@ -80,6 +83,15 @@ export interface Booking {
   status: BookingStatus;
   paymentStatus: PaymentStatus;
   paymentTiming?: "now" | "later";
+  /** Set by the checkout that created the booking; absent means Stripe. */
+  paymentProvider?: PaymentProvider;
+  /** Card brand and last four, when checkout captured them. */
+  paymentMethodBrand?: string | null;
+  paymentMethodLast4?: string | null;
+  stripePaymentIntentId?: string | null;
+  stripeCheckoutSessionId?: string | null;
+  paypalOrderId?: string | null;
+  paypalCaptureId?: string | null;
   grossAmount: number;
   currency: string;
   travelDate: string;
