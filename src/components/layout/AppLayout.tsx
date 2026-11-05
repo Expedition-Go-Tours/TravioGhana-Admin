@@ -32,7 +32,7 @@ export function AppLayout() {
           <main className="flex flex-1 flex-col overflow-y-auto p-4 md:p-6 lg:p-8">
             <div
               key={location.pathname}
-              className="mx-auto min-h-0 w-full max-w-[1440px] flex-1 animate-in fade-in duration-200 motion-reduce:animate-none"
+              className="admin-page mx-auto min-h-0 w-full max-w-[1440px] flex-1 motion-reduce:animate-none"
             >
               <Outlet />
             </div>

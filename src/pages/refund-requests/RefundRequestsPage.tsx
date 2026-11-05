@@ -1,10 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
   AlertTriangle,
   CalendarDays,
+  ExternalLink,
   Loader2,
   Mail,
   RefreshCw,
@@ -41,6 +42,7 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -108,6 +110,7 @@ function DetailValue({ children, className }: { children: React.ReactNode; class
 
 export default function RefundRequestsPage() {
   const qc = useQueryClient();
+  const navigate = useNavigate();
   const { can } = usePermission();
   const canDecide = can("payouts.approve");
 
@@ -122,6 +125,9 @@ export default function RefundRequestsPage() {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [note, setNote] = useState("");
   const [error, setError] = useState<string | null>(null);
+  // Approving moves real money through the payment provider, so it gets a
+  // confirmation step that states both amounts and that it cannot be undone.
+  const [confirmApprove, setConfirmApprove] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search.trim()), 350);
@@ -164,6 +170,7 @@ export default function RefundRequestsPage() {
     setManualOpenId(null);
     setNote("");
     setError(null);
+    setConfirmApprove(false);
     clearRequestedParam();
   }
 
@@ -171,6 +178,7 @@ export default function RefundRequestsPage() {
     setManualOpenId(id);
     setNote("");
     setError(null);
+    setConfirmApprove(false);
     clearRequestedParam();
   }
 
@@ -196,6 +204,12 @@ export default function RefundRequestsPage() {
     },
     onError: (err: unknown) => setError(errorMessage(err, "Could not reject the request.")),
   });
+
+  /** The dialog closes before the request fires so the drawer shows the spinner. */
+  function confirmApproveRefund() {
+    setConfirmApprove(false);
+    approve.mutate();
+  }
 
   function changeStatus(next: string) {
     setStatus(next);
@@ -664,7 +678,15 @@ export default function RefundRequestsPage() {
                         A note is required to reject the request.
                       </p>
                     </div>
-                    <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:justify-end">
+                    <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-end">
+                      <Button
+                        variant="ghost"
+                        onClick={() => navigate(`/admin/bookings?bookingId=${encodeURIComponent(detail.booking.id)}`)}
+                        className="gap-2 sm:mr-auto"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        View booking
+                      </Button>
                       <Button
                         variant="outline"
                         disabled={reject.isPending || approve.isPending || !note.trim()}
@@ -676,7 +698,7 @@ export default function RefundRequestsPage() {
                       </Button>
                       <Button
                         disabled={approve.isPending || reject.isPending || !!detail.blocked}
-                        onClick={() => approve.mutate()}
+                        onClick={() => setConfirmApprove(true)}
                         className="gap-2"
                       >
                         {approve.isPending ? (
@@ -701,6 +723,78 @@ export default function RefundRequestsPage() {
               )}
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Approving moves real money through the payment provider. One click
+          used to do it; this step states both amounts and that it is final. */}
+      <Dialog open={confirmApprove} onOpenChange={setConfirmApprove}>
+        <DialogContent className="sm:max-w-[460px]">
+          <DialogHeader>
+            <DialogTitle>Approve this refund?</DialogTitle>
+            <DialogDescription>
+              This refunds the traveller immediately and cannot be undone from the dashboard.
+            </DialogDescription>
+          </DialogHeader>
+
+          {detail && preview ? (
+            <div className="space-y-3 py-1">
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface-muted px-4 py-3">
+                <div>
+                  <p className="text-[13px] font-medium text-text-primary">Traveller refund</p>
+                  <p className="mt-0.5 text-[11px] text-text-tertiary">
+                    {preview.isFull ? "Full booking refund" : "Partial refund"} · back to their original payment method
+                  </p>
+                </div>
+                <p className="tnum text-lg font-semibold text-text-primary">
+                  {money(preview.proposed, currency)}
+                </p>
+              </div>
+
+              <div className="flex items-center justify-between gap-4 rounded-lg border border-border bg-surface-muted px-4 py-3">
+                <div>
+                  <p className="text-[13px] font-medium text-text-primary">Charge to supplier</p>
+                  <p className="mt-0.5 text-[11px] text-text-tertiary">
+                    {Number(preview.charge) > 0
+                      ? "Netted off their next payout"
+                      : "No charge — the payout has not been released"}
+                  </p>
+                </div>
+                <p className="tnum text-lg font-semibold text-text-primary">
+                  {money(preview.charge, currency)}
+                </p>
+              </div>
+
+              {detail.supplierBalance ? (
+                <p className="text-[12px] text-text-secondary">
+                  Supplier balance {money(detail.supplierBalance.available, currency)}
+                  {balanceAfter != null ? ` → ${money(balanceAfter, currency)} after this refund` : ""}
+                </p>
+              ) : null}
+
+              <div className="flex items-start gap-2 rounded-lg border border-status-pending/25 bg-status-pending/5 px-3.5 py-3 text-[12px] leading-relaxed text-status-pending-text">
+                <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
+                <span>
+                  The payment provider refunds the traveller as soon as you confirm. This cannot
+                  be reversed.
+                </span>
+              </div>
+            </div>
+          ) : null}
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setConfirmApprove(false)}>
+              Cancel
+            </Button>
+            <Button onClick={confirmApproveRefund} disabled={approve.isPending} className="gap-2">
+              {approve.isPending ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <ShieldCheck className="h-4 w-4" />
+              )}
+              Refund {preview ? money(preview.proposed, currency) : ""}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

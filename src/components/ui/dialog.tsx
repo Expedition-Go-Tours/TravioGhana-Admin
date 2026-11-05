@@ -15,7 +15,7 @@ const DialogOverlay = React.forwardRef<
   <DialogPrimitive.Overlay
     ref={ref}
     className={cn(
-      "fixed inset-0 z-50 bg-text-primary/30",
+      "admin-overlay fixed inset-0 z-50 bg-text-primary/30",
       className,
     )}
     {...props}
@@ -32,7 +32,7 @@ const DialogContent = React.forwardRef<
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
-        "fixed z-50 gap-4 border border-border bg-surface-base shadow-lg overflow-y-auto",
+        "admin-panel fixed z-50 gap-4 border border-border bg-surface-base shadow-lg overflow-y-auto",
         "max-h-[85dvh] p-6",
         "bottom-0 left-0 right-0 rounded-t-xl sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-xl sm:max-w-lg sm:w-full",
         className,

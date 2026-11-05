@@ -83,10 +83,10 @@ export function CustomerProfilePanel({ customerId, onClose }: CustomerProfilePan
   return (
     <>
       <div 
-        className="fixed inset-0 z-40 bg-black/10"
+        className="fixed inset-0 z-40 bg-black/10 animate-in fade-in-0 duration-200 motion-reduce:animate-none"
         onClick={onClose} />
       <div 
-        className="fixed right-0 top-0 z-50 h-full w-full sm:w-[420px] bg-surface-base border-l border-border shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col">
+        className="admin-sheet fixed right-0 top-0 z-50 h-full w-full sm:w-[420px] bg-surface-base border-l border-border shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col">
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <h2 className="text-sm font-semibold text-text-primary">Customer Profile</h2>
           <button

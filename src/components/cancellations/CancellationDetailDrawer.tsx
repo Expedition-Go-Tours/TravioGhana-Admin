@@ -101,10 +101,10 @@ export function CancellationDetailDrawer({
   return createPortal(
     <>
       <div 
-        className="fixed inset-0 z-40 bg-text-primary/30"
+        className="fixed inset-0 z-40 bg-text-primary/30 animate-in fade-in-0 duration-200 motion-reduce:animate-none"
         onClick={onClose} />
       <aside 
-        className="fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-border bg-surface-base shadow-[-4px_0_16px_rgba(0,0,0,0.08)] sm:w-[480px] md:w-[540px]"
+        className="admin-sheet fixed right-0 top-0 z-50 flex h-full w-full flex-col border-l border-border bg-surface-base shadow-[-4px_0_16px_rgba(0,0,0,0.08)] sm:w-[480px] md:w-[540px]"
         aria-label="Cancellation request detail">
         <div className="flex shrink-0 items-start justify-between gap-3 border-b border-border px-5 py-4">
           <div className="min-w-0">

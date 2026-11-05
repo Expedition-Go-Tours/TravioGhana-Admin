@@ -84,10 +84,10 @@ export function PayoutDetailPanel({ payout, supplierPhotoUrl, onClose, onApprove
   return createPortal(
     <>
       <div 
-        className="fixed inset-0 z-40 bg-black/10"
+        className="fixed inset-0 z-40 bg-black/10 animate-in fade-in-0 duration-200 motion-reduce:animate-none"
         onClick={onClose} />
       <div 
-        className="fixed right-0 top-0 z-50 h-full w-full sm:w-[480px] bg-surface-base border-l border-border shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col">
+        className="admin-sheet fixed right-0 top-0 z-50 h-full w-full sm:w-[480px] bg-surface-base border-l border-border shadow-[-4px_0_16px_rgba(0,0,0,0.06)] flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-border shrink-0">
           <div className="flex items-center gap-2 min-w-0">

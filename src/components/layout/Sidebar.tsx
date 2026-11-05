@@ -340,7 +340,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
         ref={asideRef}
         className={cn(
           "fixed inset-y-0 left-0 z-40 flex w-[280px] flex-col border-r border-sidebar-border bg-sidebar-bg",
-          "transition-[width] duration-200 motion-reduce:transition-none",
+          "transition-[width,transform] duration-200 motion-reduce:transition-none",
           collapsed ? "lg:w-[72px]" : "lg:w-[280px]",
           "lg:relative lg:h-full lg:translate-x-0",
           open ? "translate-x-0" : "-translate-x-full",
