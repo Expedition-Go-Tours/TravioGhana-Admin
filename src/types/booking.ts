@@ -106,6 +106,8 @@ export interface Booking {
   travelers: TravelerData;
   specialRequests?: string | null;
   cancellationReason?: string | null;
+  /** Server-resolved, human-readable reason (the raw field can be a code). */
+  cancellationReasonLabel?: string | null;
   paidAt?: string | null;
   createdAt: string;
   updatedAt: string;

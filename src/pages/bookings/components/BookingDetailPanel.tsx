@@ -901,7 +901,9 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
               <div>
                 <SectionTitle>Cancellation Reason</SectionTitle>
                 <div className="rounded-xl border border-status-rejected/30 bg-status-rejected/10 p-3">
-                  <p className="text-xs text-status-rejected-text">{booking.cancellationReason}</p>
+                  <p className="text-xs text-status-rejected-text">
+                    {booking.cancellationReasonLabel || booking.cancellationReason}
+                  </p>
                 </div>
               </div>
             )}
