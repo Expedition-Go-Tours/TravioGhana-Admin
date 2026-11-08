@@ -54,6 +54,32 @@ function mockApi() {
         },
       });
     }
+    if (url.startsWith("/admin/analytics/guest-claims")) {
+      return Promise.resolve({
+        data: {
+          status: "success",
+          data: {
+            period: "1y",
+            guestBookings: 14,
+            claimedGuestBookings: 6,
+            accountBookings: 86,
+            guestShare: 14,
+            claimRate: 42.9,
+            claimsInPeriod: 8,
+            averageDaysToClaim: 3.5,
+            lifetime: {
+              guestBookings: 20,
+              claimedGuestBookings: 6,
+              unclaimedGuestBookings: 14,
+              accountBookings: 140,
+              guestShare: 12.5,
+              claimRate: 30,
+              averageDaysToClaim: 3.5,
+            },
+          },
+        },
+      });
+    }
     return Promise.resolve({ data: {} });
   });
 }
@@ -91,6 +117,25 @@ describe("UserGrowthPage", () => {
     // Comparison overlay + export controls.
     expect(screen.getByRole("button", { name: "Previous period" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "CSV" })).toBeInTheDocument();
+  });
+
+  it("folds guest checkout and claim conversion into the growth story", async () => {
+    renderWithProviders(<UserGrowthPage />);
+
+    expect(await screen.findByText("Guest Checkout → Account")).toBeInTheDocument();
+    expect(await screen.findByText("Guests are 14.0% of bookings")).toBeInTheDocument();
+
+    // The claim funnel: 6 of 14 guest bookings from this window were claimed.
+    expect(screen.getByText("Claim rate")).toBeInTheDocument();
+    expect(screen.getAllByText("42.9%").length).toBeGreaterThan(0);
+    expect(screen.getByText("Claims logged")).toBeInTheDocument();
+    expect(screen.getByText("Avg days to claim")).toBeInTheDocument();
+    expect(screen.getByText("3.5d")).toBeInTheDocument();
+    expect(screen.getByText("Still unclaimed")).toBeInTheDocument();
+
+    // Lifetime context sits under the card, not in the period numbers.
+    expect(screen.getByText(/still belong to no account/)).toBeInTheDocument();
+    expect(mockGet).toHaveBeenCalledWith("/admin/analytics/guest-claims?period=1y");
   });
 
   it("shows phone numbers for booked customers in the drill-down, hides them otherwise", async () => {

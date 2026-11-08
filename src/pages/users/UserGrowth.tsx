@@ -1,9 +1,12 @@
-﻿import { useState, useMemo, useCallback } from "react";
+﻿import { useState, useMemo, useCallback, type ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
   ComposedChart, Bar, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine,
 } from "recharts";
-import { TrendingUp, Users, UserPlus, Activity, Download, Info, Phone } from "lucide-react";
+import {
+  TrendingUp, Users, UserPlus, Activity, Download, Info, Phone,
+  Ticket, UserCheck, MailCheck, Timer,
+} from "lucide-react";
 import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
@@ -55,6 +58,33 @@ interface GrowthResponse {
   previous: GrowthRow[];
   granularity: Granularity;
   period: string;
+}
+
+/**
+ * Guest checkout split for the same window. A "guest booking" is a booking
+ * created without an account; "claimed" means the guest later verified their
+ * email and attached it to one. See GET /api/admin/analytics/guest-claims.
+ */
+interface GuestClaimLifetime {
+  guestBookings: number;
+  claimedGuestBookings: number;
+  unclaimedGuestBookings: number;
+  accountBookings: number;
+  guestShare: number;
+  claimRate: number;
+  averageDaysToClaim: number | null;
+}
+
+interface GuestClaimResponse {
+  period: string;
+  guestBookings: number;
+  claimedGuestBookings: number;
+  accountBookings: number;
+  guestShare: number;
+  claimRate: number;
+  claimsInPeriod: number;
+  averageDaysToClaim: number | null;
+  lifetime: GuestClaimLifetime;
 }
 
 interface DialogUser {
@@ -120,6 +150,29 @@ function GrowthTooltip({ active, payload, label, granularity, compare }: GrowthT
   );
 }
 
+function ClaimStat({ icon, label, value, hint }: {
+  icon: ReactNode;
+  label: string;
+  value: string;
+  hint?: string;
+}) {
+  return (
+    <div className="rounded-xl border border-border bg-surface-base p-3">
+      <div className="flex items-center gap-1.5 text-xs font-medium text-text-tertiary">
+        {icon}
+        <span>{label}</span>
+      </div>
+      <p className="mt-1.5 text-xl font-semibold text-text-primary tnum">{value}</p>
+      {hint && <p className="mt-0.5 text-xs text-text-tertiary">{hint}</p>}
+    </div>
+  );
+}
+
+/** Percent without inventing precision when the API has no denominator yet. */
+function formatRate(value: number | null | undefined) {
+  return value != null && Number.isFinite(value) ? `${value.toFixed(1)}%` : "—";
+}
+
 export default function UserGrowthPage() {
   const [period, setPeriod] = useState("1y");
   const [compare, setCompare] = useState(false);
@@ -130,10 +183,30 @@ export default function UserGrowthPage() {
     queryFn: () => api.get(`/admin/analytics/user-growth?period=${period}`).then((r) => r.data),
   });
 
+  // Guest checkout feeds the same "who's joining" story: guests are demand
+  // that never created an account. Loaded separately so a slow/failed claim
+  // query cannot blank out the registration chart.
+  const {
+    data: claimData,
+    isLoading: claimLoading,
+    isError: claimError,
+    refetch: refetchClaims,
+  } = useQuery({
+    queryKey: ["admin", "guest-claims", period],
+    queryFn: () => api.get(`/admin/analytics/guest-claims?period=${period}`).then((r) => r.data),
+  });
+
   const responseData = data?.data as GrowthResponse | undefined;
   const growth = useMemo(() => responseData?.growth ?? [], [responseData]);
   const previous = useMemo(() => responseData?.previous ?? [], [responseData]);
   const granularity = responseData?.granularity ?? "month";
+
+  // The endpoint answers { status, data }; accept either envelope so an axios
+  // interceptor that unwraps one layer keeps working.
+  const guestClaims = useMemo(
+    () => ((claimData?.data ?? claimData) as GuestClaimResponse | undefined),
+    [claimData],
+  );
 
   const { data: dialogUsers, isLoading: dialogLoading } = useQuery({
     queryKey: ["admin", "users", "new", period, dialog?.type, dialog?.bucket],
@@ -286,6 +359,155 @@ export default function UserGrowthPage() {
           subtitle={growth.length ? `over ${growth.length} ${bucketNoun.toLowerCase()}s` : undefined}
         />
       </div>
+
+      <Card>
+        <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+          <div className="min-w-0">
+            <CardTitle className="flex items-center gap-2 text-sm font-semibold text-text-primary">
+              <UserPlus className="h-4 w-4 text-primary" />
+              Guest Checkout → Account
+              <span
+                className="cursor-help text-text-tertiary"
+                title="Guest bookings are made without an account. Claim rate counts guest bookings created in this window that were later attached to an account after email verification."
+              >
+                <Info className="h-3.5 w-3.5" aria-label="About guest checkout metrics" role="img" />
+              </span>
+            </CardTitle>
+            <p className="mt-1 text-xs text-text-tertiary">
+              Demand that booked without signing up, and how much of it came back
+            </p>
+          </div>
+          {!claimLoading && !claimError && guestClaims && (
+            <span
+              className="rounded-full border border-border bg-surface-muted px-3 py-1 text-xs font-semibold text-text-secondary"
+              title="Guest bookings as a share of all bookings created in this window"
+            >
+              Guests are {formatRate(guestClaims.guestShare)} of bookings
+            </span>
+          )}
+        </CardHeader>
+        <CardContent>
+          {claimLoading ? (
+            <div className="grid gap-4 lg:grid-cols-5">
+              <Skeleton className="h-52 w-full lg:col-span-3" />
+              <div className="grid grid-cols-2 gap-3 lg:col-span-2">
+                {Array.from({ length: 4 }).map((_, i) => <Skeleton key={i} className="h-24 w-full" />)}
+              </div>
+            </div>
+          ) : claimError ? (
+            <SectionError message="Failed to load guest checkout data" onRetry={() => refetchClaims()} />
+          ) : !guestClaims ? (
+            <SectionEmpty message="No guest checkout data for this period" />
+          ) : (
+            <>
+              <div className="grid gap-6 lg:grid-cols-5">
+                <div className="space-y-4 lg:col-span-3">
+                  <div className="flex items-baseline justify-between gap-3">
+                    <p className="text-xs font-medium text-text-tertiary">
+                      Booking mix · last {PERIOD_WINDOW_LABEL[period]}
+                    </p>
+                    <p className="text-xs text-text-tertiary">
+                      <span className="tnum font-semibold text-text-secondary">
+                        {formatNumber(guestClaims.guestBookings + guestClaims.accountBookings)}
+                      </span>{" "}
+                      bookings
+                    </p>
+                  </div>
+
+                  {/* One bar, two fates: booked as a guest, or booked with an
+                      account. Gold keeps the unconverted side visible. */}
+                  <div
+                    className="flex h-4 w-full overflow-hidden rounded-full bg-surface-muted"
+                    role="img"
+                    aria-label={`${formatRate(guestClaims.guestShare)} of bookings were made as a guest`}
+                  >
+                    <div
+                      className="h-full transition-all duration-700"
+                      style={{ width: `${guestClaims.guestShare}%`, backgroundColor: chartColors.gold }}
+                    />
+                    <div
+                      className="h-full transition-all duration-700"
+                      style={{ width: `${100 - guestClaims.guestShare}%`, backgroundColor: chartColors.emerald }}
+                    />
+                  </div>
+
+                  <div className="flex flex-wrap gap-x-6 gap-y-2">
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ backgroundColor: chartColors.gold }} />
+                      <span className="text-text-secondary">Guest bookings</span>
+                      <span className="tnum font-semibold text-text-primary">{formatNumber(guestClaims.guestBookings)}</span>
+                      <span className="text-text-tertiary">({formatRate(guestClaims.guestShare)})</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="h-2.5 w-2.5 shrink-0 rounded-sm" style={{ backgroundColor: chartColors.emerald }} />
+                      <span className="text-text-secondary">Account bookings</span>
+                      <span className="tnum font-semibold text-text-primary">{formatNumber(guestClaims.accountBookings)}</span>
+                    </div>
+                  </div>
+
+                  <div className="rounded-xl border border-border p-4">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-text-primary">Guest → account</p>
+                        <p className="text-xs text-text-tertiary">
+                          {formatNumber(guestClaims.claimedGuestBookings)} of {formatNumber(guestClaims.guestBookings)} guest bookings from this window were claimed
+                        </p>
+                      </div>
+                      <span className="text-sm font-semibold tnum text-text-primary">{formatRate(guestClaims.claimRate)}</span>
+                    </div>
+                    <div className="mt-2.5 h-2.5 w-full overflow-hidden rounded-full bg-surface-muted">
+                      <div
+                        className="h-full rounded-full transition-all duration-700"
+                        style={{ width: `${guestClaims.claimRate}%`, backgroundColor: chartColors.primary }}
+                      />
+                    </div>
+                    <p className="mt-1.5 text-xs text-text-tertiary">
+                      {guestClaims.claimsInPeriod > 0
+                        ? `${formatNumber(guestClaims.claimsInPeriod)} claim${guestClaims.claimsInPeriod === 1 ? "" : "s"} logged in this window, including bookings made earlier.`
+                        : "No bookings have been claimed in this window yet."}
+                    </p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 lg:col-span-2">
+                  <ClaimStat
+                    icon={<UserCheck className="h-3.5 w-3.5" />}
+                    label="Claim rate"
+                    value={formatRate(guestClaims.claimRate)}
+                    hint={`${formatNumber(guestClaims.claimedGuestBookings)} of ${formatNumber(guestClaims.guestBookings)} guests`}
+                  />
+                  <ClaimStat
+                    icon={<MailCheck className="h-3.5 w-3.5" />}
+                    label="Claims logged"
+                    value={formatNumber(guestClaims.claimsInPeriod)}
+                    hint="in the selected window"
+                  />
+                  <ClaimStat
+                    icon={<Timer className="h-3.5 w-3.5" />}
+                    label="Avg days to claim"
+                    value={guestClaims.averageDaysToClaim != null ? `${guestClaims.averageDaysToClaim.toFixed(1)}d` : "—"}
+                    hint="booking to account"
+                  />
+                  <ClaimStat
+                    icon={<Ticket className="h-3.5 w-3.5" />}
+                    label="Still unclaimed"
+                    value={formatNumber(guestClaims.lifetime.unclaimedGuestBookings)}
+                    hint="lifetime guest bookings"
+                  />
+                </div>
+              </div>
+
+              <p className="mt-4 border-t border-border pt-3 text-xs text-text-tertiary">
+                Lifetime:{" "}
+                <span className="font-semibold text-text-secondary">{formatRate(guestClaims.lifetime.claimRate)}</span>{" "}
+                of {formatNumber(guestClaims.lifetime.guestBookings)} guest bookings have been claimed
+                {" · "}
+                {formatNumber(guestClaims.lifetime.unclaimedGuestBookings)} still belong to no account.
+              </p>
+            </>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="flex flex-row flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
