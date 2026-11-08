@@ -134,7 +134,7 @@ describe("UserGrowthPage", () => {
     expect(screen.getByText("Still unclaimed")).toBeInTheDocument();
 
     // Lifetime context sits under the card, not in the period numbers.
-    expect(screen.getByText(/still belong to no account/)).toBeInTheDocument();
+    expect(screen.getByText(/still unclaimed/)).toBeInTheDocument();
     expect(mockGet).toHaveBeenCalledWith("/admin/analytics/guest-claims?period=1y");
   });
 

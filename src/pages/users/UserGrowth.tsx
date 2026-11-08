@@ -450,7 +450,7 @@ export default function UserGrowthPage() {
                       <div className="min-w-0">
                         <p className="text-sm font-semibold text-text-primary">Guest → account</p>
                         <p className="text-xs text-text-tertiary">
-                          {formatNumber(guestClaims.claimedGuestBookings)} of {formatNumber(guestClaims.guestBookings)} guest bookings from this window were claimed
+                          {formatNumber(guestClaims.claimedGuestBookings)} of {formatNumber(guestClaims.guestBookings)} guest bookings from this window {guestClaims.claimedGuestBookings === 1 ? "was" : "were"} claimed
                         </p>
                       </div>
                       <span className="text-sm font-semibold tnum text-text-primary">{formatRate(guestClaims.claimRate)}</span>
@@ -500,9 +500,10 @@ export default function UserGrowthPage() {
               <p className="mt-4 border-t border-border pt-3 text-xs text-text-tertiary">
                 Lifetime:{" "}
                 <span className="font-semibold text-text-secondary">{formatRate(guestClaims.lifetime.claimRate)}</span>{" "}
-                of {formatNumber(guestClaims.lifetime.guestBookings)} guest bookings have been claimed
+                of guest bookings claimed
+                {" "}({formatNumber(guestClaims.lifetime.claimedGuestBookings)} of {formatNumber(guestClaims.lifetime.guestBookings)})
                 {" · "}
-                {formatNumber(guestClaims.lifetime.unclaimedGuestBookings)} still belong to no account.
+                {formatNumber(guestClaims.lifetime.unclaimedGuestBookings)} still unclaimed.
               </p>
             </>
           )}
