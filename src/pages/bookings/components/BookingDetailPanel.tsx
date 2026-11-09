@@ -930,10 +930,7 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                         </div>
                         <div className="flex items-center justify-between gap-3 text-xs">
                           <span className="text-text-secondary">Reason</span>
-                          <span
-                            className="text-right font-medium text-text-primary"
-                            title={pending.payload?.cancellationCode || undefined}
-                          >
+                          <span className="text-right font-medium text-text-primary">
                             {pending.reasonLabel
                               || cancellationReasonLabel(pending.payload?.cancellationCode)
                               || "—"}

@@ -213,11 +213,9 @@ export function CancellationDetailDrawer({
                       || "—"}
                   </Field>
                   <Field label="Reason">
-                    <span title={payload?.cancellationCode || booking?.cancellationCode || undefined}>
-                      {request.reasonLabel
-                        || cancellationReasonLabel(payload?.cancellationCode || booking?.cancellationCode)
-                        || "—"}
-                    </span>
+                    {request.reasonLabel
+                      || cancellationReasonLabel(payload?.cancellationCode || booking?.cancellationCode)
+                      || "—"}
                   </Field>
                   <Field label="Counts toward rate">
                     {preview?.countsTowardRate ?? booking?.countsTowardRate ? "Yes" : "No"}

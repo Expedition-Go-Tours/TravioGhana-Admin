@@ -468,10 +468,7 @@ export default function CancellationsPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <p
-                          className="text-xs font-medium text-text-primary"
-                          title={request.payload?.cancellationCode || booking?.cancellationCode || undefined}
-                        >
+                        <p className="text-xs font-medium text-text-primary">
                           {request.reasonLabel
                             || cancellationReasonLabel(request.payload?.cancellationCode || booking?.cancellationCode)
                             || "—"}
