@@ -3,6 +3,7 @@ import { useSearchParams } from "react-router-dom";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
+  AlertCircle,
   Calendar,
   CheckSquare,
   Clock,
@@ -42,6 +43,7 @@ import { CancellationStatusBadge } from "@/components/cancellations/Cancellation
 import { CancellationDecisionDialog } from "@/components/cancellations/CancellationDecisionDialog";
 import { CancellationDetailDrawer } from "@/components/cancellations/CancellationDetailDrawer";
 import { BatchApproveDialog } from "@/components/cancellations/BatchApproveDialog";
+import { bookingCustomer, hasCategoryMismatch, cancellationReasonLabel, cancellationCategoryLabel } from "@/lib/cancellationReview";
 
 const STATUS_TABS = [
   { key: "PENDING_APPROVAL", label: "Pending" },
@@ -398,6 +400,8 @@ export default function CancellationsPage() {
                   const booking = request.booking;
                   const currency = booking?.currency || "USD";
                   const selectable = canDecide && isSelectable(request);
+                  const customer = bookingCustomer(booking);
+                  const mismatch = hasCategoryMismatch(request);
                   return (
                     <tr
                       key={request.id} 
@@ -445,8 +449,15 @@ export default function CancellationsPage() {
                         <div className="flex items-center gap-1.5">
                           <User className="h-3 w-3 shrink-0 text-text-tertiary" />
                           <div className="min-w-0">
-                            <p className="truncate text-xs text-text-primary">{booking?.customer?.name || "—"}</p>
-                            <p className="truncate text-[10px] text-text-tertiary">{booking?.customer?.email || ""}</p>
+                            <div className="flex items-center gap-1.5">
+                              <p className="truncate text-xs text-text-primary">{customer.name}</p>
+                              {customer.guest && (
+                                <Badge variant="secondary" className="shrink-0 px-1.5 py-0 text-[9px]">
+                                  Guest
+                                </Badge>
+                              )}
+                            </div>
+                            <p className="truncate text-[10px] text-text-tertiary">{customer.email}</p>
                           </div>
                         </div>
                       </td>
@@ -457,14 +468,17 @@ export default function CancellationsPage() {
                         </div>
                       </td>
                       <td className="px-4 py-3">
-                        <p className="text-xs font-medium capitalize text-text-primary">
-                          {(request.payload?.cancellationCategory || booking?.cancellationCategory || "—")
-                            .toString()
-                            .replace(/_/g, " ")
-                            .toLowerCase()}
+                        <p
+                          className="text-xs font-medium text-text-primary"
+                          title={request.payload?.cancellationCode || booking?.cancellationCode || undefined}
+                        >
+                          {request.reasonLabel
+                            || cancellationReasonLabel(request.payload?.cancellationCode || booking?.cancellationCode)
+                            || "—"}
                         </p>
-                        <p className="font-mono text-[10px] text-text-tertiary">
-                          {request.payload?.cancellationCode || booking?.cancellationCode || "—"}
+                        <p className="text-[10px] text-text-tertiary">
+                          {request.categoryLabel
+                            || cancellationCategoryLabel(request.payload?.cancellationCategory || booking?.cancellationCategory)}
                         </p>
                         {request.payload?.explanation ? (
                           <p className="mt-1 flex items-center gap-1 text-[10px] text-text-tertiary line-clamp-1 max-w-[200px]">
@@ -472,6 +486,12 @@ export default function CancellationsPage() {
                             {String(request.payload.explanation)}
                           </p>
                         ) : null}
+                        {mismatch && (
+                          <p className="mt-1 flex items-center gap-1 text-[10px] font-medium text-status-pending-text">
+                            <AlertCircle className="h-3 w-3 shrink-0" />
+                            Reason looks operational. Check the category.
+                          </p>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-right">
                         <p className="text-xs font-semibold text-text-primary tnum">
@@ -522,13 +542,16 @@ export default function CancellationsPage() {
         />
       )}
 
-      <CancellationDetailDrawer
-        requestId={selectedId}
-        canDecide={canDecide}
-        onClose={closeDetail}
-        onApprove={(request) => setDecision({ mode: "approve", request })}
-        onReject={(request) => setDecision({ mode: "reject", request })}
-      />
+      {selectedId && (
+        <CancellationDetailDrawer
+          key={selectedId}
+          requestId={selectedId}
+          canDecide={canDecide}
+          onClose={closeDetail}
+          onApprove={(request) => setDecision({ mode: "approve", request })}
+          onReject={(request) => setDecision({ mode: "reject", request })}
+        />
+      )}
 
       {decision && (
         <CancellationDecisionDialog

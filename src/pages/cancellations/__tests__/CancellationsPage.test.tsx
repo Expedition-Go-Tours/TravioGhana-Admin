@@ -128,6 +128,56 @@ describe("CancellationsPage", () => {
     });
   });
 
+  it("reopens the detail drawer after closing it", async () => {
+    renderWithProviders(<CancellationsPage />);
+    await waitFor(() => expect(screen.getByText("TG-1001")).toBeInTheDocument());
+
+    await userEvent.click(screen.getByText("TG-1001"));
+    const firstDrawer = await screen.findByLabelText("Cancellation request detail");
+    await userEvent.click(within(firstDrawer).getByRole("button", { name: "Close" }));
+
+    await waitFor(() => {
+      expect(screen.queryByLabelText("Cancellation request detail")).not.toBeInTheDocument();
+    });
+
+    await userEvent.click(screen.getByText("TG-1001"));
+    expect(await screen.findByLabelText("Cancellation request detail")).toBeInTheDocument();
+  });
+
+  it("names the guest traveller and flags an operational reason filed as a customer request", async () => {
+    vi.mocked(getCancellationRequests).mockResolvedValueOnce({
+      requests: [
+        {
+          ...pendingRequest,
+          booking: {
+            ...pendingRequest.booking,
+            customer: null,
+            leadTravelerName: "Yannick Germeau",
+            leadTravelerEmail: "yannick@example.com",
+            guest: { id: "guest_1", name: "Yannick Germeau", email: "yannick@example.com" },
+          },
+          payload: {
+            ...pendingRequest.payload,
+            cancellationCode: "CUSTOMER_REQUESTED_CANCEL",
+            cancellationCategory: "CUSTOMER_REQUESTED",
+            explanation: "Guide not available",
+          },
+        },
+      ],
+      pendingCount: 1,
+      pagination: { currentPage: 1, totalPages: 1, totalCount: 1, limit: 20 },
+    } as never);
+
+    renderWithProviders(<CancellationsPage />);
+
+    expect(await screen.findByText("Yannick Germeau")).toBeInTheDocument();
+    expect(screen.getByText("Guest")).toBeInTheDocument();
+    expect(screen.getByText("Customer asked to cancel this booking")).toBeInTheDocument();
+    expect(screen.getByText("Customer requested")).toBeInTheDocument();
+    expect(screen.queryByText("CUSTOMER_REQUESTED_CANCEL")).not.toBeInTheDocument();
+    expect(screen.getByText(/reason looks operational/i)).toBeInTheDocument();
+  });
+
   it("opens the detail drawer from a deep link and approves with a note", async () => {
     vi.mocked(approveCancellationRequest).mockResolvedValue({
       booking: pendingRequest.booking,

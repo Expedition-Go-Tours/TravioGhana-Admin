@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { usePermission } from "@/hooks/usePermission";
 import { PERMISSIONS } from "@/lib/permissions";
 import { cn, timeAgo, getStatusColor, formatCurrency, formatDateTime, formatTravelDate } from "@/lib/utils";
+import { cancellationReasonLabel, cancellationCategoryLabel } from "@/lib/cancellationReview";
 import { paymentSource } from "@/lib/paymentSource";
 import { BookingTimeline } from "./BookingTimeline";
 import type { Booking, TravelerData } from "@/types/booking";
@@ -921,17 +922,21 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                       <div className="space-y-1.5">
                         <div className="flex items-center justify-between gap-3 text-xs">
                           <span className="text-text-secondary">Category</span>
-                          <span className="font-medium capitalize text-text-primary">
-                            {(pending.payload?.cancellationCategory || booking.cancellationCategory || "—")
-                              .toString()
-                              .replace(/_/g, " ")
-                              .toLowerCase()}
+                          <span className="font-medium text-text-primary">
+                            {pending.categoryLabel
+                              || cancellationCategoryLabel(pending.payload?.cancellationCategory || booking.cancellationCategory)
+                              || "—"}
                           </span>
                         </div>
                         <div className="flex items-center justify-between gap-3 text-xs">
-                          <span className="text-text-secondary">Code</span>
-                          <span className="font-mono text-text-primary">
-                            {pending.payload?.cancellationCode || "—"}
+                          <span className="text-text-secondary">Reason</span>
+                          <span
+                            className="text-right font-medium text-text-primary"
+                            title={pending.payload?.cancellationCode || undefined}
+                          >
+                            {pending.reasonLabel
+                              || cancellationReasonLabel(pending.payload?.cancellationCode)
+                              || "—"}
                           </span>
                         </div>
                         <div className="flex items-center justify-between gap-3 text-xs">
@@ -1017,13 +1022,13 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                   ) : (
                     <div className="space-y-0.5">
                       {booking.cancellationCode && (
-                        <DetailRow icon={<Tag className="h-3 w-3" />} label="Code">
-                          <span className="font-mono">{booking.cancellationCode}</span>
+                        <DetailRow icon={<Tag className="h-3 w-3" />} label="Reason">
+                          {booking.cancellationCodeLabel || cancellationReasonLabel(booking.cancellationCode)}
                         </DetailRow>
                       )}
                       {booking.cancellationCategory && (
                         <DetailRow icon={<Tag className="h-3 w-3" />} label="Category">
-                          <span className="capitalize">{String(booking.cancellationCategory).replace(/_/g, " ").toLowerCase()}</span>
+                          {booking.cancellationCategoryLabel || cancellationCategoryLabel(booking.cancellationCategory)}
                         </DetailRow>
                       )}
                       {booking.cancellationOrigin && (

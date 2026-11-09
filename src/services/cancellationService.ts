@@ -73,6 +73,9 @@ export interface CancellationBooking {
   cancelledAt?: string | null;
   cancellationChoiceDeadline?: string | null;
   customerChoice?: string | null;
+  leadTravelerName?: string | null;
+  leadTravelerEmail?: string | null;
+  guest?: { id: string; name: string; email?: string | null } | null;
   customer?: CancellationUser | null;
 }
 
@@ -90,6 +93,9 @@ export interface CancellationRequest {
   tour?: CancellationTour | null;
   supplier?: CancellationUser | null;
   payload?: CancellationPayload | null;
+  /** Human labels resolved by the backend from the reason taxonomy. */
+  reasonLabel?: string | null;
+  categoryLabel?: string | null;
   preview?: CancellationPreview | null;
   stopSellingApplied?: boolean;
   batchId?: string | null;

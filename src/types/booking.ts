@@ -73,6 +73,8 @@ export interface PendingCancellation {
   status: string;
   createdAt: string;
   payload?: PendingCancellationPayload | null;
+  reasonLabel?: string | null;
+  categoryLabel?: string | null;
   preview?: PendingCancellationPreview | null;
   stopSellingApplied?: boolean;
 }
@@ -143,7 +145,9 @@ export interface Booking {
   /** Present while a supplier cancellation request awaits an admin decision. */
   pendingCancellation?: PendingCancellation | null;
   cancellationCode?: string | null;
+  cancellationCodeLabel?: string | null;
   cancellationCategory?: string | null;
+  cancellationCategoryLabel?: string | null;
   cancellationOrigin?: string | null;
   countsTowardRate?: boolean | null;
   cancellationFee?: number | null;

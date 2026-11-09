@@ -25,6 +25,7 @@ import { getCancellationRequest } from "@/services/cancellationService";
 import type { CancellationRequest } from "@/services/cancellationService";
 import { cn, formatCurrency, formatDateTime, formatTravelDate, timeAgo } from "@/lib/utils";
 import { useAnimatedClose } from "@/hooks/useAnimatedClose";
+import { bookingCustomer, hasCategoryMismatch, cancellationReasonLabel, cancellationCategoryLabel } from "@/lib/cancellationReview";
 
 interface CancellationDetailDrawerProps {
   requestId: string | null;
@@ -97,6 +98,8 @@ export function CancellationDetailDrawer({
   const currency = booking?.currency || "USD";
   const preview = request?.preview;
   const payload = request?.payload;
+  const customer = bookingCustomer(booking);
+  const mismatch = hasCategoryMismatch(request);
   const isDecidable =
     !!request && (request.status === "PENDING_APPROVAL" || request.status === "APPROVING");
 
@@ -179,10 +182,17 @@ export function CancellationDetailDrawer({
                 <SectionTitle>Customer</SectionTitle>
                 <div className="rounded-xl border border-border p-4">
                   <InfoRow icon={<User className="h-3.5 w-3.5" />} label="Name">
-                    {booking?.customer?.name || "—"}
+                    <span className="inline-flex items-center gap-1.5">
+                      {customer.name}
+                      {customer.guest && (
+                        <span className="rounded-full bg-surface-muted px-1.5 py-0.5 text-[9px] font-semibold text-text-tertiary">
+                          Guest
+                        </span>
+                      )}
+                    </span>
                   </InfoRow>
                   <InfoRow icon={<Mail className="h-3.5 w-3.5" />} label="Email">
-                    {booking?.customer?.email || "—"}
+                    {customer.email || "—"}
                   </InfoRow>
                   <InfoRow icon={<CircleDollarSign className="h-3.5 w-3.5" />} label="Booking total">
                     {formatCurrency(booking?.grossAmount, currency)}
@@ -198,12 +208,16 @@ export function CancellationDetailDrawer({
                 <SectionTitle>Request reason</SectionTitle>
                 <div className="space-y-3 rounded-xl border border-border p-4">
                   <Field label="Category">
-                    <span className="capitalize">
-                      {(payload?.cancellationCategory || booking?.cancellationCategory || "—").toString().replace(/_/g, " ").toLowerCase()}
-                    </span>
+                    {request.categoryLabel
+                      || cancellationCategoryLabel(payload?.cancellationCategory || booking?.cancellationCategory)
+                      || "—"}
                   </Field>
-                  <Field label="Code">
-                    <span className="font-mono">{payload?.cancellationCode || booking?.cancellationCode || "—"}</span>
+                  <Field label="Reason">
+                    <span title={payload?.cancellationCode || booking?.cancellationCode || undefined}>
+                      {request.reasonLabel
+                        || cancellationReasonLabel(payload?.cancellationCode || booking?.cancellationCode)
+                        || "—"}
+                    </span>
                   </Field>
                   <Field label="Counts toward rate">
                     {preview?.countsTowardRate ?? booking?.countsTowardRate ? "Yes" : "No"}
@@ -216,6 +230,20 @@ export function CancellationDetailDrawer({
                       <p className="whitespace-pre-wrap text-xs text-text-secondary">{String(payload.explanation)}</p>
                     </div>
                   ) : null}
+                  {mismatch && (
+                    <div className="rounded-xl border border-status-pending/40 bg-status-pending/5 p-3">
+                      <p className="flex items-center gap-1.5 text-[11px] font-semibold text-status-pending-text">
+                        <AlertCircle className="h-3.5 w-3.5" />
+                        Check the category before approving
+                      </p>
+                      <p className="mt-1 text-[11px] leading-relaxed text-text-secondary">
+                        This is filed as a customer request, but the explanation sounds
+                        operational. Approving it gives a full refund with no 25% fee and no
+                        cancellation-rate hit. If the supplier could not run the tour, reject it
+                        and ask them to resubmit as operational.
+                      </p>
+                    </div>
+                  )}
                   {payload?.supplierNotes ? (
                     <div className="rounded-xl bg-surface-muted p-3">
                       <p className="mb-1 flex items-center gap-1.5 text-[10px] font-semibold text-text-tertiary">
