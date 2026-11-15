@@ -45,6 +45,9 @@ interface RefundClaim {
   status: ClaimStatus;
   reviewNote?: string | null;
   releasedAmount?: number | string | null;
+  firstApprovedById?: string | null;
+  firstApprovedAt?: string | null;
+  firstApprovedAmount?: number | string | null;
   createdAt: string;
   booking?: ClaimBooking | null;
 }
@@ -130,6 +133,15 @@ function ClaimDetail({ claim }: { claim: RefundClaim }) {
           Decision note: {claim.reviewNote}
         </div>
       )}
+      {claim.firstApprovedById && claim.status === "SUPPLIER_APPROVED" && (
+        <div className="mt-3 rounded-md border border-border bg-surface-base px-3 py-2 text-sm text-text-secondary">
+          One admin has already approved{" "}
+          {claim.firstApprovedAmount != null
+            ? formatCurrency(Number(claim.firstApprovedAmount), booking.currency)
+            : "this release"}
+          . A different admin must release it.
+        </div>
+      )}
     </div>
   );
 }
@@ -193,8 +205,14 @@ export function CustomerRefundClaimsTab() {
   const releaseMutation = useMutation({
     mutationFn: ({ id, releasedAmount }: { id: string; releasedAmount?: number }) =>
       api.patch(`/refund-claims/admin/${id}/release`, releasedAmount != null ? { releasedAmount } : {}),
-    onSuccess: () => {
-      toast.success("Refund released");
+    onSuccess: (res) => {
+      // Above the two-admin threshold the first click only records an
+      // approval; money has NOT moved, so "Refund released" would be false.
+      if (res?.data?.data?.requiresSecondApproval) {
+        toast.info(res.data.message || "Approval recorded — a different admin must release this refund");
+      } else {
+        toast.success("Refund released");
+      }
       queryClient.invalidateQueries({ queryKey: ["admin", "refund-claims"] });
       setActionTarget(null);
     },
