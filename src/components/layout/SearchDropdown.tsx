@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, CornerDownLeft, Clock, ArrowRight, X, Package, Building2, Loader2 } from "lucide-react";
 import { getNavGroups } from "@/components/layout/navConfig";
+import { searchScopes } from "@/components/layout/searchScopes";
 import { usePermission } from "@/hooks/usePermission";
 import { useAdminSearch } from "@/hooks/useAdminSearch";
 import { SafeImage } from "@/components/shared/SafeImage";
@@ -123,6 +124,7 @@ export function SearchDropdown() {
 
   const canSearchTours = can("tours.view");
   const canSearchSuppliers = can("suppliers.view");
+  const scopes = searchScopes(canSearchTours, canSearchSuppliers);
   const { tours, suppliers, loading } = useAdminSearch(query, {
     toursEnabled: canSearchTours,
     suppliersEnabled: canSearchSuppliers,
@@ -284,7 +286,7 @@ export function SearchDropdown() {
             ? "border-primary/40 bg-surface-base text-text-primary"
             : "border-border bg-surface-muted text-text-tertiary hover:border-text-tertiary hover:text-text-secondary",
         )}
-        aria-label="Search pages, tours and suppliers"
+        aria-label={`Search ${scopes}`}
         aria-expanded={open}
         aria-haspopup="dialog"
       >
@@ -312,7 +314,7 @@ export function SearchDropdown() {
                 value={query}
                 onChange={(e) => { setQuery(e.target.value); setHighlight(0); }}
                 onKeyDown={handleKeyDown}
-                placeholder="Search pages, tours, suppliers…"
+                placeholder={`Search ${scopes}…`}
                 className="h-12 w-full bg-transparent py-3 text-sm text-text-primary placeholder:text-text-tertiary outline-none"
               />
               {query && (
@@ -340,7 +342,7 @@ export function SearchDropdown() {
                     {query.trim() ? `No results for "${query}"` : "No recent searches"}
                   </p>
                   <p className="text-xs text-text-tertiary mt-1">
-                    {query.trim() ? "Try a different search term" : "Start typing to search pages, tours and suppliers"}
+                    {query.trim() ? "Try a different search term" : `Start typing to search ${scopes}`}
                   </p>
                 </div>
               ) : (

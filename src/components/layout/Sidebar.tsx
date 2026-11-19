@@ -13,6 +13,7 @@ import {
 
 import api from "@/lib/axios";
 import { cn } from "@/lib/utils";
+import { getDefaultRoute } from "@/lib/permissions";
 import { usePermission } from "@/hooks/usePermission";
 import { useAuthContext } from "@/auth/auth-context";
 import { useSocketInvalidate } from "@/hooks/useSocketEvent";
@@ -356,7 +357,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
           )}
         >
           <Link
-            to="/admin/overview"
+            to={getDefaultRoute()}
             className={cn("flex min-w-0 items-center", collapsed && "lg:hidden")}
             aria-label="Travio Ghana dashboard"
           >
@@ -375,7 +376,7 @@ export function Sidebar({ open, onClose }: SidebarProps) {
 
           {collapsed && (
             <Link
-              to="/admin/overview"
+              to={getDefaultRoute()}
               className="hidden h-9 w-9 items-center justify-center overflow-hidden rounded-full lg:flex"
               aria-label="Travio Ghana dashboard"
               title="Travio Ghana"

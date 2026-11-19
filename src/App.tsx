@@ -94,7 +94,7 @@ const router = createBrowserRouter([
     element: <AdminLayout />,
     children: [
       { index: true, element: <HomeRedirect /> },
-      { path: "overview", element: <OverviewPage /> },
+      { path: "overview", element: <PermissionRoute permission={["dashboard.*", "analytics.view"]}><OverviewPage /></PermissionRoute> },
       { path: "revenue-trend", element: <PermissionRoute permission="analytics.view"><RevenueTrendPage /></PermissionRoute> },
       { path: "user-growth", element: <PermissionRoute permission="users.view"><UserGrowthPage /></PermissionRoute> },
       { path: "clv", element: <PermissionRoute permission="users.view"><CustomerLifetimeValuePage /></PermissionRoute> },

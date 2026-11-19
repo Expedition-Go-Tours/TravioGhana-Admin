@@ -5,6 +5,7 @@ import { LogOut, Loader2, Settings, UserCircle, Menu, ChevronRight, Sun, Moon, S
 import { NotificationBell } from "@/components/ui/NotificationBell";
 import { SearchDropdown } from "./SearchDropdown";
 import { useAuth } from "@/auth/useAuth";
+import { getDefaultRoute } from "@/lib/permissions";
 import { isSuperAdmin, hasPermission } from "@/hooks/usePermission";
 import { useTheme } from "@/hooks/useTheme";
 import api from "@/lib/axios";
@@ -102,7 +103,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         </button>
 
         <Link
-          to="/admin/overview"
+          to={getDefaultRoute()}
           className="flex h-8 w-8 shrink-0 items-center justify-center overflow-hidden rounded-full md:hidden"
           aria-label="Travio Ghana dashboard"
         >
@@ -112,7 +113,7 @@ export function Header({ onMenuClick }: HeaderProps) {
         <SearchDropdown />
 
         <nav aria-label="Breadcrumb" className="hidden sm:flex items-center gap-1.5 text-[13px] text-text-tertiary min-w-0">
-          <Link to="/admin/overview" className="shrink-0 hover:text-text-primary">
+          <Link to={getDefaultRoute()} className="shrink-0 hover:text-text-primary">
             Home
           </Link>
           {segments.slice(1).map((seg, idx) => {

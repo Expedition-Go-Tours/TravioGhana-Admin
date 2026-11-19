@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Search, CornerDownLeft, Package, Building2, Loader2 } from "lucide-react";
 import { getNavGroups } from "@/components/layout/navConfig";
+import { searchScopes } from "@/components/layout/searchScopes";
 import { usePermission } from "@/hooks/usePermission";
 import { useAdminSearch } from "@/hooks/useAdminSearch";
 import { SafeImage } from "@/components/shared/SafeImage";
@@ -95,6 +96,7 @@ export function CommandPalette() {
 
   const canSearchTours = can("tours.view");
   const canSearchSuppliers = can("suppliers.view");
+  const scopes = searchScopes(canSearchTours, canSearchSuppliers);
   const { tours, suppliers, loading } = useAdminSearch(query, {
     toursEnabled: canSearchTours,
     suppliersEnabled: canSearchSuppliers,
@@ -232,7 +234,7 @@ export function CommandPalette() {
                 value={query}
                 onChange={(e) => { setQuery(e.target.value); setHighlight(0); }}
                 onKeyDown={handleKeyDown}
-                placeholder="Search pages, tours, suppliers…"
+                placeholder={`Search ${scopes}…`}
                 className="h-12 w-full bg-transparent py-4 text-sm text-text-primary placeholder:text-text-tertiary outline-none"
               />
               <kbd className="hidden shrink-0 rounded-md border border-border bg-surface-muted px-1.5 py-0.5 text-[10px] font-medium text-text-tertiary sm:block">

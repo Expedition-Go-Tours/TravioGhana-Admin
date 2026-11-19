@@ -60,4 +60,12 @@ describe("getNavGroups", () => {
       "Notifications",
     ]);
   });
+
+  it("renders only Blog for a blog-only role", () => {
+    const groups = getNavGroups((key) => key === "blog.manage");
+
+    expect(groups).toHaveLength(1);
+    expect(groups[0].group).toBe("Engagement");
+    expect(groups[0].items.map((item) => item.label)).toEqual(["Blog"]);
+  });
 });
