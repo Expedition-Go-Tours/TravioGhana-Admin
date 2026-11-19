@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import OptimizedImage from "@/components/shared/OptimizedImage";
 
 interface TipTapAttrs {
@@ -7,6 +7,7 @@ interface TipTapAttrs {
   alt?: string;
   title?: string;
   href?: string;
+  textAlign?: string;
 }
 
 interface TipTapMark {
@@ -64,17 +65,20 @@ export function renderTipTapNode(node: TipTapNode, key?: number): ReactNode {
     case "paragraph": {
       const hasText = node.content?.some((n) => n.text);
       if (!hasText) return <div key={key} className="h-4" />;
-      return <p key={key} className="text-base leading-relaxed text-text-primary">{children}</p>;
+      const align = node.attrs?.textAlign as CSSProperties["textAlign"] | undefined;
+      return <p key={key} style={align ? { textAlign: align } : undefined} className="text-base leading-relaxed text-text-primary">{children}</p>;
     }
 
     case "heading": {
       const level = node.attrs?.level || 1;
       const styles = ["text-3xl font-semibold", "text-2xl font-semibold", "text-xl font-semibold"];
+      const align = node.attrs?.textAlign as CSSProperties["textAlign"] | undefined;
       const className = `${styles[Math.min(level - 1, 2)]} text-text-primary`;
-      if (level === 1) return <h1 key={key} className={className}>{children}</h1>;
-      if (level === 2) return <h2 key={key} className={className}>{children}</h2>;
-      if (level === 3) return <h3 key={key} className={className}>{children}</h3>;
-      return <h4 key={key} className={className}>{children}</h4>;
+      const style = align ? { textAlign: align } : undefined;
+      if (level === 1) return <h1 key={key} className={className} style={style}>{children}</h1>;
+      if (level === 2) return <h2 key={key} className={className} style={style}>{children}</h2>;
+      if (level === 3) return <h3 key={key} className={className} style={style}>{children}</h3>;
+      return <h4 key={key} className={className} style={style}>{children}</h4>;
     }
 
     case "bulletList":

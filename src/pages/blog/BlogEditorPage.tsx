@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useParams, useNavigate, useBlocker } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Image, Calendar, Plus } from "lucide-react";
@@ -18,6 +18,7 @@ import {
 import { getArticleById, createArticle, updateArticle, getCategories, getTags, createCategory, createTag } from "@/services/blogService";
 import api from "@/lib/axios";
 import { RichTextEditor } from "./components/RichTextEditor";
+import { countWords } from "./wordCount";
 import { ImageUploadDialog } from "./components/ImageUploadDialog";
 import { SlugField } from "./components/SlugField";
 import { TagSelector } from "./components/TagSelector";
@@ -60,6 +61,9 @@ export default function BlogEditorPage() {
   const [currentUserId, setCurrentUserId] = useState<string | null>(null);
   const [articleStatus, setArticleStatus] = useState<string>("DRAFT");
   const [navigatingAfterSave, setNavigatingAfterSave] = useState(false);
+  // The router evaluates the blocker synchronously inside navigate(), before
+  // the state update above has re-rendered. The ref is what it reads then.
+  const navigatingAfterSaveRef = useRef(false);
   const [original, setOriginal] = useState<Record<string, unknown>>({});
   const [lastLoadedArticleId, setLastLoadedArticleId] = useState<string | null>(null);
 
@@ -96,7 +100,9 @@ export default function BlogEditorPage() {
 
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
-      hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
+      !navigatingAfterSaveRef.current
+      && hasUnsavedChanges
+      && currentLocation.pathname !== nextLocation.pathname
   );
 
   useEffect(() => {
@@ -190,12 +196,7 @@ export default function BlogEditorPage() {
     });
   }
 
-  const wordCount = useMemo(() => {
-    if (!content) return 0;
-    const text = JSON.stringify(content);
-    const stripped = text.replace(/<[^>]*>/g, "").replace(/[{}[\]"]/g, " ");
-    return stripped.split(/\s+/).filter(Boolean).length;
-  }, [content]);
+  const wordCount = useMemo(() => countWords(content), [content]);
 
   const readTime = Math.max(1, Math.round(wordCount / 200));
 
@@ -219,6 +220,7 @@ export default function BlogEditorPage() {
       toast.success(isNew ? "Article created" : "Article updated");
       queryClient.invalidateQueries({ queryKey: ["articles"] });
       if (!isNew) queryClient.invalidateQueries({ queryKey: ["article", id] });
+      navigatingAfterSaveRef.current = true;
       setNavigatingAfterSave(true);
       navigate("/admin/blog");
     },
@@ -261,7 +263,14 @@ export default function BlogEditorPage() {
     saveMutation.mutate(payload);
   }, [title, slug, excerpt, content, categoryId, tagIds, relatedTourIds, metaTitle, metaDescription, featuredImage, publishDate, saveMutation, currentUserId]);
 
-  const saveAsDraftAndPreview = useCallback(async () => {
+  const saveAndPreview = useCallback(async () => {
+    // Preview is a read-only view: an unchanged article needs no write. This
+    // also stops a PUBLISHED article being silently saved back to DRAFT.
+    if (!isNew && id && !hasUnsavedChanges) {
+      navigate(`/admin/blog/preview/${id}`);
+      return;
+    }
+
     const payload: Record<string, unknown> = {
       title: title.trim() || "Untitled",
       slug: slug.trim() || "untitled",
@@ -274,7 +283,9 @@ export default function BlogEditorPage() {
       metaTitle: metaTitle.trim() || undefined,
       metaDescription: metaDescription.trim() || undefined,
       featuredImage: featuredImage || undefined,
-      status: "DRAFT",
+      // Keep the article's own status (a new article starts as DRAFT) instead
+      // of forcing DRAFT and unpublishing whatever was already live.
+      status: articleStatus,
     };
 
     try {
@@ -284,14 +295,15 @@ export default function BlogEditorPage() {
       const savedId = res?.data?.article?.id || id;
       queryClient.invalidateQueries({ queryKey: ["articles"] });
       if (savedId) {
+        navigatingAfterSaveRef.current = true;
         setNavigatingAfterSave(true);
         navigate(`/admin/blog/preview/${savedId}`);
       }
     } catch (err) {
-      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to save draft for preview";
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to save article for preview";
       toast.error(msg);
     }
-  }, [isNew, id, title, slug, excerpt, content, categoryId, tagIds, relatedTourIds, metaTitle, metaDescription, featuredImage, currentUserId, navigate, queryClient]);
+  }, [isNew, id, hasUnsavedChanges, articleStatus, title, slug, excerpt, content, categoryId, tagIds, relatedTourIds, metaTitle, metaDescription, featuredImage, currentUserId, navigate, queryClient]);
 
   const canPreview = !isNew || (!!title && !!slug);
 
@@ -311,7 +323,7 @@ export default function BlogEditorPage() {
         onBack={() => navigate("/admin/blog")}
         onSaveDraft={() => handleSave("DRAFT")}
         onPublish={() => handleSave("PUBLISHED")}
-        onPreview={saveAsDraftAndPreview}
+        onPreview={saveAndPreview}
         canPreview={canPreview}
       />
 

@@ -5,6 +5,7 @@ import ImageExtension from "@tiptap/extension-image";
 import LinkExtension from "@tiptap/extension-link";
 import Placeholder from "@tiptap/extension-placeholder";
 import Underline from "@tiptap/extension-underline";
+import TextAlign from "@tiptap/extension-text-align";
 import {
   Bold,
   Italic,
@@ -20,6 +21,10 @@ import {
   Heading1,
   Heading2,
   Heading3,
+  AlignLeft,
+  AlignCenter,
+  AlignRight,
+  AlignJustify,
   ImageIcon,
   Link,
   Unlink,
@@ -60,6 +65,8 @@ function ToolbarButton({
       type="button"
       onClick={onClick}
       title={label}
+      aria-label={label}
+      aria-pressed={active}
       className={`flex h-8 w-8 items-center justify-center rounded-md text-sm transition-colors ${
         active
           ? "bg-accent text-accent-foreground"
@@ -85,8 +92,14 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, expand 
     extensions: [
       StarterKit.configure({
         heading: { levels: [1, 2, 3] },
+        // StarterKit v3 bundles Link and Underline; they are added explicitly
+        // below so the link mark can be configured, so switch off the copies
+        // here instead of registering duplicate extensions.
+        link: false,
+        underline: false,
       }),
       Underline,
+      TextAlign.configure({ types: ['heading', 'paragraph'] }),
       ImageExtension.configure({ inline: true }),
       LinkExtension.configure({ openOnClick: false }),
       Placeholder.configure({ placeholder: placeholder || "Start writing..." }),
@@ -98,6 +111,10 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, expand 
     },
     editable: !disabled,
     immediatelyRender: false,
+    // TipTap React defaults this to false: the toolbar would then keep the
+    // active states from the last parent render, so a Heading 1 looked
+    // unpressed until something else re-rendered the editor.
+    shouldRerenderOnTransaction: true,
   });
 
   useEffect(() => {
@@ -115,6 +132,10 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, expand 
   }, [editor]);
 
   if (!editor) return null;
+
+  const currentAlignment = (editor.getAttributes('heading').textAlign
+    || editor.getAttributes('paragraph').textAlign
+    || 'left') as string;
 
   const openLinkDialog = () => {
     setLinkUrl(editor.getAttributes('link').href || "");
@@ -159,6 +180,13 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, expand 
         <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 1 }).run()} active={editor.isActive('heading', { level: 1 })} icon={Heading1} label="Heading 1" />
         <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} active={editor.isActive('heading', { level: 2 })} icon={Heading2} label="Heading 2" />
         <ToolbarButton onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} active={editor.isActive('heading', { level: 3 })} icon={Heading3} label="Heading 3" />
+
+        <ToolbarDivider />
+
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('left').run()} active={currentAlignment === 'left'} icon={AlignLeft} label="Align left" />
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('center').run()} active={currentAlignment === 'center'} icon={AlignCenter} label="Align center" />
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('right').run()} active={currentAlignment === 'right'} icon={AlignRight} label="Align right" />
+        <ToolbarButton onClick={() => editor.chain().focus().setTextAlign('justify').run()} active={currentAlignment === 'justify'} icon={AlignJustify} label="Justify" />
 
         <ToolbarDivider />
 
