@@ -201,6 +201,60 @@ describe("InvoicesTab — the receipt", () => {
     expect(await screen.findByText(/MOBILE MONEY/)).toBeInTheDocument();
     expect(screen.getByText(/MTN/)).toBeInTheDocument();
   });
+
+  it("nets supplier charges into the total instead of calling it a mismatch", async () => {
+    const user = userEvent.setup();
+    mockApi([
+      {
+        ...DUE,
+        id: "inv-charged-1",
+        invoiceNumber: "INV-2026-0004",
+        chargesTotal: 30,
+        netTotal: 800,
+        charges: [
+          {
+            id: "ch-1",
+            amount: 30,
+            reason: "SUPPLIER_CANCELLATION_FEE",
+            booking: { bookingNumber: "GHA-33723361-2026-01" },
+          },
+        ],
+      },
+    ]);
+    renderWithProviders(<InvoicesTab />);
+    await screen.findByText("INV-2026-0004");
+    await user.click(rowOf("INV-2026-0004"));
+
+    const table = await screen.findByRole("table", {
+      name: /bookings billed on invoice inv-2026-0004/i,
+    });
+    const chargeRow = within(table).getByText(/Supplier charge — Cancellation fee/).closest("tr") as HTMLElement;
+    expect(within(chargeRow).getByText(/\$30\.00/)).toBeInTheDocument();
+    expect(within(chargeRow).getByText(/GHA-33723361-2026-01/)).toBeInTheDocument();
+    expect(within(table).getByText(/matches invoice/)).toBeInTheDocument();
+    expect(within(table).queryByText(/mismatch/)).not.toBeInTheDocument();
+  });
+
+  it("still flags a genuine drift after charges are accounted for", async () => {
+    const user = userEvent.setup();
+    mockApi([
+      {
+        ...DUE,
+        id: "inv-drift-1",
+        invoiceNumber: "INV-2026-0005",
+        chargesTotal: 30,
+        netTotal: 700,
+      },
+    ]);
+    renderWithProviders(<InvoicesTab />);
+    await screen.findByText("INV-2026-0005");
+    await user.click(rowOf("INV-2026-0005"));
+
+    const table = await screen.findByRole("table", {
+      name: /bookings billed on invoice inv-2026-0005/i,
+    });
+    expect(within(table).getByText(/mismatch\. Invoice says \$700\.00/)).toBeInTheDocument();
+  });
 });
 
 describe("InvoicesTab — approving (maker–checker)", () => {

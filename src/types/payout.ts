@@ -160,6 +160,15 @@ export interface InvoiceItem {
   } | null;
 }
 
+export interface InvoiceCharge {
+  id: string;
+  amount: number | string;
+  reason: string;
+  status?: string;
+  bookingId?: string;
+  booking?: { bookingNumber?: string; tour?: { title?: string } };
+}
+
 export interface Invoice {
   id: string;
   invoiceNumber: string;
@@ -185,6 +194,8 @@ export interface Invoice {
   grossTotal: number | string;
   /** Flat 15% commission, frozen at booking time (older bookings may show 17%). */
   commissionTotal: number | string;
+  /** Supplier charges (positive) or credits (negative) netted into `netTotal`. */
+  chargesTotal?: number | string;
   netTotal: number | string;
   currency: string;
   bookingCount: number;
@@ -202,5 +213,7 @@ export interface Invoice {
     mobileNumber?: string;
   } | null;
   items?: InvoiceItem[];
+  /** Charges/credits netted into `netTotal` (detail response). */
+  charges?: InvoiceCharge[];
   createdAt: string;
 }

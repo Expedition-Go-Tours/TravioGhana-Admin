@@ -102,10 +102,34 @@ function MethodLabel({ invoice }: { invoice: Invoice }) {
   );
 }
 
-/** Cross-check: the line items' supplier payouts must equal the invoice net. */
+/**
+ * Cross-check: the line items' supplier payouts, minus any supplier charges
+ * reserved on the invoice, must equal the invoice net. Charges are a real
+ * deduction (`SUPPLIER_CANCELLATION_FEE`, refund debt, …) and credits are
+ * negative, so comparing the raw item sum would flag every charged invoice as
+ * a mismatch.
+ */
 function itemsCheck(inv: Invoice) {
   const sum = (inv.items || []).reduce((s, it) => s + Number(it.supplierPayout || 0), 0);
-  return { sum, matches: Math.abs(sum - Number(inv.netTotal || 0)) < 0.01 };
+  const charges = Number(inv.chargesTotal || 0);
+  const expectedNet = Math.round((sum - charges + Number.EPSILON) * 100) / 100;
+  return {
+    sum,
+    charges,
+    expectedNet,
+    matches: Math.abs(expectedNet - Number(inv.netTotal || 0)) < 0.01,
+  };
+}
+
+const CHARGE_REASON_LABELS: Record<string, string> = {
+  SUPPLIER_COMMISSION: "Commission collection",
+  SUPPLIER_CANCELLATION_FEE: "Cancellation fee",
+  SUPPLIER_REFUND: "Refund charged to supplier",
+  CUSTOMER_REFUND_CLAIM: "Customer refund claim",
+};
+
+function chargeReason(reason: string): string {
+  return CHARGE_REASON_LABELS[reason] || reason.replace(/_/g, " ").toLowerCase();
 }
 
 /**
@@ -232,9 +256,45 @@ function InvoiceDetail({ invoice: inv, loading }: { invoice: Invoice; loading?: 
             ))}
           </tbody>
           <tfoot>
+            {check.charges !== 0 && (
+              <>
+                <tr className="border-t border-border/60">
+                  <td colSpan={4} className="px-4 py-2 text-right text-[11px] text-text-tertiary">
+                    Items total
+                  </td>
+                  <td colSpan={2} className="px-4 py-2 text-right tnum text-text-secondary">
+                    {formatCurrency(check.sum, inv.currency)}
+                  </td>
+                </tr>
+                {inv.charges && inv.charges.length > 0 ? (
+                  inv.charges.map((charge) => (
+                    <tr key={charge.id}>
+                      <td colSpan={4} className="px-4 py-2 text-right text-[11px] text-text-tertiary">
+                        Supplier charge — {chargeReason(charge.reason)}
+                        {charge.booking?.bookingNumber ? (
+                          <span className="text-text-tertiary/70"> · {charge.booking.bookingNumber}</span>
+                        ) : null}
+                      </td>
+                      <td colSpan={2} className="px-4 py-2 text-right tnum text-text-secondary">
+                        {formatCurrency(-Number(charge.amount || 0), inv.currency)}
+                      </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={4} className="px-4 py-2 text-right text-[11px] text-text-tertiary">
+                      Supplier charges
+                    </td>
+                    <td colSpan={2} className="px-4 py-2 text-right tnum text-text-secondary">
+                      {formatCurrency(-check.charges, inv.currency)}
+                    </td>
+                  </tr>
+                )}
+              </>
+            )}
             <tr className="border-t border-border">
               <td colSpan={4} className="px-4 py-2 text-right text-[11px] text-text-tertiary">
-                Items total ·{" "}
+                {check.charges !== 0 ? "Net to supplier" : "Items total"} ·{" "}
                 {check.matches ? (
                   <span className="inline-flex items-center gap-1 normal-case text-status-active-text">
                     <ShieldCheck className="h-3.5 w-3.5" aria-hidden /> matches invoice
@@ -247,7 +307,7 @@ function InvoiceDetail({ invoice: inv, loading }: { invoice: Invoice; loading?: 
                 )}
               </td>
               <td colSpan={2} className="px-4 py-2 text-right font-semibold tnum">
-                {formatCurrency(check.sum, inv.currency)}
+                {formatCurrency(check.expectedNet, inv.currency)}
               </td>
             </tr>
           </tfoot>
