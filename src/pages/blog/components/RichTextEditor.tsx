@@ -160,7 +160,7 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, expand 
     ? "flex flex-col h-full rounded-xl border border-border"
     : "flex flex-col rounded-xl border border-border bg-card ";
   const contentAreaClass = expand
-    ? "blog-editor flex-1 overflow-y-auto p-6"
+    ? "blog-editor blog-editor-expand flex-1 overflow-y-auto p-6"
     : "blog-editor p-4 sm:p-6";
   // `prose` is deliberately absent: the typography plugin is not installed, so
   // those classes were dead weight. The editor's typography lives in
@@ -168,6 +168,16 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, expand 
   const editorClass = expand
     ? "max-w-none focus:outline-none h-full"
     : "max-w-none focus:outline-none min-h-[400px]";
+
+  /**
+   * Clicking the sheet's padding (not just a line of text) focuses the editor
+   * and shows the caret, so the sheet always behaves like one writing surface.
+   * Clicks on the text itself are handled by ProseMirror as usual.
+   */
+  const focusFromSheet = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.target !== event.currentTarget) return;
+    editor.chain().focus().run();
+  };
 
   return (
     <div className={containerClass}>
@@ -212,7 +222,7 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, expand 
         <ToolbarButton onClick={() => editor.chain().focus().redo().run()} icon={Redo2} label="Redo" />
       </div>
 
-      <div className={contentAreaClass}>
+      <div className={contentAreaClass} onClick={focusFromSheet}>
         <EditorContent
           editor={editor}
           className={editorClass}

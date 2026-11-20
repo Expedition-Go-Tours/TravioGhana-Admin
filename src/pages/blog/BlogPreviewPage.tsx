@@ -116,9 +116,9 @@ export default function BlogPreviewPage() {
 
           <div
             className="text-base leading-[1.8] text-text-primary space-y-6
-            [&_h1]:text-3xl [&_h1]:font-semibold [&_h1]:text-text-primary [&_h1]:tracking-tight [&_h1]:mt-12 [&_h1]:mb-4
-            [&_h2]:text-2xl [&_h2]:font-semibold [&_h2]:text-text-primary [&_h2]:tracking-tight [&_h2]:mt-10 [&_h2]:mb-3
-            [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:text-text-primary [&_h3]:mt-8 [&_h3]:mb-2
+            [&_h1]:text-3xl [&_h1]:font-normal [&_h1]:text-text-primary [&_h1]:tracking-tight [&_h1]:mt-12 [&_h1]:mb-4
+            [&_h2]:text-2xl [&_h2]:font-normal [&_h2]:text-text-primary [&_h2]:tracking-tight [&_h2]:mt-10 [&_h2]:mb-3
+            [&_h3]:text-lg [&_h3]:font-normal [&_h3]:text-text-primary [&_h3]:mt-8 [&_h3]:mb-2
             [&_p]:leading-[1.8] [&_p]:mb-5
             [&_blockquote]:border-t [&_blockquote]:border-b [&_blockquote]:border-border [&_blockquote]:py-6 [&_blockquote]:my-10 [&_blockquote]:px-0 [&_blockquote]:italic [&_blockquote]:text-text-secondary [&_blockquote]:w-full
             [&_img]:max-w-full [&_img]:h-auto [&_img]:my-8 [&_img]:mx-auto [&_img]:rounded-sm

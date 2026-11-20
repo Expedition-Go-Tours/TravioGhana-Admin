@@ -233,6 +233,24 @@
   line-height: 1.75;
   color: hsl(var(--foreground));
   outline: none;
+  /* Fills the sheet: a click anywhere in it lands in the document and shows
+     the caret, instead of only the exact lines of text being clickable. */
+  flex: 1;
+}
+
+/* EditorContent wraps ProseMirror in one div that carries the min-height. Make
+   it a column so ProseMirror can take the remaining space. */
+.blog-editor > div {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Text inputs show focus through the caret; a ring around the whole sheet is
+   noise (and it used to paint a green rectangle over the editor). */
+.blog-editor .ProseMirror:focus,
+.blog-editor .ProseMirror:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 .blog-editor .ProseMirror > :first-child {
@@ -249,11 +267,19 @@
 .blog-editor .ProseMirror h4,
 .blog-editor .ProseMirror h5,
 .blog-editor .ProseMirror h6 {
-  font-weight: 800;
+  /* Size is the heading's defining trait, not weight: the author decides
+     emphasis with the Bold button, which must actually be visible. */
+  font-weight: 400;
   line-height: 1.25;
   letter-spacing: -0.01em;
   color: hsl(var(--foreground));
   margin: 1.4em 0 0.5em;
+}
+
+/* Explicit, so `bolder` cannot resolve differently per heading weight. */
+.blog-editor .ProseMirror strong,
+.blog-editor .ProseMirror b {
+  font-weight: 700;
 }
 
 .blog-editor .ProseMirror h1 { font-size: 28px; }
