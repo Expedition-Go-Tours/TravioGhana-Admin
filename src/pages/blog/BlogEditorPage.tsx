@@ -461,8 +461,11 @@ export default function BlogEditorPage() {
             <SectionDivider label="Featured Image" />
             <div className="space-y-3">
               {featuredImage ? (
-                <div className="relative overflow-hidden rounded-xl border border-border aspect-[3/1]">
-                  <OptimizedImage src={featuredImage} alt="Featured" width={800} className="w-full h-full object-cover" />
+                // Square crop, not a 3:1 strip: the old ratio cut most of a
+                // portrait or square upload in half, so the preview never
+                // looked like the image that was chosen.
+                <div className="relative overflow-hidden rounded-xl border border-border aspect-square bg-surface-muted">
+                  <OptimizedImage src={featuredImage} alt="Featured" width={800} className="w-full h-full object-contain" />
                 </div>
               ) : (
                 <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-muted-foreground/30 py-6 text-center">
