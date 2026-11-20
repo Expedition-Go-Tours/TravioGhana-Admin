@@ -73,6 +73,7 @@ export default function BookingsPage() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("All");
   const [sourceFilter, setSourceFilter] = useState("ALL");
+  const [searchInput, setSearchInput] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [viewCustomerId, setViewCustomerId] = useState<string | null>(null);
@@ -81,14 +82,27 @@ export default function BookingsPage() {
 
   useSocketInvalidate("admin:new-booking", ["admin", "bookings"]);
 
+  // Search runs on the server across the whole booking table. It used to filter
+  // only the 20 rows of the current page, so an older reference — or any
+  // customer/traveller detail on another page — looked missing.
+  useEffect(() => {
+    const next = searchInput.trim();
+    const timer = setTimeout(() => {
+      setSearchQuery((prev) => (prev === next ? prev : next));
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
   const statusParam = statusFilter === "All" ? "" : statusFilter.toUpperCase();
   const paymentSourceParam = sourceFilter === "ALL" ? "" : sourceFilter;
   const { data, isLoading, isError, refetch, isRefetching } = useQuery({
-    queryKey: ["admin", "bookings", { page, limit, status: statusParam, paymentProvider: paymentSourceParam }],
+    queryKey: ["admin", "bookings", { page, limit, status: statusParam, paymentProvider: paymentSourceParam, search: searchQuery }],
     queryFn: () => {
       const params = new URLSearchParams({ page: String(page), limit: String(limit) });
       if (statusParam) params.set("status", statusParam);
       if (paymentSourceParam) params.set("paymentProvider", paymentSourceParam);
+      if (searchQuery) params.set("search", searchQuery);
       return api.get(`/admin/bookings?${params.toString()}`).then((r) => r.data?.data);
     },
     refetchOnWindowFocus: false,
@@ -101,14 +115,7 @@ export default function BookingsPage() {
   const pagination = data?.pagination || data?.data?.pagination;
   const counts = data?.counts || data?.data?.counts || {};
 
-  const query = searchQuery.toLowerCase().trim();
-  const filtered = useMemo(() => {
-    if (!query) return rawBookings;
-    return rawBookings.filter((b) =>
-      [b.bookingNumber, b.customer?.name, b.tour?.title, b.tour?.supplier?.name]
-        .some((f) => f?.toLowerCase().includes(query))
-    );
-  }, [rawBookings, query]);
+  const filtered = rawBookings;
 
   const confirmPaymentMutation = useMutation({
     mutationFn: (body: { reference?: string }) =>
@@ -270,20 +277,36 @@ export default function BookingsPage() {
         <div className="relative w-full sm:flex-1 sm:max-w-xs">
           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
           <Input
-            placeholder="Search by booking #, customer, tour..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search booking #, customer, email, phone, tour…"
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key !== 'Enter') return;
+              e.preventDefault();
+              const next = searchInput.trim();
+              setSearchQuery(next);
+              setPage(1);
+            }}
+            aria-label="Search bookings"
             className="pl-9 h-10 w-full"
           />
-          {searchQuery && (
+          {searchInput && (
             <button
-              onClick={() => setSearchQuery("")}
+              onClick={() => { setSearchInput(""); setSearchQuery(""); setPage(1); }}
+              aria-label="Clear search"
               className="absolute right-3 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary"
             >
               <X className="h-3.5 w-3.5" />
             </button>
           )}
         </div>
+
+        {searchQuery && !isLoading && (
+          <p className="text-xs text-text-tertiary" role="status" aria-live="polite">
+            {pagination?.totalCount ?? filtered.length}{" "}
+            {(pagination?.totalCount ?? filtered.length) === 1 ? "match" : "matches"}
+          </p>
+        )}
 
         <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
           <div className="flex gap-1 bg-surface-muted p-0.5 rounded-xl border border-border min-w-0 overflow-x-auto scrollbar-none">
@@ -361,10 +384,10 @@ export default function BookingsPage() {
               <Inbox className="h-6 w-6 text-text-tertiary" />
             </div>
             <p className="text-sm font-medium text-text-primary mb-1">
-              {query ? "No matching bookings" : "No bookings yet"}
+              {searchQuery ? "No matching bookings" : "No bookings yet"}
             </p>
             <p className="text-xs text-text-tertiary">
-              {query ? "Try a different search term" : "Bookings will appear here once customers start booking tours."}
+              {searchQuery ? "Nothing matches that search. Try a booking #, customer name, email, phone, tour or payment reference." : "Bookings will appear here once customers start booking tours."}
             </p>
           </div>
         ) : (

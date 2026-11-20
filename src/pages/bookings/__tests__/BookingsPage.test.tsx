@@ -285,3 +285,67 @@ describe("BookingsPage guest bookings (no account)", () => {
     expect(screen.queryByRole("button", { name: /view profile/i })).not.toBeInTheDocument();
   });
 });
+
+/**
+ * The search bar used to filter only the 20 rows on the current page, so a
+ * real reference like TRG-86629225-2026-47 — or any result on page 2 — was
+ * reported as "no matching bookings". Search now goes to the server.
+ */
+describe("BookingsPage search", () => {
+  it("sends the term to the server and shows a result from another page", async () => {
+    const user = userEvent.setup();
+    const reference = "TRG-86629225-2026-47";
+    const found = makeBooking("bk_found", reference);
+
+    mockGet.mockImplementation((url: string) => {
+      if (url.includes(`search=${reference}`)) {
+        return Promise.resolve({
+          data: {
+            data: {
+              bookings: [found],
+              pagination: { currentPage: 1, totalPages: 1, totalCount: 1, limit: 20 },
+              counts: {},
+            },
+          },
+        });
+      }
+      return Promise.resolve({
+        data: {
+          data: {
+            bookings,
+            pagination: { currentPage: 1, totalPages: 3, totalCount: 60, limit: 20 },
+            counts: {},
+          },
+        },
+      });
+    });
+
+    renderWithProviders(<BookingsPage />, { initialEntries: ["/bookings"] });
+    await screen.findByText("TG-1001");
+
+    await user.type(screen.getByLabelText("Search bookings"), reference);
+
+    expect(await screen.findByText(reference, {}, { timeout: 3000 })).toBeInTheDocument();
+    // The first page's rows are gone because the server answered the query.
+    expect(screen.queryByText("TG-1001")).not.toBeInTheDocument();
+
+    const urls = mockGet.mock.calls.map(([url]) => String(url));
+    expect(urls.some((url) => url.includes(`search=${reference}`))).toBe(true);
+  });
+
+  it("clears the term and asks for page one again", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<BookingsPage />, { initialEntries: ["/bookings"] });
+    await screen.findByText("TG-1001");
+
+    const input = screen.getByLabelText("Search bookings");
+    await user.type(input, "Ama");
+    await user.click(screen.getByRole("button", { name: "Clear search" }));
+
+    expect(input).toHaveValue("");
+    await waitFor(() => {
+      const urls = mockGet.mock.calls.map(([url]) => String(url));
+      expect(urls[urls.length - 1]).not.toContain("search=");
+    });
+  });
+});
