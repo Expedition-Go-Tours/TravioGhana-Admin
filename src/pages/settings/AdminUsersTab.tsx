@@ -14,6 +14,7 @@ import {
   Clock,
   Eye,
   EyeOff,
+  Pencil,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -113,6 +114,8 @@ export function AdminUsersTab() {
   const [newPassword, setNewPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [newRoleId, setNewRoleId] = useState("");
+  const [editNameAdmin, setEditNameAdmin] = useState<AdminUser | null>(null);
+  const [editName, setEditName] = useState("");
   const queryClient = useQueryClient();
 
   const { data: admins, isLoading } = useQuery({
@@ -144,6 +147,46 @@ export function AdminUsersTab() {
           "Could not update the role",
       ),
   });
+
+  const renameMutation = useMutation({
+    mutationFn: ({ id, name }: { id: string; name: string }) =>
+      api.patch(`/admin/admins/${id}/name`, { name }),
+    onSuccess: (response) => {
+      const updated = response.data?.data;
+      if (updated) {
+        queryClient.setQueryData<AdminUser[]>(["admin", "admin-users"], (old) =>
+          old?.map((admin) => (admin.id === updated.id ? { ...admin, ...updated } : admin)) ?? [],
+        );
+      }
+      toast.success("Name updated");
+      queryClient.invalidateQueries({ queryKey: ["admin", "admin-users"] });
+      setEditNameAdmin(null);
+    },
+    onError: (err: Error) =>
+      toast.error(
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+          "Could not update the name",
+      ),
+  });
+
+  const openRename = useCallback((admin: AdminUser) => {
+    setEditNameAdmin(admin);
+    setEditName(admin.name);
+  }, []);
+
+  const handleRename = useCallback(
+    (event: FormEvent) => {
+      event.preventDefault();
+      if (!editNameAdmin) return;
+      const name = editName.trim();
+      if (!name) {
+        toast.error("Enter a name");
+        return;
+      }
+      renameMutation.mutate({ id: editNameAdmin.id, name });
+    },
+    [editName, editNameAdmin, renameMutation],
+  );
 
   const revokeMutation = useMutation({
     mutationFn: (userId: string) => api.delete(`/admin/admins/${userId}/revoke`),
@@ -311,13 +354,24 @@ export function AdminUsersTab() {
                 return (
                   <tr
                     key={admin.id}
-                    className="border-b border-border transition-colors last:border-b-0 hover:bg-surface-muted/60"
+                    className="group border-b border-border transition-colors last:border-b-0 hover:bg-surface-muted/60"
                   >
                     <td className="px-5 py-3.5">
                       <div className="flex min-w-0 items-center gap-3">
                         <AdminAvatar admin={admin} />
                         <div className="min-w-0">
-                          <span className="block truncate font-medium text-text-primary">{admin.name}</span>
+                          <div className="flex items-center gap-1">
+                            <span className="truncate font-medium text-text-primary">{admin.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => openRename(admin)}
+                              className="shrink-0 rounded p-0.5 text-text-tertiary opacity-0 transition-opacity hover:text-primary focus-visible:opacity-100 group-hover:opacity-100"
+                              aria-label={`Edit name for ${admin.name}`}
+                              title="Edit name"
+                            >
+                              <Pencil className="h-3 w-3" />
+                            </button>
+                          </div>
                           <span className="mt-0.5 flex items-center gap-1 text-xs text-text-tertiary">
                             <Mail className="h-3 w-3 shrink-0" />
                             <span className="truncate">{admin.email}</span>
@@ -425,6 +479,13 @@ export function AdminUsersTab() {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-semibold text-text-primary">{admin.name}</p>
                     <p className="mt-0.5 truncate text-xs text-text-tertiary">{admin.email}</p>
+                    <button
+                      type="button"
+                      onClick={() => openRename(admin)}
+                      className="mt-1 inline-flex items-center gap-1 text-[11px] text-text-tertiary transition-colors hover:text-primary"
+                    >
+                      <Pencil className="h-3 w-3" /> Edit name
+                    </button>
                   </div>
                   <StatusPill active={admin.active} />
                 </div>
@@ -588,6 +649,47 @@ export function AdminUsersTab() {
               <Button type="submit" disabled={addMutation.isPending} className="gap-2">
                 {addMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
                 Add admin
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!editNameAdmin} onOpenChange={(open) => !open && setEditNameAdmin(null)}>
+        <DialogContent className="sm:max-w-md">
+          <form onSubmit={handleRename} className="space-y-5">
+            <DialogHeader className="text-left">
+              <DialogTitle>Edit admin name</DialogTitle>
+              <DialogDescription className="mt-1">
+                This changes the name shown in the console. The email and role stay the same.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="admin-name-edit">Name</Label>
+              <Input
+                id="admin-name-edit"
+                value={editName}
+                onChange={(event) => setEditName(event.target.value)}
+                maxLength={100}
+                autoFocus
+              />
+              {editNameAdmin && (
+                <p className="text-[11px] text-text-tertiary">{editNameAdmin.email}</p>
+              )}
+            </div>
+
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => setEditNameAdmin(null)}>
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={renameMutation.isPending || !editName.trim()}
+                className="gap-2"
+              >
+                {renameMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                Save name
               </Button>
             </DialogFooter>
           </form>
