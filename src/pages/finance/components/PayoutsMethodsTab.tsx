@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Users, Wallet, Smartphone, AlertCircle, ShieldCheck, Search, Building2, X } from "lucide-react";
@@ -69,13 +69,25 @@ export function PayoutsMethodsTab() {
   const [hasMethod, setHasMethod] = useState("all");
   const [viewSupplierId, setViewSupplierId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const limit = 20;
 
+  // Server-side search. The table shows one page of suppliers (20), so a
+  // client-side filter could never find a supplier past the first page.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(search.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [search]);
+
   const { data, isLoading, isError, refetch } = useQuery({
-    queryKey: ["admin", "payout-methods", { page, limit, hasMethod }],
+    queryKey: ["admin", "payout-methods", { page, limit, hasMethod, search: debouncedSearch }],
     queryFn: () => {
       const params = new URLSearchParams({ page: String(page), limit: String(limit) });
       if (hasMethod && hasMethod !== "all") params.set("hasMethod", hasMethod);
+      if (debouncedSearch) params.set("search", debouncedSearch);
       return api.get(`/payout-methods/admin?${params.toString()}`).then((r) => r.data);
     },
   });
@@ -107,15 +119,7 @@ export function PayoutsMethodsTab() {
   const pagination = data?.data?.pagination || data?.pagination;
   const selectedSupplier = suppliers.find((s) => s.id === viewSupplierId);
 
-  const searchLower = search.toLowerCase();
-  const filteredSuppliers = useMemo(() => {
-    if (!search) return suppliers;
-    return suppliers.filter(
-      (s) =>
-        (s.name || s.user?.name || "").toLowerCase().includes(searchLower) ||
-        (s.email || s.user?.email || "").toLowerCase().includes(searchLower),
-    );
-  }, [suppliers, search, searchLower]);
+  const filteredSuppliers = suppliers;
 
   const mix = coverage?.typeMix || {};
   const mixTotal = (mix.BANK_TRANSFER?.total || 0) + (mix.MOBILE_MONEY?.total || 0) + (mix.PAYPAL?.total || 0);
@@ -245,7 +249,7 @@ export function PayoutsMethodsTab() {
               </SelectContent>
             </Select>
             <span className="ml-auto text-xs text-text-tertiary tnum">
-              {filteredSuppliers.length} of {pagination?.totalCount ?? suppliers.length} suppliers
+              {pagination?.totalCount ?? suppliers.length} suppliers
             </span>
           </div>
           <DataTable
@@ -253,8 +257,8 @@ export function PayoutsMethodsTab() {
             data={filteredSuppliers}
             loading={isLoading}
             error={isError ? "Failed to load payout methods" : null}
-            emptyMessage={search ? "No suppliers match your search" : "No suppliers found"}
-            pagination={!search && pagination ? { page: pagination.currentPage || page, totalPages: pagination.totalPages || 1, totalCount: pagination.totalCount || 0, onPageChange: setPage } : undefined}
+            emptyMessage={debouncedSearch ? "No suppliers match your search" : "No suppliers found"}
+            pagination={pagination ? { page: pagination.currentPage || page, totalPages: pagination.totalPages || 1, totalCount: pagination.totalCount || 0, onPageChange: setPage } : undefined}
             onRetry={() => refetch()}
             keyExtractor={(r) => r.id}
             onRowClick={(r) => setViewSupplierId(r.id)}

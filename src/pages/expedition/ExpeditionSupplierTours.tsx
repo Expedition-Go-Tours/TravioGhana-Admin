@@ -285,7 +285,10 @@ export default function ExpeditionSupplierTours({ supplier, onBack }: SupplierTo
     const q = search.trim().toLowerCase();
     if (!q) return tours;
     return tours.filter(
-      (t) => t.title.toLowerCase().includes(q) || (t.category?.toLowerCase().includes(q) ?? false),
+      (t) =>
+        t.title.toLowerCase().includes(q)
+        || t.slug.toLowerCase().includes(q)
+        || (t.category?.toLowerCase().includes(q) ?? false),
     );
   }, [tours, search]);
 

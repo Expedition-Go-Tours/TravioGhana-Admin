@@ -273,7 +273,9 @@ export function AdminUsersTab() {
     if (roleFilter !== "all" && admin.adminRole?.name !== roleFilter) return false;
     if (!query) return true;
     return (
-      admin.name.toLowerCase().includes(query) || admin.email.toLowerCase().includes(query)
+      admin.name.toLowerCase().includes(query)
+      || admin.email.toLowerCase().includes(query)
+      || (admin.adminRole?.name || "").toLowerCase().includes(query)
     );
   });
 

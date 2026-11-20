@@ -144,6 +144,17 @@ export default function ReviewModerationPage() {
   const [page, setPage] = useState(1);
   const [statusFilter, setStatusFilter] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+
+  // Server-side search: the table pages 20 rows at a time, so filtering the
+  // loaded page hid every matching review after the first page.
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchQuery.trim());
+      setPage(1);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
 
   const [actionReview, setActionReview] = useState<Review | null>(null);
   const [actionType, setActionType] = useState<"approve" | "reject" | "flag" | null>(null);
@@ -175,10 +186,11 @@ export default function ReviewModerationPage() {
   const statusParam = statusFilter === "All" ? "" : statusFilter.toUpperCase();
 
   const { data, isLoading, isError, refetch, isRefetching } = useQuery({
-    queryKey: ["admin", "reviews", { page, limit, status: statusParam }],
+    queryKey: ["admin", "reviews", { page, limit, status: statusParam, search: debouncedSearch }],
     queryFn: () => {
       const params = new URLSearchParams({ page: String(page), limit: String(limit) });
       if (statusParam) params.set("status", statusParam);
+      if (debouncedSearch) params.set("search", debouncedSearch);
       return api.get(`/reviews/admin/pending?${params.toString()}`).then((r) => r.data);
     },
   });
@@ -272,14 +284,7 @@ export default function ReviewModerationPage() {
     }
   }, [rawReviews, location.pathname, navigate, deepLinkReviewId]);
 
-  const query = searchQuery.toLowerCase().trim();
-  const filteredReviews = useMemo(() => {
-    if (!query) return rawReviews;
-    return rawReviews.filter((r) =>
-      [r.customer?.name, r.tour?.title, r.tour?.supplier?.name, r.title, r.comment]
-        .some((f) => f?.toLowerCase().includes(query)),
-    );
-  }, [rawReviews, query]);
+  const filteredReviews = rawReviews;
 
   const tourGroups: TourGroup[] = useMemo(() => {
     const map = new Map<string, Review[]>();
@@ -747,19 +752,19 @@ export default function ReviewModerationPage() {
             className="flex flex-col items-center justify-center py-20">
             <div className={cn(
               "flex h-14 w-14 items-center justify-center rounded-xl mb-4",
-              query ? "bg-surface-muted" : "bg-status-active/10",
+              debouncedSearch ? "bg-surface-muted" : "bg-status-active/10",
             )}>
-              {query ? (
+              {debouncedSearch ? (
                 <Search className="h-7 w-7 text-text-tertiary" />
               ) : (
                 <CheckCheck className="h-7 w-7 text-status-active-text" />
               )}
             </div>
             <p className="text-sm font-medium text-text-primary mb-1">
-              {query ? "No reviews match your search" : "All caught up!"}
+              {debouncedSearch ? "No reviews match your search" : "All caught up!"}
             </p>
             <p className="text-xs text-text-tertiary">
-              {query ? "Try adjusting your search terms." : "There are no reviews waiting for moderation."}
+              {debouncedSearch ? "Try adjusting your search terms." : "There are no reviews waiting for moderation."}
             </p>
           </div>
         ) : (

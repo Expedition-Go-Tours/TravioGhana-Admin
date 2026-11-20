@@ -235,10 +235,11 @@ export default function ActivityLogPage() {
   });
 
   const logsQuery = useQuery({
-    queryKey: ["admin", "audit-log", { page, limit: 50, email: debouncedEmail, action: actionFilter, fromDate, toDate }],
+    queryKey: ["admin", "audit-log", { page, limit: 50, search: debouncedEmail, action: actionFilter, fromDate, toDate }],
     queryFn: () => {
       const params = new URLSearchParams({ page: String(page), limit: "50" });
-      if (debouncedEmail) params.set("email", debouncedEmail);
+      // Free text: admin email, action, resource or resource id.
+      if (debouncedEmail) params.set("search", debouncedEmail);
       if (actionFilter !== "all") params.set("action", actionFilter);
       if (fromDate) params.set("startDate", new Date(fromDate).toISOString());
       if (toDate) params.set("endDate", new Date(new Date(toDate).getTime() + 24 * 60 * 60 * 1000).toISOString());
@@ -418,7 +419,7 @@ export default function ActivityLogPage() {
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder="Search by email..."
+                placeholder="Search email, action or resource…"
                 value={searchEmail}
                 onChange={(e) => setSearchEmail(e.target.value)}
                 className="pl-9"
