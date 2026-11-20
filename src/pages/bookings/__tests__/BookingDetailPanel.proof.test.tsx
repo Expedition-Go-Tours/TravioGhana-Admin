@@ -213,28 +213,31 @@ describe("BookingDetailPanel — proof of payment", () => {
 });
 
 describe("BookingDetailPanel — pay-later lifecycle", () => {
-  it("shows both stages once the deferred charge has settled", () => {
+  it("draws the three stops once the deferred charge has settled", () => {
     renderPanel(makeBooking());
 
-    expect(screen.getByText("Reserve now, pay later")).toBeInTheDocument();
-    expect(screen.getByText(/pay later, settled/i)).toBeInTheDocument();
-    expect(
-      screen.getByText(/charged/i, { selector: "p" }),
-    ).toHaveTextContent(/1 day before the activity/i);
-    expect(screen.queryByText(/charges automatically before the activity date/i)).not.toBeInTheDocument();
+    expect(screen.getByText("Pay later")).toBeInTheDocument();
+    expect(screen.getByText("Settled")).toBeInTheDocument();
+    expect(screen.getByText("Booked")).toBeInTheDocument();
+    expect(screen.getByText("Charged")).toBeInTheDocument();
+    expect(screen.getByText("Activity")).toBeInTheDocument();
+    expect(screen.getByText(/Charged 1 day before the activity\./)).toBeInTheDocument();
   });
 
-  it("says the card is on file while the sweep is still waiting", () => {
+  it("marks the charge as scheduled while the sweep is still waiting", () => {
     renderPanel(makeBooking({ paymentStatus: "PENDING", paidAt: null }));
 
-    expect(screen.getByText(/charges automatically before the activity date/i)).toBeInTheDocument();
-    expect(screen.queryByText(/pay later, settled/i)).not.toBeInTheDocument();
+    expect(screen.getAllByText("Scheduled").length).toBeGreaterThan(0);
+    expect(
+      screen.getByText(/The charge runs automatically before the activity date\./),
+    ).toBeInTheDocument();
+    expect(screen.queryByText("Settled")).not.toBeInTheDocument();
   });
 
   it("counts failed attempts instead of hiding them", () => {
     renderPanel(makeBooking({ paymentStatus: "PENDING", paidAt: null, chargeRetries: 2 }));
 
-    expect(screen.getByText(/2 failed attempts so far/i)).toBeInTheDocument();
+    expect(screen.getByText(/2 failed attempts so far\./)).toBeInTheDocument();
   });
 
   it("escalates when the customer must finish payment", () => {
@@ -246,6 +249,7 @@ describe("BookingDetailPanel — pay-later lifecycle", () => {
       }),
     );
 
+    expect(screen.getByText("Action needed")).toBeInTheDocument();
     expect(screen.getByText(/3-D Secure or a new card/i)).toBeInTheDocument();
   });
 
@@ -253,6 +257,6 @@ describe("BookingDetailPanel — pay-later lifecycle", () => {
     renderPanel(makeBooking({ paymentTiming: "now" }));
 
     expect(screen.getByText("Charged at booking")).toBeInTheDocument();
-    expect(screen.queryByText(/pay later, settled/i)).not.toBeInTheDocument();
+    expect(screen.queryByText("Pay later")).not.toBeInTheDocument();
   });
 });

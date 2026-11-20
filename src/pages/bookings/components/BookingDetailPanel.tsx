@@ -221,6 +221,106 @@ function TravelerManifest({ details }: { details: NonNullable<TravelerData["deta
   );
 }
 
+/**
+ * A reserve-now-pay-later booking is two events with a gap in between: the
+ * booking is taken with a card on file, then the sweep charges before travel.
+ * A single grey sentence hid which of those had happened, which is the first
+ * thing an operator needs when a customer asks why they were charged.
+ *
+ * Drawn as a three-stop track so the state is readable at a glance:
+ * booked (done) → charged (done, or scheduled) → activity date.
+ */
+function PayLaterTrack({ booking, leadTime }: { booking: Booking; leadTime: string | null }) {
+  const settled = Boolean(booking.paidAt);
+  const needsAction = Boolean(booking.requiresPaymentActionAt);
+
+  // Three stops share ~70px each on a phone. "Oct 22" fits; the year is only
+  // worth the width when it differs from the activity year (the panel header
+  // and the timeline below both carry the full date).
+  const activityYear = booking.travelDate ? new Date(booking.travelDate).getFullYear() : null;
+  const day = (value?: string | null) => {
+    if (!value) return null;
+    const d = new Date(value);
+    const sameYear = activityYear !== null && d.getFullYear() === activityYear;
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      ...(sameYear ? {} : { year: "numeric" as const }),
+    });
+  };
+  const clock = (value?: string | null) =>
+    value ? new Date(value).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" }) : null;
+
+  const steps = [
+    { key: "booked", label: "Booked", date: day(booking.createdAt), time: clock(booking.createdAt), done: true },
+    {
+      key: "charged",
+      label: "Charged",
+      date: settled ? day(booking.paidAt) : null,
+      time: settled ? clock(booking.paidAt) : null,
+      done: settled,
+    },
+    { key: "activity", label: "Activity", date: day(booking.travelDate), time: booking.selectedTime || null, done: false },
+  ];
+
+  const chip = needsAction
+    ? { label: "Action needed", icon: <ShieldAlert className="h-3 w-3" />, className: "text-status-rejected-text" }
+    : settled
+      ? { label: "Settled", icon: <CheckCircle2 className="h-3 w-3" />, className: "text-status-approved-text" }
+      : { label: "Scheduled", icon: <Clock className="h-3 w-3" />, className: "text-status-pending-text" };
+
+  const attempts = booking.chargeRetries
+    ? `${booking.chargeRetries} failed attempt${booking.chargeRetries === 1 ? "" : "s"}`
+    : null;
+
+  return (
+    <div className="rounded-xl border border-border bg-surface-muted px-3 py-2.5">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">
+          Pay later
+        </span>
+        <span className={cn("flex items-center gap-1 text-[10px] font-semibold", chip.className)}>
+          {chip.icon}
+          {chip.label}
+        </span>
+      </div>
+
+      <ol className="mt-2.5 flex items-start">
+        {steps.map((step, index) => (
+          <li key={step.key} className="min-w-0 flex-1">
+            <div className="flex items-center">
+              <span
+                className={cn(
+                  "h-2 w-2 shrink-0 rounded-full",
+                  step.done ? "bg-status-approved" : "border border-text-tertiary/40 bg-surface-base",
+                )}
+              />
+              {index < steps.length - 1 && <span className="h-px flex-1 bg-border" />}
+            </div>
+            <p className="mt-1.5 pr-2 text-[10px] font-medium uppercase tracking-[0.04em] text-text-tertiary">
+              {step.label}
+            </p>
+            <p className="whitespace-nowrap pr-2 text-[10.5px] font-semibold leading-tight text-text-primary tnum">
+              {step.date || "—"}
+            </p>
+            <p className="mt-0.5 h-3 whitespace-nowrap pr-2 text-[10px] text-text-tertiary tnum">{step.time || ""}</p>
+          </li>
+        ))}
+      </ol>
+
+      <p className="mt-2 border-t border-border pt-2 text-[10px] leading-relaxed text-text-tertiary">
+        {settled
+          ? leadTime
+            ? `Charged ${leadTime}${attempts ? `, after ${attempts}` : ""}.`
+            : `Charged before the activity date${attempts ? `, after ${attempts}` : ""}.`
+          : `Card on file. The charge runs automatically before the activity date.${
+              attempts ? ` ${attempts} so far.` : ""
+            }`}
+      </p>
+    </div>
+  );
+}
+
 export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onChargeNow, onViewCustomer }: BookingDetailPanelProps) {
   const navigate = useNavigate();
   const { can } = usePermission();
@@ -468,15 +568,18 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
   // booking is at, otherwise "auto-charges before activity date" keeps
   // claiming a future charge that already happened.
   const isPayLater = booking.paymentTiming === "later";
-  const payLaterSettled = isPayLater && booking.paymentStatus === "SUCCEEDED" && Boolean(booking.paidAt);
   const chargeLeadTime = (() => {
     if (!booking.paidAt || !booking.travelDate) return null;
-    const ms = new Date(booking.travelDate).getTime() - new Date(booking.paidAt).getTime();
-    if (!Number.isFinite(ms) || ms <= 0) return null;
-    const days = ms / 86_400_000;
-    if (days < 1) return "less than a day before the activity";
-    const rounded = Math.round(days);
-    return `${rounded} day${rounded === 1 ? "" : "s"} before the activity`;
+    const paid = new Date(booking.paidAt);
+    const travel = new Date(booking.travelDate);
+    if (Number.isNaN(paid.getTime()) || Number.isNaN(travel.getTime())) return null;
+    // Calendar days, like the receipt: the pay-later sweep runs 24h ahead, so a
+    // 23h41m gap is "the day before", not "less than a day".
+    const utcDay = (d: Date) => Date.UTC(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate());
+    const days = Math.round((utcDay(travel) - utcDay(paid)) / 86_400_000);
+    if (days < 0) return null;
+    if (days === 0) return "on the day of the activity";
+    return `${days} day${days === 1 ? "" : "s"} before the activity`;
   })();
 
   // Receipts are generated from live Stripe data, so the request can take a
@@ -896,49 +999,22 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                     </p>
                   </div>
                 )}
-                <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
-                  <span className="text-xs font-medium text-text-secondary">Payment timing</span>
-                  <span className="text-xs font-medium text-text-primary">
-                    {isPayLater ? "Reserve now, pay later" : "Charged at booking"}
-                  </span>
-                </div>
+                {isPayLater ? (
+                  <PayLaterTrack booking={booking} leadTime={chargeLeadTime} />
+                ) : (
+                  <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                    <span className="text-xs font-medium text-text-secondary">Payment timing</span>
+                    <span className="text-xs font-medium text-text-primary">Charged at booking</span>
+                  </div>
+                )}
 
                 {isPayLater && booking.requiresPaymentActionAt && (
                   <div className="flex items-start gap-2 rounded-xl border border-status-rejected/30 bg-status-rejected/10 px-3 py-2">
                     <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-status-rejected-text" />
-                    <span className="text-xs text-status-rejected-text">
+                    <span className="text-xs leading-relaxed text-status-rejected-text">
                       The automatic charge needs the customer to finish payment (3-D Secure or a new
                       card). Requested {timeAgo(booking.requiresPaymentActionAt)}.
                     </span>
-                  </div>
-                )}
-
-                {isPayLater && !payLaterSettled && !booking.requiresPaymentActionAt && (
-                  <div className="flex items-start gap-2 rounded-xl bg-status-pending/10 border border-status-pending/30 px-3 py-2">
-                    <Clock className="mt-0.5 h-3.5 w-3.5 text-status-pending-text shrink-0" />
-                    <span className="text-xs leading-relaxed text-status-pending-text">
-                      Card on file — charges automatically before the activity date
-                      {booking.chargeRetries
-                        ? ` · ${booking.chargeRetries} failed attempt${booking.chargeRetries === 1 ? "" : "s"} so far`
-                        : ""}
-                      .
-                    </span>
-                  </div>
-                )}
-
-                {payLaterSettled && (
-                  <div className="rounded-xl border border-border bg-surface-muted px-3 py-2">
-                    <div className="flex items-center gap-1.5">
-                      <Clock className="h-3 w-3 text-text-tertiary" />
-                      <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">
-                        Pay later, settled
-                      </span>
-                    </div>
-                    <p className="mt-1 text-xs leading-relaxed text-text-secondary">
-                      Booked {formatDateTime(booking.createdAt)}
-                      {" · "}charged {formatDateTime(booking.paidAt)}
-                      {chargeLeadTime ? `, ${chargeLeadTime}` : ""}.
-                    </p>
                   </div>
                 )}
 
