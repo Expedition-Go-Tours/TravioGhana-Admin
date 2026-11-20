@@ -463,6 +463,22 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
       : paymentStatusMeta.hint;
   const paidWith = paymentSource(booking);
 
+  // Pay-later is a lifecycle, not a flag: booked now with a card on file, then
+  // charged by the sweep before travel. The panel has to say which stage this
+  // booking is at, otherwise "auto-charges before activity date" keeps
+  // claiming a future charge that already happened.
+  const isPayLater = booking.paymentTiming === "later";
+  const payLaterSettled = isPayLater && booking.paymentStatus === "SUCCEEDED" && Boolean(booking.paidAt);
+  const chargeLeadTime = (() => {
+    if (!booking.paidAt || !booking.travelDate) return null;
+    const ms = new Date(booking.travelDate).getTime() - new Date(booking.paidAt).getTime();
+    if (!Number.isFinite(ms) || ms <= 0) return null;
+    const days = ms / 86_400_000;
+    if (days < 1) return "less than a day before the activity";
+    const rounded = Math.round(days);
+    return `${rounded} day${rounded === 1 ? "" : "s"} before the activity`;
+  })();
+
   // Receipts are generated from live Stripe data, so the request can take a
   // moment. Keep the button honest: disabled + spinner while it runs, one
   // toast on failure, and the file lands in the browser's downloads.
@@ -880,12 +896,49 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                     </p>
                   </div>
                 )}
-                {booking.paymentTiming === "later" && (
-                  <div className="flex items-center gap-2 rounded-xl bg-status-pending/10 border border-status-pending/30 px-3 py-2">
-                    <Clock className="h-3.5 w-3.5 text-status-pending-text shrink-0" />
-                    <span className="text-xs text-status-pending-text">
-                      Reserve now, pay later — card on file, auto-charges before activity date
+                <div className="flex flex-col gap-0.5 sm:flex-row sm:items-center sm:justify-between sm:gap-3">
+                  <span className="text-xs font-medium text-text-secondary">Payment timing</span>
+                  <span className="text-xs font-medium text-text-primary">
+                    {isPayLater ? "Reserve now, pay later" : "Charged at booking"}
+                  </span>
+                </div>
+
+                {isPayLater && booking.requiresPaymentActionAt && (
+                  <div className="flex items-start gap-2 rounded-xl border border-status-rejected/30 bg-status-rejected/10 px-3 py-2">
+                    <ShieldAlert className="mt-0.5 h-3.5 w-3.5 shrink-0 text-status-rejected-text" />
+                    <span className="text-xs text-status-rejected-text">
+                      The automatic charge needs the customer to finish payment (3-D Secure or a new
+                      card). Requested {timeAgo(booking.requiresPaymentActionAt)}.
                     </span>
+                  </div>
+                )}
+
+                {isPayLater && !payLaterSettled && !booking.requiresPaymentActionAt && (
+                  <div className="flex items-start gap-2 rounded-xl bg-status-pending/10 border border-status-pending/30 px-3 py-2">
+                    <Clock className="mt-0.5 h-3.5 w-3.5 text-status-pending-text shrink-0" />
+                    <span className="text-xs leading-relaxed text-status-pending-text">
+                      Card on file — charges automatically before the activity date
+                      {booking.chargeRetries
+                        ? ` · ${booking.chargeRetries} failed attempt${booking.chargeRetries === 1 ? "" : "s"} so far`
+                        : ""}
+                      .
+                    </span>
+                  </div>
+                )}
+
+                {payLaterSettled && (
+                  <div className="rounded-xl border border-border bg-surface-muted px-3 py-2">
+                    <div className="flex items-center gap-1.5">
+                      <Clock className="h-3 w-3 text-text-tertiary" />
+                      <span className="text-[10px] font-semibold uppercase tracking-[0.06em] text-text-tertiary">
+                        Pay later, settled
+                      </span>
+                    </div>
+                    <p className="mt-1 text-xs leading-relaxed text-text-secondary">
+                      Booked {formatDateTime(booking.createdAt)}
+                      {" · "}charged {formatDateTime(booking.paidAt)}
+                      {chargeLeadTime ? `, ${chargeLeadTime}` : ""}.
+                    </p>
                   </div>
                 )}
 

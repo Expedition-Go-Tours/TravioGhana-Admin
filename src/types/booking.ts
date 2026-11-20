@@ -85,6 +85,11 @@ export interface Booking {
   status: BookingStatus;
   paymentStatus: PaymentStatus;
   paymentTiming?: "now" | "later";
+  // Pay-later bookkeeping. `paidAt` is when the deferred charge actually
+  // settled; these three describe what happened on the way there.
+  chargeRetries?: number;
+  nextRetryAt?: string | null;
+  requiresPaymentActionAt?: string | null;
   /** Set by the checkout that created the booking; absent means Stripe. */
   paymentProvider?: PaymentProvider;
   /** Card brand and last four, when checkout captured them. */
