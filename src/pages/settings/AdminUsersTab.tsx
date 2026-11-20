@@ -1,4 +1,4 @@
-﻿import { useState, useRef, useEffect, useCallback } from "react";
+﻿import { useState, useCallback, type FormEvent } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import {
@@ -12,6 +12,8 @@ import {
   Users as UsersIcon,
   Mail,
   Clock,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
@@ -32,8 +34,6 @@ import { timeAgo } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 import type { AdminUser, AdminRole } from "@/lib/permissions";
 import OptimizedImage from "@/components/shared/OptimizedImage";
-
-type UserResult = { id: string; name: string; email: string; photoURL?: string };
 
 function formatRoleName(name: string) {
   return name.replace(/_/g, " ").replace(/\b\w/g, (letter) => letter.toUpperCase());
@@ -108,13 +108,12 @@ export function AdminUsersTab() {
   const [showRevoke, setShowRevoke] = useState<AdminUser | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
-  const [userSearch, setUserSearch] = useState("");
-  const [searchResults, setSearchResults] = useState<UserResult[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<UserResult | null>(null);
+  const [newName, setNewName] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [newRoleId, setNewRoleId] = useState("");
   const queryClient = useQueryClient();
-  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const { data: admins, isLoading } = useQuery({
     queryKey: ["admin", "admin-users"],
@@ -167,7 +166,8 @@ export function AdminUsersTab() {
   });
 
   const addMutation = useMutation({
-    mutationFn: (data: { userId: string; adminRoleId: string }) => api.post("/admin/admins", data),
+    mutationFn: (data: { email: string; name?: string; password: string; adminRoleId: string }) =>
+      api.post("/admin/admins", data),
     onSuccess: (response) => {
       const newAdmin = response.data?.data;
       if (newAdmin) {
@@ -176,7 +176,7 @@ export function AdminUsersTab() {
           ...(old ?? []),
         ]);
       }
-      toast.success("Admin access granted");
+      toast.success("Admin added");
       queryClient.invalidateQueries({ queryKey: ["admin", "admin-users"] });
       resetAddDialog();
     },
@@ -189,40 +189,38 @@ export function AdminUsersTab() {
 
   const resetAddDialog = useCallback(() => {
     setShowAdd(false);
-    setSelectedUser(null);
-    setUserSearch("");
-    setSearchResults([]);
+    setNewName("");
+    setNewEmail("");
+    setNewPassword("");
+    setShowPassword(false);
     setNewRoleId("");
-    setSearchLoading(false);
-    if (searchTimer.current) clearTimeout(searchTimer.current);
   }, []);
 
-  useEffect(() => {
-    return () => {
-      if (searchTimer.current) clearTimeout(searchTimer.current);
-    };
-  }, []);
-
-  const handleUserSearch = useCallback((query: string) => {
-    setUserSearch(query);
-    if (searchTimer.current) clearTimeout(searchTimer.current);
-    if (query.length < 2) {
-      setSearchResults([]);
-      setSearchLoading(false);
-      return;
-    }
-    setSearchLoading(true);
-    searchTimer.current = setTimeout(async () => {
-      try {
-        const response = await api.get(`/admin/users/search?q=${encodeURIComponent(query)}`);
-        setSearchResults(response.data?.data?.users || []);
-      } catch {
-        setSearchResults([]);
-      } finally {
-        setSearchLoading(false);
+  const handleAddAdmin = useCallback(
+    (event: FormEvent) => {
+      event.preventDefault();
+      const email = newEmail.trim().toLowerCase();
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        toast.error("Enter a valid email address");
+        return;
       }
-    }, 300);
-  }, []);
+      if (newPassword.length < 8) {
+        toast.error("Password must be at least 8 characters");
+        return;
+      }
+      if (!newRoleId) {
+        toast.error("Choose a role");
+        return;
+      }
+      addMutation.mutate({
+        email,
+        name: newName.trim() || undefined,
+        password: newPassword,
+        adminRoleId: newRoleId,
+      });
+    },
+    [addMutation, newEmail, newName, newPassword, newRoleId],
+  );
 
   const allAdmins: AdminUser[] = admins || [];
   const allRoles: AdminRole[] = roles || [];
@@ -495,155 +493,104 @@ export function AdminUsersTab() {
 
       <Dialog open={showAdd} onOpenChange={(open) => !open && resetAddDialog()}>
         <DialogContent className="sm:max-w-lg">
-          <DialogHeader className="text-left">
-            <div className="flex items-start gap-3">
-              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
-                <ShieldCheck className="h-4 w-4" />
+          <form onSubmit={handleAddAdmin} className="space-y-5">
+            <DialogHeader className="text-left">
+              <div className="flex items-start gap-3">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                  <ShieldCheck className="h-4 w-4" />
+                </div>
+                <div className="min-w-0">
+                  <DialogTitle>Add an admin</DialogTitle>
+                  <DialogDescription className="mt-1">
+                    Create a console account with an email and password. If the email already belongs to a Travio user, that account is promoted and the password is replaced.
+                  </DialogDescription>
+                </div>
               </div>
-              <div className="min-w-0">
-                <DialogTitle>Grant admin access</DialogTitle>
-                <DialogDescription className="mt-1">
-                  Find an existing Travio account and choose what they can do.
-                </DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
+            </DialogHeader>
 
-          <div className="space-y-5">
-            <div className="space-y-1.5">
-              <Label htmlFor="user-search">Travio account</Label>
-              <div className="relative">
-                <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-text-tertiary" />
+            <div className="space-y-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="admin-name">
+                  Name <span className="font-normal text-text-tertiary">(optional)</span>
+                </Label>
                 <Input
-                  id="user-search"
-                  placeholder="Search by name or email"
-                  value={userSearch}
-                  onChange={(event) => handleUserSearch(event.target.value)}
-                  className="pl-9 pr-9"
+                  id="admin-name"
+                  placeholder="e.g. Ama Mensah"
+                  value={newName}
+                  onChange={(event) => setNewName(event.target.value)}
+                  autoComplete="off"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="admin-email">Email</Label>
+                <Input
+                  id="admin-email"
+                  type="email"
+                  placeholder="name@company.com"
+                  value={newEmail}
+                  onChange={(event) => setNewEmail(event.target.value)}
+                  autoComplete="off"
                   autoFocus
                 />
-                {userSearch && (
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="admin-password">Password</Label>
+                <div className="relative">
+                  <Input
+                    id="admin-password"
+                    type={showPassword ? "text" : "password"}
+                    placeholder="At least 8 characters"
+                    value={newPassword}
+                    onChange={(event) => setNewPassword(event.target.value)}
+                    autoComplete="new-password"
+                    className="pr-10"
+                  />
                   <button
                     type="button"
-                    className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full p-0.5 text-text-tertiary transition-colors hover:text-text-primary"
-                    onClick={() => {
-                      setUserSearch("");
-                      setSearchResults([]);
-                      setSelectedUser(null);
-                    }}
-                    aria-label="Clear user search"
+                    onClick={() => setShowPassword((value) => !value)}
+                    className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-md text-text-tertiary transition-colors hover:bg-surface-muted hover:text-text-primary"
+                    aria-label={showPassword ? "Hide password" : "Show password"}
                   >
-                    <X className="h-4 w-4" />
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
-                )}
-              </div>
-              <p className="text-[11px] text-text-tertiary">Type at least two characters.</p>
-            </div>
-
-            {searchLoading && (
-              <div className="flex items-center justify-center gap-2 rounded-lg border border-border bg-surface-muted px-4 py-6 text-sm text-text-secondary">
-                <Loader2 className="h-4 w-4 animate-spin" />
-                Searching accounts
-              </div>
-            )}
-
-            {!searchLoading && userSearch.length >= 2 && searchResults.length === 0 && !selectedUser && (
-              <div className="flex flex-col items-center gap-1.5 rounded-lg border border-border bg-surface-muted px-4 py-8 text-center">
-                <UsersIcon className="mb-1 h-7 w-7 text-text-tertiary" />
-                <p className="text-sm font-medium text-text-primary">No accounts found</p>
-                <p className="text-xs text-text-tertiary">Try a different name or email address.</p>
-              </div>
-            )}
-
-            {!searchLoading && searchResults.length > 0 && !selectedUser && (
-              <div className="max-h-56 overflow-y-auto rounded-lg border border-border">
-                {searchResults.map((user) => (
-                  <button
-                    key={user.id}
-                    type="button"
-                    className="flex w-full items-center gap-3 border-b border-border px-4 py-3 text-left transition-colors last:border-b-0 hover:bg-surface-muted"
-                    onClick={() => {
-                      setSelectedUser(user);
-                      setSearchResults([]);
-                    }}
-                  >
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                      {user.name.charAt(0).toUpperCase()}
-                    </div>
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-medium text-text-primary">{user.name}</p>
-                      <p className="truncate text-xs text-text-tertiary">{user.email}</p>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {selectedUser && (
-              <div className="flex items-center justify-between gap-3 rounded-lg border border-primary/20 bg-primary/5 px-4 py-3">
-                <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
-                    {selectedUser.name.charAt(0).toUpperCase()}
-                  </div>
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-medium text-text-primary">{selectedUser.name}</p>
-                    <p className="truncate text-xs text-text-tertiary">{selectedUser.email}</p>
-                  </div>
                 </div>
-                <button
-                  type="button"
-                  className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-text-tertiary transition-colors hover:bg-surface-base hover:text-text-primary"
-                  onClick={() => {
-                    setSelectedUser(null);
-                    setUserSearch("");
-                    setSearchResults([]);
-                  }}
-                  aria-label="Remove selected user"
-                >
-                  <X className="h-3.5 w-3.5" />
-                </button>
+                <p className="text-[11px] leading-relaxed text-text-tertiary">
+                  At least 8 characters. If this email already has an account, the password above replaces the current one.
+                </p>
               </div>
-            )}
 
-            <div className="space-y-1.5">
-              <Label htmlFor="admin-role">Role</Label>
-              <Select value={newRoleId} onValueChange={setNewRoleId}>
-                <SelectTrigger id="admin-role">
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {allRoles.map((role) => (
-                    <SelectItem key={role.id} value={role.id}>
-                      {formatRoleName(role.name)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="text-[11px] leading-relaxed text-text-tertiary">
-                {selectedRole?.description || "The role decides which pages and actions this admin can use."}
-              </p>
+              <div className="space-y-1.5">
+                <Label htmlFor="admin-role">Role</Label>
+                <Select value={newRoleId} onValueChange={setNewRoleId}>
+                  <SelectTrigger id="admin-role">
+                    <SelectValue placeholder="Select a role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {allRoles.map((role) => (
+                      <SelectItem key={role.id} value={role.id}>
+                        {formatRoleName(role.name)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-[11px] leading-relaxed text-text-tertiary">
+                  {selectedRole?.description || "The role decides which pages and actions this admin can use."}
+                </p>
+              </div>
             </div>
-          </div>
 
-          <DialogFooter className="mt-2">
-            <Button variant="outline" onClick={resetAddDialog}>
-              Cancel
-            </Button>
-            <Button
-              onClick={() => {
-                if (!selectedUser || !newRoleId) {
-                  toast.error("Select an account and a role");
-                  return;
-                }
-                addMutation.mutate({ userId: selectedUser.id, adminRoleId: newRoleId });
-              }}
-              disabled={!selectedUser || !newRoleId || addMutation.isPending}
-              className="gap-2"
-            >
-              {addMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-              Grant access
-            </Button>
-          </DialogFooter>
+            <DialogFooter className="mt-2">
+              <Button type="button" variant="outline" onClick={resetAddDialog}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={addMutation.isPending} className="gap-2">
+                {addMutation.isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                Add admin
+              </Button>
+            </DialogFooter>
+          </form>
         </DialogContent>
       </Dialog>
 
