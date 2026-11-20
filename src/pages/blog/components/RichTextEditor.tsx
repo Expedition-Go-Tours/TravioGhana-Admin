@@ -160,11 +160,14 @@ export function RichTextEditor({ value, onChange, placeholder, disabled, expand 
     ? "flex flex-col h-full rounded-xl border border-border"
     : "flex flex-col rounded-xl border border-border bg-card ";
   const contentAreaClass = expand
-    ? "flex-1 overflow-y-auto p-6"
-    : "p-4 sm:p-6";
+    ? "blog-editor flex-1 overflow-y-auto p-6"
+    : "blog-editor p-4 sm:p-6";
+  // `prose` is deliberately absent: the typography plugin is not installed, so
+  // those classes were dead weight. The editor's typography lives in
+  // `.blog-editor` (src/index.css) and is what makes H1/H2 visibly different.
   const editorClass = expand
-    ? "prose prose-sm max-w-none focus:outline-none h-full"
-    : "prose prose-sm max-w-none focus:outline-none min-h-[400px]";
+    ? "max-w-none focus:outline-none h-full"
+    : "max-w-none focus:outline-none min-h-[400px]";
 
   return (
     <div className={containerClass}>

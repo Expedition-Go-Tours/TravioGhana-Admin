@@ -220,6 +220,124 @@
   }
 }
 
+/* ── Blog rich-text editor ────────────────────────────────────────────────
+   TipTap emits real <h1>/<h2>/<blockquote>/<ul> nodes, but Tailwind's preflight
+   strips every browser default for them (font-size, weight, margins, list
+   markers). The editor had `prose` classes, yet the typography plugin is not
+   installed, so none of them applied: clicking H1 changed the underlying JSON
+   while the text stayed visually identical to a paragraph. These rules are the
+   editor's own typography, mirroring how the public article renders.
+   Scoped to `.blog-editor` so no other content is affected. */
+.blog-editor .ProseMirror {
+  font-size: 15px;
+  line-height: 1.75;
+  color: hsl(var(--foreground));
+  outline: none;
+}
+
+.blog-editor .ProseMirror > :first-child {
+  margin-top: 0;
+}
+
+.blog-editor .ProseMirror p {
+  margin: 0 0 0.9em;
+}
+
+.blog-editor .ProseMirror h1,
+.blog-editor .ProseMirror h2,
+.blog-editor .ProseMirror h3,
+.blog-editor .ProseMirror h4,
+.blog-editor .ProseMirror h5,
+.blog-editor .ProseMirror h6 {
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+  color: hsl(var(--foreground));
+  margin: 1.4em 0 0.5em;
+}
+
+.blog-editor .ProseMirror h1 { font-size: 28px; }
+.blog-editor .ProseMirror h2 { font-size: 24px; }
+.blog-editor .ProseMirror h3 { font-size: 19px; }
+.blog-editor .ProseMirror h4,
+.blog-editor .ProseMirror h5,
+.blog-editor .ProseMirror h6 { font-size: 16px; }
+
+.blog-editor .ProseMirror ul,
+.blog-editor .ProseMirror ol {
+  margin: 0 0 0.9em;
+  padding-left: 1.4em;
+}
+.blog-editor .ProseMirror ul { list-style: disc; }
+.blog-editor .ProseMirror ol { list-style: decimal; }
+.blog-editor .ProseMirror li { margin-bottom: 0.35em; }
+.blog-editor .ProseMirror li > p { margin-bottom: 0.35em; }
+.blog-editor .ProseMirror li::marker { color: hsl(var(--primary)); }
+
+.blog-editor .ProseMirror blockquote {
+  margin: 1.2em 0;
+  padding: 0.35em 0 0.35em 1em;
+  border-left: 3px solid hsl(var(--primary));
+  color: hsl(var(--muted-foreground));
+  font-style: italic;
+}
+
+.blog-editor .ProseMirror pre {
+  margin: 1.2em 0;
+  padding: 0.9em 1.1em;
+  background: hsl(var(--foreground));
+  color: hsl(var(--background));
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.blog-editor .ProseMirror code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.9em;
+  background: hsl(var(--surface-muted, var(--muted)));
+  padding: 0.15em 0.35em;
+  border-radius: 4px;
+}
+
+.blog-editor .ProseMirror pre code {
+  background: none;
+  padding: 0;
+  color: inherit;
+  font-size: inherit;
+}
+
+.blog-editor .ProseMirror a {
+  color: hsl(var(--primary));
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.blog-editor .ProseMirror hr {
+  margin: 1.8em auto;
+  max-width: 240px;
+  border: 0;
+  border-top: 1px solid hsl(var(--border));
+}
+
+.blog-editor .ProseMirror img {
+  max-width: 100%;
+  height: auto;
+  margin: 1.2em auto;
+  border-radius: 6px;
+}
+
+/* The Placeholder extension sets `data-placeholder`; without this rule the
+   editor shows no hint at all. */
+.blog-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  color: hsl(var(--muted-foreground));
+  pointer-events: none;
+}
+
 /* Stripe surface utilities live on the primitives; no decorative layers. */
 
 @media (pointer: coarse) {
