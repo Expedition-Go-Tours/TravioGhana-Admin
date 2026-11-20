@@ -25,15 +25,19 @@ import {
   Globe,
   Tag,
   Zap,
+  Download,
+  Loader2,
   ShieldAlert,
   Ban,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import api from "@/lib/axios";
 import { usePermission } from "@/hooks/usePermission";
 import { PERMISSIONS } from "@/lib/permissions";
 import { cn, timeAgo, getStatusColor, formatCurrency, formatDateTime, formatTravelDate } from "@/lib/utils";
 import { cancellationReasonLabel, cancellationCategoryLabel } from "@/lib/cancellationReview";
 import { paymentSource } from "@/lib/paymentSource";
+import { downloadBlob, safeFilenamePart } from "@/lib/downloadFile";
 import { BookingTimeline } from "./BookingTimeline";
 import type { Booking, TravelerData } from "@/types/booking";
 import { isPaymentPaid, travelerCount } from "@/types/booking";
@@ -226,6 +230,9 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
   // the parent's open state. Every close path funnels through runAfterClose so
   // the overlay, X, Escape key, and footer button all behave the same way.
   const [closing, setClosing] = useState(false);
+  // Proof-of-payment download: the PDF is generated server-side, so the button
+  // needs its own busy state (it can take a second while Stripe is queried).
+  const [downloadingProof, setDownloadingProof] = useState(false);
   const closingRef = useRef(false);
   const closeTimer = useRef<number | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -455,6 +462,28 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
       ? "The customer chose to pay later. Nothing has been charged yet."
       : paymentStatusMeta.hint;
   const paidWith = paymentSource(booking);
+
+  // Receipts are generated from live Stripe data, so the request can take a
+  // moment. Keep the button honest: disabled + spinner while it runs, one
+  // toast on failure, and the file lands in the browser's downloads.
+  const canDownloadProof = can("bookings.view");
+  const handleDownloadProof = async () => {
+    if (downloadingProof) return;
+    setDownloadingProof(true);
+    try {
+      const response = await api.get(`/admin/bookings/${booking.id}/proof-of-payment`, {
+        responseType: "blob",
+        // 30s is plenty for a pdfkit page; a hung Stripe call must not spin forever.
+        timeout: 30000,
+      });
+      const blob = new Blob([response.data], { type: "application/pdf" });
+      downloadBlob(blob, `proof-of-payment-${safeFilenamePart(booking.bookingNumber)}.pdf`);
+    } catch {
+      toast.error("Could not generate the proof of payment. Try again.");
+    } finally {
+      setDownloadingProof(false);
+    }
+  };
 
   return createPortal(
     <>
@@ -859,6 +888,27 @@ export function BookingDetailPanel({ booking, onClose, onConfirmPayment, onCharg
                     </span>
                   </div>
                 )}
+
+                {canDownloadProof && (
+                  <button
+                    type="button"
+                    onClick={handleDownloadProof}
+                    disabled={downloadingProof}
+                    aria-busy={downloadingProof}
+                    className="flex w-full items-center justify-center gap-2 rounded-lg border border-border bg-surface-base px-3 py-2 text-xs font-medium text-text-primary transition-colors hover:bg-surface-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {downloadingProof ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                    ) : (
+                      <Download className="h-3.5 w-3.5" aria-hidden="true" />
+                    )}
+                    {downloadingProof ? "Preparing PDF…" : "Download proof of payment"}
+                  </button>
+                )}
+                <p className="text-[10px] text-text-tertiary">
+                  One-page PDF for the customer: amount received, the settlement account and the
+                  processor reference. No commission or payout figures.
+                </p>
               </div>
             </div>
 
