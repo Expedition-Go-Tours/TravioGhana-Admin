@@ -14,7 +14,7 @@ import { renderWithProviders } from "@/test/test-utils";
 import type { Booking } from "@/types/booking";
 import { toast } from "sonner";
 
-const perms = vi.hoisted(() => ({ can: (_permission: string) => true }));
+const perms = vi.hoisted(() => ({ can: (() => true) as (permission: string) => boolean }));
 vi.mock("@/hooks/usePermission", () => ({
   usePermission: () => ({
     can: perms.can,
