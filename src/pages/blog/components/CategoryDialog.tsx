@@ -21,21 +21,25 @@ interface CategoryDialogProps {
 }
 
 export function CategoryDialog({ open, onOpenChange, category, categories, onSave }: CategoryDialogProps) {
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
-  const [description, setDescription] = useState("");
-  const [parentId, setParentId] = useState<string>("");
+  const [name, setName] = useState(category?.name || "");
+  const [slug, setSlug] = useState(category?.slug || "");
+  const [description, setDescription] = useState(category?.description || "");
+  const [parentId, setParentId] = useState<string>(category?.parentId || "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [prevCategory, setPrevCategory] = useState<ArticleCategory | null>(category);
-
-  if (open && category !== prevCategory) {
-    setPrevCategory(category);
-    setName(category?.name || "");
-    setSlug(category?.slug || "");
-    setDescription(category?.description || "");
-    setParentId(category?.parentId || "");
-    setError("");
+  // See TagDialog: reset on open, never by comparing the prop to stored state
+  // during render (an absent prop made the comparison permanently true and
+  // sent React into a re-render loop, error #301).
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setName(category?.name || "");
+      setSlug(category?.slug || "");
+      setDescription(category?.description || "");
+      setParentId(category?.parentId || "");
+      setError("");
+    }
   }
 
   const handleNameChange = (value: string) => {

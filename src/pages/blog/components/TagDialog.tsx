@@ -19,18 +19,25 @@ interface TagDialogProps {
   onSave: (data: { id?: string; name: string; slug: string }) => Promise<void>;
 }
 
-export function TagDialog({ open, onOpenChange, tag, onSave }: TagDialogProps) {
-  const [name, setName] = useState("");
-  const [slug, setSlug] = useState("");
+export function TagDialog({ open, onOpenChange, tag = null, onSave }: TagDialogProps) {
+  const [name, setName] = useState(tag?.name || "");
+  const [slug, setSlug] = useState(tag?.slug || "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [prevTag, setPrevTag] = useState<ArticleTag | null>(tag ?? null);
-
-  if (open && tag !== prevTag) {
-    setPrevTag(tag ?? null);
-    setName(tag?.name || "");
-    setSlug(tag?.slug || "");
-    setError("");
+  // Seed the fields when the dialog OPENS — that is the only moment that
+  // matters. The previous version compared `tag` to a stored copy and reset
+  // state during render; "New tag" passes no tag (undefined) while the stored
+  // copy starts as null, `undefined !== null` stayed true on every render, and
+  // React aborted with "too many re-renders" (#301). `wasOpen` flips exactly
+  // once per open, so this settles after a single extra render.
+  const [wasOpen, setWasOpen] = useState(open);
+  if (open !== wasOpen) {
+    setWasOpen(open);
+    if (open) {
+      setName(tag?.name || "");
+      setSlug(tag?.slug || "");
+      setError("");
+    }
   }
 
   const handleNameChange = (value: string) => {
