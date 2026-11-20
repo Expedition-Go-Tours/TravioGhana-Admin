@@ -24,6 +24,12 @@ export default function AuthCallback() {
       const params = new URLSearchParams(window.location.search);
       const accessToken = params.get("accessToken");
       const refreshToken = params.get("refreshToken");
+      const error = params.get("error");
+
+      if (error) {
+        redirectToLogin(`${error} Redirecting...`);
+        return;
+      }
 
       // Never leave bearer tokens in the address bar or browser history. The
       // OAuth redirect also sets httpOnly cookies, but some browsers drop them
