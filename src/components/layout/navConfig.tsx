@@ -24,6 +24,7 @@ import {
   Settings2,
   History,
   Settings,
+  Store,
 } from "lucide-react";
 
 export interface NavItem {
@@ -110,6 +111,9 @@ export function getNavGroups(can: (key: string) => boolean): NavGroup[] {
       items: [
         ...(can("reviews.view")
           ? [{ label: "Reviews", path: "/admin/reviews", icon: <Star className="h-4 w-4" />, badgeKey: "reviews" as const, keywords: ["ratings", "feedback"] }]
+          : []),
+        ...(can("reviews.view")
+          ? [{ label: "Restaurant claims", path: "/admin/restaurant-claims", icon: <Store className="h-4 w-4" />, keywords: ["restaurant", "owner", "venue", "claims"] }]
           : []),
         ...(can("blog.manage")
           ? [{ label: "Blog", path: "/admin/blog", icon: <FileText className="h-4 w-4" />, keywords: ["posts", "articles", "content"] }]

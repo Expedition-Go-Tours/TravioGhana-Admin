@@ -27,6 +27,7 @@ import SupplierDetailPage from "@/pages/suppliers/SupplierDetail";
 import SupplierQcDashboardPage from "@/pages/suppliers/SupplierQcDashboard";
 import PayoutsPage from "@/pages/finance/PayoutsPage";
 import ReviewModerationPage from "@/pages/reviews/ReviewModeration";
+import RestaurantClaimsPage from "@/pages/reviews/RestaurantClaimsPage";
 import BookingsPage from "@/pages/bookings/BookingsPage";
 import CancellationsPage from "@/pages/cancellations/CancellationsPage";
 import RefundRequestsPage from "@/pages/refund-requests/RefundRequestsPage";
@@ -112,6 +113,7 @@ const router = createBrowserRouter([
       { path: "cancellations", element: <PermissionRoute permission={["bookings.view", "dashboard.*"]}><CancellationsPage /></PermissionRoute> },
       { path: "refund-requests", element: <PermissionRoute permission={["bookings.view", "dashboard.*"]}><RefundRequestsPage /></PermissionRoute> },
       { path: "reviews", element: <PermissionRoute permission="reviews.view"><ReviewModerationPage /></PermissionRoute> },
+      { path: "restaurant-claims", element: <PermissionRoute permission="reviews.view"><RestaurantClaimsPage /></PermissionRoute> },
       { path: "chat/suppliers", element: <PermissionRoute permission="chat.suppliers"><ChatPage /></PermissionRoute> },
       { path: "chat/customers", element: <PermissionRoute permission="chat.customers"><ChatPage /></PermissionRoute> },
       { path: "chat/expedition", element: <PermissionRoute permission="chat.expedition"><ChatPage /></PermissionRoute> },

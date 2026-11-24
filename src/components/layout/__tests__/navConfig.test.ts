@@ -54,10 +54,22 @@ describe("getNavGroups", () => {
 
     expect(engagement?.items.map((item) => item.label)).toEqual([
       "Reviews",
+      "Restaurant claims",
       "Blog",
       "Customer Support",
       "Supplier Messages",
       "Notifications",
+    ]);
+  });
+
+  it("places restaurant claims beside Reviews for a review viewer", () => {
+    const engagement = getNavGroups((key) => key === "reviews.view").find(
+      (group) => group.group === "Engagement",
+    );
+
+    expect(engagement?.items.map((item) => item.path)).toEqual([
+      "/admin/reviews",
+      "/admin/restaurant-claims",
     ]);
   });
 

@@ -16,64 +16,71 @@ const api = axios.create({
 // Auth endpoints (/auth/*) stay on the shared backend.
 // Everything else is rewritten to /travioghana/admin/* so this dashboard
 // only sees Ghana-scoped data. Blog stays shared (cross-platform content).
-api.interceptors.request.use((config) => {
-  const url = config.url || "";
+
+/**
+ * Pure form of the request URL rewrite, so the shared-route exceptions can be
+ * tested without constructing an axios request.
+ */
+export function resolveApiUrl(url: string): string {
+  // Restaurant venue claims are mounted on the shared
+  // `/api/admin/restaurant-venues` router, ahead of the Ghana admin router.
+  // This check must stay ahead of the generic `/admin` rule: prefixing
+  // `/travioghana` would send the queue to a route that does not exist.
+  if (url.startsWith("/admin/restaurant-venues/")) {
+    return url;
+  }
 
   // /admin/* → /travioghana/admin/*
   if (url.startsWith("/admin")) {
-    config.url = "/travioghana" + url;
-    return config;
+    return "/travioghana" + url;
   }
 
   // /reviews/admin/* → /travioghana/admin/reviews/*
   if (url.startsWith("/reviews/admin/")) {
-    config.url = "/travioghana/admin/reviews" + url.slice("/reviews/admin".length);
-    return config;
+    return "/travioghana/admin/reviews" + url.slice("/reviews/admin".length);
   }
   if (url.match(/^\/reviews\/[^/]+\/(moderate|admin)/)) {
-    config.url = "/travioghana/admin/reviews" + url.slice("/reviews".length);
-    return config;
+    return "/travioghana/admin/reviews" + url.slice("/reviews".length);
   }
 
   // /suppliers/admin/* → /travioghana/admin/suppliers/*
   if (url.startsWith("/suppliers/admin/")) {
-    config.url = "/travioghana/admin/suppliers" + url.slice("/suppliers/admin".length);
-    return config;
+    return "/travioghana/admin/suppliers" + url.slice("/suppliers/admin".length);
   }
 
   // /payouts/admin/* → /travioghana/admin/payouts/*
   if (url.startsWith("/payouts/admin")) {
-    config.url = "/travioghana/admin/payouts" + url.slice("/payouts/admin".length);
-    return config;
+    return "/travioghana/admin/payouts" + url.slice("/payouts/admin".length);
   }
 
   // /payout-methods/admin/* → /travioghana/admin/payout-methods/*
   if (url.startsWith("/payout-methods/admin")) {
-    config.url = "/travioghana/admin/payout-methods" + url.slice("/payout-methods/admin".length);
-    return config;
+    return "/travioghana/admin/payout-methods" + url.slice("/payout-methods/admin".length);
   }
 
   // /notifications → /travioghana/admin/notifications (Ghana-scoped)
   if (url.startsWith("/notifications")) {
-    config.url = "/travioghana/admin" + url;
-    return config;
+    return "/travioghana/admin" + url;
   }
 
   // /chat/* → /travioghana/admin/chat/* (Ghana-scoped)
   if (url.startsWith("/chat")) {
-    config.url = "/travioghana/admin" + url;
-    return config;
+    return "/travioghana/admin" + url;
   }
 
   // /tours/* (non-admin) → /travioghana/admin/tours/* (Ghana tours only)
   // Exception: /tours/filters/options stays shared (filter metadata)
   if (url.startsWith("/tours/") && !url.startsWith("/tours/filters")) {
-    config.url = "/travioghana/admin/tours" + url.slice("/tours".length);
-    return config;
+    return "/travioghana/admin/tours" + url.slice("/tours".length);
   }
 
   // Blog stays shared (cross-platform content)
 
+  return url;
+}
+
+api.interceptors.request.use((config) => {
+  config.url = resolveApiUrl(config.url || "");
   return config;
 });
 

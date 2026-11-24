@@ -26,6 +26,7 @@ import {
   ShieldCheck,
   ShoppingCart,
   Star,
+  Store,
   UserCheck,
   UserPlus,
   UserX,
@@ -49,6 +50,7 @@ export const notificationRouteMap: NotificationRouteMap = {
   NEW_SUPPLIER_APPLICATION: (data) => data?.supplierId ? { path: `/admin/suppliers/${data.supplierId}` } : null,
   SUPPLIER_STATUS_CHANGE: (data) => data?.supplierId ? { path: `/admin/suppliers/${data.supplierId}` } : null,
   REVIEW_NEEDS_MODERATION: (data) => data?.reviewId ? { path: "/admin/reviews", state: { reviewId: data.reviewId } } : null,
+  RESTAURANT_VENUE_CLAIM_PENDING: (data) => data?.claimId ? { path: `/admin/restaurant-claims?claimId=${data.claimId}` } : { path: "/admin/restaurant-claims" },
   TOUR_SUBMITTED_FOR_REVIEW: (data) => data?.tourId ? { path: "/admin/tour-moderation", state: { tourId: data.tourId } } : null,
   PAYOUT_NEEDS_APPROVAL: (data) => ({ path: "/admin/payouts", state: { payoutId: data?.payoutId || data?.payoutRequestId } }),
   BOOKING_CREATED: (data) => data?.bookingId ? { path: `/admin/bookings?bookingId=${data.bookingId}` } : { path: "/admin/bookings" },
@@ -110,6 +112,7 @@ const notificationTypeConfig: Record<string, TypeStyle> = {
   NEW_SUPPLIER_APPLICATION: { icon: UserCheck, color: "text-status-pending-text dark:text-status-pending-text" },
   SUPPLIER_STATUS_CHANGE: { icon: UserCheck, color: "text-status-approved-text dark:text-status-approved-text" },
   REVIEW_NEEDS_MODERATION: { icon: MessageSquare, color: "text-status-pending-text dark:text-status-pending-text" },
+  RESTAURANT_VENUE_CLAIM_PENDING: { icon: Store, color: "text-status-pending-text dark:text-status-pending-text" },
   TOUR_SUBMITTED_FOR_REVIEW: { icon: ClipboardCheck, color: "text-status-pending-text dark:text-status-pending-text" },
   SYSTEM_ALERT: { icon: AlertTriangle, color: "text-status-rejected-text dark:text-status-rejected-text" },
   NEW_MESSAGE: { icon: MessageSquare, color: "text-primary dark:text-primary" },
@@ -231,7 +234,7 @@ export const NOTIFICATION_CATEGORIES: readonly NotificationCategory[] = [
     key: "content",
     label: "Tours & reviews",
     icon: ClipboardCheck,
-    types: ["TOUR_SUBMITTED_FOR_REVIEW", "REVIEW_NEEDS_MODERATION"],
+    types: ["TOUR_SUBMITTED_FOR_REVIEW", "REVIEW_NEEDS_MODERATION", "RESTAURANT_VENUE_CLAIM_PENDING"],
   },
   {
     key: "messages",
@@ -278,6 +281,8 @@ export const ACTION_REQUIRED_TYPES: ReadonlySet<string> = new Set([
   "PAYOUT_NEEDS_APPROVAL",
   "REVIEW_NEEDS_MODERATION",
   "TOUR_SUBMITTED_FOR_REVIEW",
+  // Emitted by the restaurant claim service alongside review moderation.
+  "RESTAURANT_VENUE_CLAIM_PENDING",
   "SUPPLIER_CANCELLATION_REQUEST",
   "REFUND_CLAIM",
 ]);

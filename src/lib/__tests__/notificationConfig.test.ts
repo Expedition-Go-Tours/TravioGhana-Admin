@@ -24,6 +24,8 @@ const ALL_ENUM_TYPES = [
   "NEW_SUPPLIER_APPLICATION",
   "SUPPLIER_STATUS_CHANGE",
   "REVIEW_NEEDS_MODERATION",
+  // Emitted by the restaurant claim service; pending addition to the Prisma enum.
+  "RESTAURANT_VENUE_CLAIM_PENDING",
   "PAYOUT_NEEDS_APPROVAL",
   "SYSTEM_ALERT",
   "NEW_MESSAGE",
@@ -158,6 +160,18 @@ describe("notificationConfig deep links", () => {
       expect(route, `${type} has nowhere to go`).not.toBeNull();
       expect(route!.path.startsWith("/")).toBe(true);
     }
+  });
+
+  it("links a pending restaurant claim to its card in the queue", () => {
+    expect(
+      resolveNotificationRoute("RESTAURANT_VENUE_CLAIM_PENDING", { claimId: "claim_9" }),
+    ).toEqual({ path: "/admin/restaurant-claims?claimId=claim_9" });
+    expect(resolveNotificationRoute("RESTAURANT_VENUE_CLAIM_PENDING")).toEqual({
+      path: "/admin/restaurant-claims",
+    });
+    expect(getNotificationTypeConfig("RESTAURANT_VENUE_CLAIM_PENDING").color).toContain(
+      "status-pending",
+    );
   });
 
   it("builds a booking-specific destination when an id is present", () => {
