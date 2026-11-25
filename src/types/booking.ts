@@ -178,6 +178,77 @@ export interface TravelerData {
   phoneNumber?: string;
   location?: string;
   details?: TravelerDetail[];
+  /** Supplier-defined categories (students, youth, …) plus legacy extras. */
+  [category: string]: unknown;
+}
+
+export interface TravelerCategory {
+  key: string;
+  count: number;
+  singular: string;
+  plural: string;
+}
+
+const TRAVELER_META_KEYS = new Set([
+  "phoneNumber",
+  "phone",
+  "location",
+  "details",
+  "name",
+  "email",
+  "specialRequests",
+]);
+
+const TRAVELER_CATEGORY_ORDER = ["adults", "children", "infants", "seniors"];
+
+const TRAVELER_LABELS: Record<string, [string, string]> = {
+  adults: ["Adult", "Adults"],
+  children: ["Child", "Children"],
+  infants: ["Infant", "Infants"],
+  seniors: ["Senior", "Seniors"],
+  students: ["Student", "Students"],
+  youth: ["Youth", "Youths"],
+  youths: ["Youth", "Youths"],
+  seniorcitizens: ["Senior citizen", "Senior citizens"],
+  seniorcitizen: ["Senior citizen", "Senior citizens"],
+};
+
+function travelerCountValue(value: unknown): number {
+  if (typeof value !== "number" && !(typeof value === "string" && /^\d+$/.test(value))) return 0;
+  const count = Number(value);
+  return Number.isFinite(count) && count > 0 ? count : 0;
+}
+
+/** Every numeric traveller category, in a stable presentation order. */
+export function travelerCategories(
+  travelers: TravelerData | null | undefined,
+): TravelerCategory[] {
+  if (!travelers || typeof travelers !== "object") return [];
+
+  return (Object.entries(travelers) as [string, unknown][])
+    .filter(([key, value]) => !TRAVELER_META_KEYS.has(key) && travelerCountValue(value) > 0)
+    .sort(([a], [b]) => {
+      const ai = TRAVELER_CATEGORY_ORDER.indexOf(a);
+      const bi = TRAVELER_CATEGORY_ORDER.indexOf(b);
+      if (ai !== -1 || bi !== -1) {
+        if (ai === -1) return 1;
+        if (bi === -1) return -1;
+        return ai - bi;
+      }
+      return a.localeCompare(b);
+    })
+    .map(([key, value]) => {
+      const count = travelerCountValue(value);
+      const known = TRAVELER_LABELS[key];
+      if (known) return { key, count, singular: known[0], plural: known[1] };
+      const singular = key.endsWith("s") ? key.slice(0, -1) : key;
+      return {
+        key,
+        count,
+        singular: singular ? singular.charAt(0).toUpperCase() + singular.slice(1) : key,
+        plural: key.charAt(0).toUpperCase() + key.slice(1),
+      };
+    });
 }
 
 export interface PickupData {
@@ -191,6 +262,5 @@ export interface PickupData {
 }
 
 export function travelerCount(travelers: TravelerData | null | undefined): number {
-  if (!travelers || typeof travelers !== "object") return 0;
-  return (travelers.adults || 0) + (travelers.children || 0) + (travelers.infants || 0) + (travelers.seniors || 0);
+  return travelerCategories(travelers).reduce((sum, category) => sum + category.count, 0);
 }

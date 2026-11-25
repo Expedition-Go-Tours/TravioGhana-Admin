@@ -40,7 +40,7 @@ import { paymentSource } from "@/lib/paymentSource";
 import { downloadBlob, safeFilenamePart } from "@/lib/downloadFile";
 import { BookingTimeline } from "./BookingTimeline";
 import type { Booking, TravelerData } from "@/types/booking";
-import { isPaymentPaid, travelerCount } from "@/types/booking";
+import { isPaymentPaid, travelerCategories, travelerCount } from "@/types/booking";
 import OptimizedImage from "@/components/shared/OptimizedImage";
 import { bookingContact, contactInitial } from "@/lib/bookingContact";
 import { CancellationStatusBadge } from "@/components/cancellations/CancellationStatusBadge";
@@ -161,19 +161,21 @@ function DetailRow({ icon, label, children }: { icon: React.ReactNode; label: st
 }
 
 function TravelerBreakdown({ travelers }: { travelers: TravelerData }) {
-  const categories = [
-    { singular: "Adult", plural: "Adults", count: travelers.adults || 0, icon: <User className="h-3.5 w-3.5" /> },
-    { singular: "Child", plural: "Children", count: travelers.children || 0, icon: <PersonStanding className="h-3.5 w-3.5" /> },
-    { singular: "Infant", plural: "Infants", count: travelers.infants || 0, icon: <Baby className="h-3.5 w-3.5" /> },
-    { singular: "Senior", plural: "Seniors", count: travelers.seniors || 0, icon: <Users className="h-3.5 w-3.5" /> },
-  ].filter((c) => c.count > 0);
+  const categories = travelerCategories(travelers).map((cat) => ({
+    ...cat,
+    icon:
+      cat.key === "adults" ? <User className="h-3.5 w-3.5" /> :
+      cat.key === "children" ? <PersonStanding className="h-3.5 w-3.5" /> :
+      cat.key === "infants" ? <Baby className="h-3.5 w-3.5" /> :
+      <Users className="h-3.5 w-3.5" />,
+  }));
 
   if (categories.length === 0) return null;
 
   return (
     <div className="flex flex-wrap gap-2">
       {categories.map((cat) => (
-        <div key={cat.plural} className="flex items-center gap-1.5 rounded-xl border border-border bg-surface-base px-2.5 py-1.5">
+        <div key={cat.key} className="flex items-center gap-1.5 rounded-xl border border-border bg-surface-base px-2.5 py-1.5">
           <span className="text-text-tertiary">{cat.icon}</span>
           <span className="text-xs font-semibold text-text-primary">{cat.count}</span>
           <span className="text-xs text-text-secondary">{cat.count === 1 ? cat.singular : cat.plural}</span>
