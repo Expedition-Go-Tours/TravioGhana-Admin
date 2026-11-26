@@ -24,8 +24,9 @@ const ALL_ENUM_TYPES = [
   "NEW_SUPPLIER_APPLICATION",
   "SUPPLIER_STATUS_CHANGE",
   "REVIEW_NEEDS_MODERATION",
-  // Emitted by the restaurant claim service; pending addition to the Prisma enum.
   "RESTAURANT_VENUE_CLAIM_PENDING",
+  "RESTAURANT_REVIEW_NEEDS_MODERATION",
+  "RESTAURANT_REVIEW_REPORTED",
   "PAYOUT_NEEDS_APPROVAL",
   "SYSTEM_ALERT",
   "NEW_MESSAGE",
@@ -136,6 +137,17 @@ describe("notificationConfig presentation", () => {
 });
 
 describe("notificationConfig deep links", () => {
+  /**
+   * Types with no admin surface to open yet: the backend exposes
+   * /admin/restaurant-venues/reviews/pending but no page consumes it. These
+   * stay unlinked — a misleading destination is worse than none — and the
+   * moment a moderation queue lands they must move out of this set.
+   */
+  const NO_ADMIN_SURFACE = new Set([
+    "RESTAURANT_REVIEW_NEEDS_MODERATION",
+    "RESTAURANT_REVIEW_REPORTED",
+  ]);
+
   it("resolves a destination for every enum type", () => {
     // A data bag carrying every id field the route map consults, so a missing
     // map entry cannot hide behind a missing field.
@@ -157,8 +169,18 @@ describe("notificationConfig deep links", () => {
 
     for (const type of ALL_ENUM_TYPES) {
       const route = resolveNotificationRoute(type, richData);
+      if (NO_ADMIN_SURFACE.has(type)) {
+        expect(route, `${type} must stay unlinked until its queue exists`).toBeNull();
+        continue;
+      }
       expect(route, `${type} has nowhere to go`).not.toBeNull();
       expect(route!.path.startsWith("/")).toBe(true);
+    }
+  });
+
+  it("keeps the unlinked set exactly the types without an admin surface", () => {
+    for (const type of NO_ADMIN_SURFACE) {
+      expect(ALL_ENUM_TYPES).toContain(type);
     }
   });
 

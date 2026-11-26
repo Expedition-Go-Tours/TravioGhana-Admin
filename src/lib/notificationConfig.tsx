@@ -113,6 +113,12 @@ const notificationTypeConfig: Record<string, TypeStyle> = {
   SUPPLIER_STATUS_CHANGE: { icon: UserCheck, color: "text-status-approved-text dark:text-status-approved-text" },
   REVIEW_NEEDS_MODERATION: { icon: MessageSquare, color: "text-status-pending-text dark:text-status-pending-text" },
   RESTAURANT_VENUE_CLAIM_PENDING: { icon: Store, color: "text-status-pending-text dark:text-status-pending-text" },
+  // Restaurant review moderation has no admin surface yet (the backend exposes
+  // /admin/restaurant-venues/reviews/pending but no page consumes it), so these
+  // render as uncategorised-by-action rows until that lands. Presentation and
+  // category still apply; there is deliberately no deep link to invent.
+  RESTAURANT_REVIEW_NEEDS_MODERATION: { icon: MessageSquare, color: "text-status-pending-text dark:text-status-pending-text" },
+  RESTAURANT_REVIEW_REPORTED: { icon: ShieldAlert, color: "text-status-rejected-text dark:text-status-rejected-text" },
   TOUR_SUBMITTED_FOR_REVIEW: { icon: ClipboardCheck, color: "text-status-pending-text dark:text-status-pending-text" },
   SYSTEM_ALERT: { icon: AlertTriangle, color: "text-status-rejected-text dark:text-status-rejected-text" },
   NEW_MESSAGE: { icon: MessageSquare, color: "text-primary dark:text-primary" },
@@ -234,7 +240,13 @@ export const NOTIFICATION_CATEGORIES: readonly NotificationCategory[] = [
     key: "content",
     label: "Tours & reviews",
     icon: ClipboardCheck,
-    types: ["TOUR_SUBMITTED_FOR_REVIEW", "REVIEW_NEEDS_MODERATION", "RESTAURANT_VENUE_CLAIM_PENDING"],
+    types: [
+      "TOUR_SUBMITTED_FOR_REVIEW",
+      "REVIEW_NEEDS_MODERATION",
+      "RESTAURANT_VENUE_CLAIM_PENDING",
+      "RESTAURANT_REVIEW_NEEDS_MODERATION",
+      "RESTAURANT_REVIEW_REPORTED",
+    ],
   },
   {
     key: "messages",
@@ -283,6 +295,8 @@ export const ACTION_REQUIRED_TYPES: ReadonlySet<string> = new Set([
   "TOUR_SUBMITTED_FOR_REVIEW",
   // Emitted by the restaurant claim service alongside review moderation.
   "RESTAURANT_VENUE_CLAIM_PENDING",
+  "RESTAURANT_REVIEW_NEEDS_MODERATION",
+  "RESTAURANT_REVIEW_REPORTED",
   "SUPPLIER_CANCELLATION_REQUEST",
   "REFUND_CLAIM",
 ]);
